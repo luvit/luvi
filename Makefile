@@ -3,8 +3,8 @@ XCFLAGS+=-DLUAJIT_ENABLE_LUA52COMPAT
 export XCFLAGS
 
 CFLAGS=-Iluv/libuv/include -g -Iluajit-2.0/src \
-	-DLUV_STACK_CHECK -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
-	-Wall -Werror -fPIC -O2
+	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
+	-Wall -Werror -O2
 
 uname_S=$(shell uname -s)
 ifeq (Darwin, $(uname_S))
@@ -32,7 +32,7 @@ SOURCE_FILES=\
 all: luvi
 
 luv/libuv/libuv.a:
-	CPPFLAGS=-fPIC $(MAKE) -C luv/libuv
+	$(MAKE) -C luv/libuv
 
 luajit-2.0/src/libluajit.a:
 	$(MAKE) -C luajit-2.0
