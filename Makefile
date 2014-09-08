@@ -9,7 +9,7 @@ CFLAGS=-Iluv/libuv/include -g -Iluajit-2.0/src \
 
 uname_S=$(shell uname -s)
 ifeq (Darwin, $(uname_S))
-	LDFLAGS=-framework CoreServices
+	LDFLAGS=-framework CoreServices -pagezero_size 10000 -image_base 100000000
 else
 	LDFLAGS=-lrt
 endif
