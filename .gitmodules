@@ -1,0 +1,6 @@
+[submodule "luv"]
+	path = luv
+	url = git@github.com:luvit/luv.git
+[submodule "luajit-2.0"]
+	path = luajit-2.0
+	url = git@github.com:luvit/luajit-2.0.git
