@@ -3,6 +3,7 @@
 #include "lauxlib.h"
 #include "uv.h"
 #include "luv/src/luv.c"
+#include "lzlib.c"
 
 int main(int argc, char* argv[] ) {
 
@@ -27,6 +28,8 @@ int main(int argc, char* argv[] ) {
   luaL_openlibs(L);
   luaopen_luv(L);
   lua_setglobal(L, "uv");
+  luaopen_zlib(L);
+  lua_setglobal(L, "zlib");
 
   // Load the execute the input script.
   if (luaL_dofile(L, argv[1])) {

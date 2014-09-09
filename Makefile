@@ -2,19 +2,20 @@ XCFLAGS+=-DLUAJIT_ENABLE_LUA52COMPAT
 #XCFLAGS+=-DLUA_USE_APICHECK
 export XCFLAGS
 
-CFLAGS=-Iluv/libuv/include -g -Iluajit-2.0/src \
+CFLAGS+=-Iluv/libuv/include -Izlib -Izlib/contrib/minizip -Iluajit-2.0/src \
 	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
-	-Wall -Werror -O2
+	-O3 -Wformat -Wall -pedantic -std=gnu99
 
 uname_S=$(shell uname -s)
 ifeq (Darwin, $(uname_S))
-	LDFLAGS=-framework CoreServices -pagezero_size 10000 -image_base 100000000
+	LDFLAGS+=-framework CoreServices -pagezero_size 10000 -image_base 100000000
 else
 	LDFLAGS=-lpthread -lm -ldl
 endif
 
 SOURCE_FILES=\
 	main.c \
+	lzlib.c \
 	luv/src/dns.c \
 	luv/src/fs.c \
 	luv/src/handle.c \
@@ -29,6 +30,11 @@ SOURCE_FILES=\
 	luv/src/tty.c \
 	luv/src/util.c
 
+DEPS =\
+	luajit-2.0/src/libluajit.a \
+	luv/libuv/libuv.a \
+	zlib/libz.a
+
 all: luvi
 
 luv/libuv/libuv.a:
@@ -37,14 +43,18 @@ luv/libuv/libuv.a:
 luajit-2.0/src/libluajit.a:
 	$(MAKE) -C luajit-2.0
 
+zlib/libz.a:
+	$(MAKE) -C zlib
 
-luvi: ${SOURCE_FILES} luv/libuv/libuv.a luajit-2.0/src/libluajit.a
+
+luvi: ${SOURCE_FILES} ${DEPS}
 	$(CC) -c main.c ${CFLAGS} -o luvi.o
-	$(CC) luvi.o luv/libuv/libuv.a luajit-2.0/src/libluajit.a ${LDFLAGS} -o $@
+	$(CC) luvi.o ${DEPS} ${LDFLAGS} -o $@
 	rm luvi.o
 
 clean:
 	$(MAKE) -C luajit-2.0 clean
 	$(MAKE) -C luv clean
 	$(MAKE) -C luv/libuv clean
+	$(MAKE) -C zlib clean
 	rm -f luvi
