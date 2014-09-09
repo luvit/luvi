@@ -4,6 +4,3 @@
 [submodule "luajit-2.0"]
 	path = luajit-2.0
 	url = git@github.com:luvit/luajit-2.0.git
-[submodule "zlib"]
-	path = zlib
-	url = git@github.com:luvit/zlib.git 
