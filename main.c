@@ -6,52 +6,35 @@
 
 int main(int argc, char* argv[] ) {
 
-  lua_State *L;
-  uv_loop_t *loop;
+  // Make sure a script was passed in.
+  if (argc < 2) {
+    printf("Usage: %s program.lua\n", argv[0]);
+    return 1;
+  }
 
+  // Hooks in libuv that need to be done in main.
   argv = uv_setup_args(argc, argv);
 
+  // Create the lua state.
+  lua_State *L;
   L = luaL_newstate();
   if (L == NULL) {
     fprintf(stderr, "luaL_newstate has failed\n");
     return 1;
   }
 
+  // Add in the lua standard libraries and libuv bindings
   luaL_openlibs(L);
+  luaopen_luv(L);
+  lua_setglobal(L, "uv");
 
-  // int luaopen_luv (lua_State *L);
-
-  loop = uv_default_loop();
-
-  /* Load the file containing the script we are going to run */
-  if (argc < 2) {
-    printf("Usage: %s program.lua\n", argv[0]);
+  // Load the execute the input script.
+  if (luaL_dofile(L, argv[1])) {
+    fprintf(stderr, "%s\n", lua_tostring(L, -1));
     return 1;
   }
-  int status = luaL_loadfile(L, argv[1]);
-  if (status) {
-    /* If something went wrong, error message is at the top of */
-    /* the stack */
-    fprintf(stderr, "Couldn't load file: %s\n", lua_tostring(L, -1));
-    exit(1);
-  }
 
-
-  int result = lua_pcall(L, 0, LUA_MULTRET, 0);
-  if (result) {
-    fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
-    exit(1);
-  }
-  // /* Run the main lua script */
-  // if (luvit_run(L)) {
-  //   printf("%s\n", lua_tostring(L, -1));
-  //   lua_pop(L, 1);
-  //   lua_close(L);
-  //   return -1;
-  // }
-
+  // Cleanup and exit.
   lua_close(L);
-
-
   return 0;
 }
