@@ -11,8 +11,8 @@ This project is still in progress, but once done, it will be used as follows:
 
  1. Create your lua program.  This consists of a folder with a `main.lua` in
     it's root.
- 2. Test your unzipped program with bare `luvi` by passing in `LUVI_IN` as a
-    path to the folder.
+ 2. Test your unzipped program with bare `luvi` by setting the`LUVI_IN`
+    environment variable to point to your folder.
  3. When wou are pleased with the result, zip your folder making sure `main.lua`
     is in the root of the new zip file.  Then concatenate the `luvi` binary with
     your zip to form a new binary.  Mark it as executable and distribute.
