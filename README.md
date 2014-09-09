@@ -60,8 +60,7 @@ If the file doesn't exist, it returns `nil`.
 
 ### bundle.readdir(path)
 
-Read a directory.  Returns a table indexed by filename with stat entries for
-values.
+Read a directory.  Returns a list of filenames in the directory.
 
 If the directory doesn't exist, it return `nil`.
 

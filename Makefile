@@ -15,7 +15,7 @@ endif
 
 SOURCE_FILES=\
 	main.c \
-	lzlib.c \
+	bundle.c \
 	luv/src/dns.c \
 	luv/src/fs.c \
 	luv/src/handle.c \
@@ -32,8 +32,7 @@ SOURCE_FILES=\
 
 DEPS =\
 	luajit-2.0/src/libluajit.a \
-	luv/libuv/libuv.a \
-	zlib/libz.a
+	luv/libuv/libuv.a
 
 all: luvi
 
@@ -43,18 +42,16 @@ luv/libuv/libuv.a:
 luajit-2.0/src/libluajit.a:
 	$(MAKE) -C luajit-2.0
 
-zlib/libz.a:
-	$(MAKE) -C zlib
-
 
 luvi: ${SOURCE_FILES} ${DEPS}
 	$(CC) -c main.c ${CFLAGS} -o luvi.o
 	$(CC) luvi.o ${DEPS} ${LDFLAGS} -o $@
 	rm luvi.o
 
-clean:
+clean-all: clean
 	$(MAKE) -C luajit-2.0 clean
 	$(MAKE) -C luv clean
 	$(MAKE) -C luv/libuv clean
-	$(MAKE) -C zlib clean
-	rm -f luvi
+
+clean:
+	rm -f luvi *.o
