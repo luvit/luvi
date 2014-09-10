@@ -3,7 +3,10 @@
 #include "lauxlib.h"
 #include "uv.h"
 #include "luv/src/luv.c"
-#include "bundle.c"
+#include "inflate.c"
+#include "env.c"
+
+extern const char* luaJIT_BC_init;
 
 int main(int argc, char* argv[] ) {
 
@@ -21,13 +24,17 @@ int main(int argc, char* argv[] ) {
   // Add in the lua standard libraries
   luaL_openlibs(L);
 
+  // Expose the inflate function from tinfl.
+  lua_pushcfunction(L, ltinfl);
+  lua_setglobal(L, "inflate");
+
+  lua_newtable (L);
+  luaL_register(L, NULL, lenv_f);
+  lua_setglobal(L, "env");
+
   // Expose libuv via global `uv`
   luaopen_luv(L);
   lua_setglobal(L, "uv");
-
-  // Expose bundle API via global `bundle`
-  luaopen_bundle(L);
-  lua_setglobal(L, "bundle");
 
   // Expose command line arguments via global `args`
   lua_createtable (L, argc, 0);
@@ -37,13 +44,8 @@ int main(int argc, char* argv[] ) {
   }
   lua_setglobal(L, "args");
 
-  // Compile main.lua from the bundle root.
-  if (luaL_dostring(L, "return (function () "
-    "local main = bundle.readfile('main.lua')\n"
-    "if not main then error 'Missing main.lua in bundle' end\n"
-    "return assert(loadstring(main, 'bundle:main.lua'))\n"
-    "end)()\n"
-  )) {
+  // Load the init.lua script
+  if (luaL_loadstring(L, "return require('init')(...)")) {
     fprintf(stderr, "%s\n", lua_tostring(L, -1));
     return -1;
   }
@@ -60,7 +62,10 @@ int main(int argc, char* argv[] ) {
   }
 
   // Use the return value from the script as process exit code.
-  int res = luaL_optinteger(L, -1, 0);
+  int res = 0;
+  if (lua_type(L, -1) == LUA_TNUMBER) {
+    res = lua_tointeger(L, -1);
+  }
   lua_close(L);
   return res;
 }

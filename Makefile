@@ -1,10 +1,15 @@
+XCFLAGS=
+#XCFLAGS+=-DLUAJIT_DISABLE_JIT
 XCFLAGS+=-DLUAJIT_ENABLE_LUA52COMPAT
 #XCFLAGS+=-DLUA_USE_APICHECK
 export XCFLAGS
+# verbose build
+export Q=
+MAKEFLAGS+=-e
 
 CFLAGS+=-Iluv/libuv/include -Izlib -Izlib/contrib/minizip -Iluajit-2.0/src \
 	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
-	-O3 -Wformat -Wall -pedantic -std=gnu99
+	-O3 -Wformat -Wall -pedantic -std=gnu99 -DLUAJIT_ENABLE_LUA52COMPAT
 
 uname_S=$(shell uname -s)
 ifeq (Darwin, $(uname_S))
@@ -15,7 +20,8 @@ endif
 
 SOURCE_FILES=\
 	main.c \
-	bundle.c \
+	env.c \
+	inflate.c \
 	luv/src/dns.c \
 	luv/src/fs.c \
 	luv/src/handle.c \
@@ -32,7 +38,9 @@ SOURCE_FILES=\
 
 DEPS =\
 	luajit-2.0/src/libluajit.a \
-	luv/libuv/libuv.a
+	luv/libuv/libuv.a \
+	init.lua.o \
+	utils.lua.o
 
 all: luvi
 
@@ -43,10 +51,20 @@ luajit-2.0/src/libluajit.a:
 	$(MAKE) -C luajit-2.0
 
 
+%.lua.o: lib/%.lua luajit-2.0/src/libluajit.a
+	luajit-2.0/src/luajit -bg $< $@
+
 luvi: ${SOURCE_FILES} ${DEPS}
 	$(CC) -c main.c ${CFLAGS} -o luvi.o
 	$(CC) luvi.o ${DEPS} ${LDFLAGS} -o $@
 	rm luvi.o
+
+sample-app.zip: sample-app sample-app/main.lua sample-app/greetings.txt
+	cd sample-app && zip -r -9 ../sample-app.zip . && cd ..
+
+app: luvi sample-app.zip
+	cat $^ > $@
+	chmod +x $@
 
 clean-all: clean
 	$(MAKE) -C luajit-2.0 clean
@@ -54,4 +72,4 @@ clean-all: clean
 	$(MAKE) -C luv/libuv clean
 
 clean:
-	rm -f luvi *.o
+	rm -f luvi *.o app sample-app.zip

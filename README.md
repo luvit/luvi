@@ -40,8 +40,8 @@ event loop if you want to actually wait for any events to happen.
 The raw `argc` and `argv` from C side is exposed as a **zero** indexed lua table
 of strings at `args`.
 
-Also `...` in main is the program args skipping the first (usually path to your
-binary or `luvi`).  So it's the arguments to your program.
+The global `env` provides read/write access to your local environment variables
+via `env.keys`, `env.get`, `env.put`, `env.set`, and `env.unset`.
 
 If you return an integer from this file, it will be your program's exit code.
 
