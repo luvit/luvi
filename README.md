@@ -75,3 +75,50 @@ it doesn't.
 [luv]: https://github.com/luvit/luv
 [luvit]: https://luvit.io/
 [derivatives]: http://virgoagent.com/
+
+## Building from Source
+
+If you want to not wait for pre-built binaries and dive right in, building on
+Linux or OSX is pretty simple.
+
+First clone this repo recursively.
+
+```shell
+git clone --recursive git@github.com:luvit/luvi.git
+```
+
+Then run the makefile inside it.
+
+```sh
+cd luvi
+make -j4
+```
+
+When that's done you should have a shiny little binary `luvi`.
+
+```sh
+$ ls -lh luvi
+-rwxr-xr-x  1 tim  staff   795K Sep  9 22:56 luvi
+```
+
+If you try to run it, it will show usage information:
+
+```sh
+$ ./luvi
+Missing bundle.  Either set LUVI_IN environment variable to path to folder or append zip to this binary
+```
+
+You can run the sample app by doing:
+
+```sh
+LUVI_IN=sample-app ./luvi
+```
+
+When you're done creating an app you need to zip your app and concatenate it with luvi.
+
+See the `app` makefile target for an example of this.
+
+```sh
+make app
+./app
+```
