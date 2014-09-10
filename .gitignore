@@ -2,3 +2,4 @@ luvi
 app
 sample-app.zip
 *.o
+out
