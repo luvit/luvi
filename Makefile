@@ -15,7 +15,7 @@ uname_S=$(shell uname -s)
 ifeq (Darwin, $(uname_S))
 	LDFLAGS+=-framework CoreServices -pagezero_size 10000 -image_base 100000000
 else
-	LDFLAGS=-lpthread -lm -ldl -Wl,-E
+	LDFLAGS=-lpthread -lm -ldl -Wl,-E -lrt
 endif
 
 SOURCE_FILES=\
