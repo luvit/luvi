@@ -31,6 +31,7 @@ p{
 }
 p{
   [""] = bundle.stat(""),
+  ["add"] = bundle.stat("add"),
   ["main.lua"] = bundle.stat("main.lua"),
   ["fake"] = bundle.stat("fake"),
 }

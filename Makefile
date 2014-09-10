@@ -40,6 +40,7 @@ DEPS =\
 	luajit-2.0/src/libluajit.a \
 	luv/libuv/libuv.a \
 	init.lua.o \
+	zipreader.lua.o \
 	utils.lua.o
 
 all: luvi
@@ -59,7 +60,7 @@ luvi: ${SOURCE_FILES} ${DEPS}
 	$(CC) luvi.o ${DEPS} ${LDFLAGS} -o $@
 	rm luvi.o
 
-sample-app.zip: sample-app sample-app/main.lua sample-app/greetings.txt
+sample-app.zip: sample-app sample-app/main.lua sample-app/greetings.txt sample-app/add/init.lua
 	cd sample-app && zip -r -9 ../sample-app.zip . && cd ..
 
 app: luvi sample-app.zip
