@@ -13,7 +13,7 @@ This project is still in progress, but once done, it will be used as follows:
     it's root.
  2. Test your unzipped program with bare `luvi` by setting the`LUVI_IN`
     environment variable to point to your folder.
- 3. When wou are pleased with the result, zip your folder making sure `main.lua`
+ 3. When you are pleased with the result, zip your folder making sure `main.lua`
     is in the root of the new zip file.  Then concatenate the `luvi` binary with
     your zip to form a new binary.  Mark it as executable and distribute.
 
@@ -25,7 +25,8 @@ things added.  This means you can use the luajit [extensions][] including
 
 ### LibUV is baked in.
 
-The global `uv` table is bindings to [libuv][] as defined in the [luv][] project.
+The global `uv` table is bindings to [libuv][] as defined in the [luv][]
+project.
 
 Use this for file I/O, network I/O, timers, or various interfaces with the
 operating system.  This lets you write fast non-blocking network servers or
@@ -105,7 +106,8 @@ If you try to run it, it will show usage information:
 
 ```sh
 $ ./luvi
-Missing bundle.  Either set LUVI_IN environment variable to path to folder or append zip to this binary
+Missing bundle.  Either set LUVI_IN environment variable to path to folder or
+append zip to this binary
 ```
 
 You can run the sample app by doing:
@@ -114,7 +116,8 @@ You can run the sample app by doing:
 LUVI_IN=sample-app ./luvi
 ```
 
-When you're done creating an app you need to zip your app and concatenate it with luvi.
+When you're done creating an app you need to zip your app and concatenate it
+with luvi.
 
 See the `app` makefile target for an example of this.
 
