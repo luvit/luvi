@@ -49,7 +49,7 @@ If you return an integer from this file, it will be your program's exit code.
 ### Bundle I/O
 
 If you're running from a unzipped folder on disk or a zipped bundle appended to
-the directory, the I/O to read from this is the same.  This is exposed as the
+the binary, the I/O to read from this is the same.  This is exposed as the
 global `bundle` table.
 
 ### bundle.stat(path)
@@ -106,8 +106,8 @@ If you try to run it, it will show usage information:
 
 ```sh
 $ ./luvi
-Missing bundle.  Either set LUVI_IN environment variable to path to folder or
-append zip to this binary
+Missing bundle.  Either set LUVI_IN environment variable to path to folder
+or append zip to this binary
 ```
 
 You can run the sample app by doing:
