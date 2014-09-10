@@ -72,6 +72,10 @@ return function(...)
       fstat=uv.fs_fstat,
       read=uv.fs_read
     })
+    if not zip then
+      print("Missing bundle.  Either set LUVI_IN environment variable to path to folder or append zip to this binary.")
+      return 1
+    end
 
     bundle = {
       stat = function (path)
