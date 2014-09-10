@@ -5,7 +5,8 @@ A project in-between [luv][] and [luvit][].
 
 The goal of this is to make building [luvit][] and [derivatives][] much easier.
 
-This project is still in progress, but once done, it will be used as follows:
+This project is still in progress, but it's complete enough to be useful
+already.
 
 ## Usage
 
