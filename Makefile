@@ -45,6 +45,11 @@ DEPS =\
 
 all: luvi
 
+gyp:
+	# replace with configure
+	tools/gyp/gyp --depth=$$PWD -D target_arch=x64 -Goutput_dir=$$PWD/out --generator-output $$PWD/out -f make -I common.gypi -D library=static_library
+	$(MAKE) -C out
+
 luv/libuv/libuv.a:
 	$(MAKE) -C luv/libuv
 
