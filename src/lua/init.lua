@@ -18,7 +18,8 @@ limitations under the License.
 
 return function(...)
 
-  local uv = _G.uv
+  local uv = require('uv')
+  local env = require('luvi').env
   local bundle
 
   -- Given a path like /foo/bar and foo//bar/ return foo/bar.bar

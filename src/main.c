@@ -20,8 +20,7 @@
 #include "lauxlib.h"
 #include "uv.h"
 #include "../luv/src/luv.c"
-#include "inflate.c"
-#include "env.c"
+#include "luvi.c"
 
 extern const char* luaJIT_BC_init;
 
@@ -41,17 +40,18 @@ int main(int argc, char* argv[] ) {
   // Add in the lua standard libraries
   luaL_openlibs(L);
 
-  // Expose the inflate function from tinfl.
-  lua_pushcfunction(L, ltinfl);
-  lua_setglobal(L, "inflate");
+  // Get package.preload so we can store builtins in it.
+  lua_getglobal(L, "package");
+  lua_getfield(L, -1, "preload");
+  lua_remove(L, -2); // Remove package
 
-  lua_newtable (L);
-  luaL_register(L, NULL, lenv_f);
-  lua_setglobal(L, "env");
+  // Store uv module definition at preload.uv
+  lua_pushcfunction(L, luaopen_luv);
+  lua_setfield(L, -2, "uv");
 
-  // Expose libuv via global `uv`
-  luaopen_luv(L);
-  lua_setglobal(L, "uv");
+  // Store luvi module definition at preload.luvi
+  lua_pushcfunction(L, luaopen_luvi);
+  lua_setfield(L, -2, "luvi");
 
   // Expose command line arguments via global `args`
   lua_createtable (L, argc, 0);

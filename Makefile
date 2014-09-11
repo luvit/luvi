@@ -20,8 +20,8 @@ endif
 
 SOURCE_FILES=\
 	src/main.c \
-	src/env.c \
-	src/inflate.c \
+	src/luvi.c \
+	src/tinfl.c \
 	luv/src/dns.c \
 	luv/src/fs.c \
 	luv/src/handle.c \
