@@ -26,11 +26,14 @@ extern const char* luaJIT_BC_init;
 
 int main(int argc, char* argv[] ) {
 
+  lua_State* L;
+  int index;
+  int res;
+
   // Hooks in libuv that need to be done in main.
   argv = uv_setup_args(argc, argv);
 
   // Create the lua state.
-  lua_State *L;
   L = luaL_newstate();
   if (L == NULL) {
     fprintf(stderr, "luaL_newstate has failed\n");
@@ -55,7 +58,7 @@ int main(int argc, char* argv[] ) {
 
   // Expose command line arguments via global `args`
   lua_createtable (L, argc, 0);
-  for (int index = 0; index < argc; index++) {
+  for (index = 0; index < argc; index++) {
     lua_pushstring(L, argv[index]);
     lua_rawseti(L, -2, index);
   }
@@ -68,7 +71,7 @@ int main(int argc, char* argv[] ) {
   }
 
   // Also expose arguments via (...) in main.lua
-  for (int index = 1; index < argc; index++) {
+  for (index = 1; index < argc; index++) {
     lua_pushstring(L, argv[index]);
   }
 
@@ -79,7 +82,7 @@ int main(int argc, char* argv[] ) {
   }
 
   // Use the return value from the script as process exit code.
-  int res = 0;
+  res = 0;
   if (lua_type(L, -1) == LUA_TNUMBER) {
     res = lua_tointeger(L, -1);
   }
