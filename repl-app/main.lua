@@ -7,7 +7,7 @@ if uv.guess_handle(0) ~= "TTY" or
   error "stdio must be a tty"
 end
 local stdin = uv.new_tty(0, true)
-local stdout = uv.new_tty(1)
+local stdout = uv.new_tty(1, false)
 local print = function(...)
   uv.write(stdout, table.concat({...}, "\t") .. "\n")
 end

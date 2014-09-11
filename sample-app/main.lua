@@ -4,10 +4,10 @@ local dump = require('utils').dump
 
 local stdout
 if uv.guess_handle(1) == "TTY" then
-  stdout = uv.new_tty(1)
+  stdout = uv.new_tty(1, false)
   print("STDOUT is TTY")
 else
-  stdout = uv.new_pipe()
+  stdout = uv.new_pipe(false)
   uv.pipe_open(stdout, 1)
   print("STDOUT is PIPE")
 end
