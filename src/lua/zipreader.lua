@@ -17,7 +17,7 @@ limitations under the License.
 --]]
 
 local ffi = require('ffi')
-local inflate = _G.inflate
+local inflate = require('luvi').inflate
 
 ffi.cdef[[
   struct zip_LFH {

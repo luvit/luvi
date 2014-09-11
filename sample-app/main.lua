@@ -1,4 +1,5 @@
 local p = require('utils').prettyPrint
+local env = require('luvi').env
 
 p("uv", uv)
 p("env", setmetatable({}, {

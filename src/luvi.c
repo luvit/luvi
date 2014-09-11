@@ -25,6 +25,8 @@
 #include <errno.h>
 #endif
 
+#include "tinfl.c"
+
 extern char **environ;
 
 static int lenv_keys(lua_State* L) {
@@ -139,3 +141,23 @@ static const luaL_reg lenv_f[] = {
   {"unset", lenv_unset},
   {NULL, NULL}
 };
+
+static int ltinfl(lua_State* L) {
+  size_t in_len;
+  const char* in_buf = luaL_checklstring(L, 1, &in_len);
+  size_t out_len;
+  int flags = luaL_optint(L, 2, 0);
+  char* out_buf = tinfl_decompress_mem_to_heap(in_buf, in_len, &out_len, flags);
+  lua_pushlstring(L, out_buf, out_len);
+  free(out_buf);
+  return 1;
+}
+
+LUALIB_API int luaopen_luvi(lua_State *L) {
+  lua_newtable(L);
+  luaL_newlib(L, lenv_f);
+  lua_setfield(L, -2, "env");
+  lua_pushcfunction(L, ltinfl);
+  lua_setfield(L, -2, "inflate");
+  return 1;
+}

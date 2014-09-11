@@ -1,20 +1,3 @@
-/*
- *  Copyright 2014 The Luvit Authors. All Rights Reserved.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
-
 /* tinfl.c v1.10 - public domain inflate with zlib header parsing/adler32 checking (inflate-only subset of miniz.c)
    Rich Geldreich <richgel99@gmail.com>, last updated May 20, 2011
    Implements RFC 1950: http://www.ietf.org/rfc/rfc1950.txt and RFC 1951: http://www.ietf.org/rfc/rfc1951.txt
@@ -571,14 +554,3 @@ int tinfl_decompress_mem_to_callback(const void *pIn_buf, size_t *pIn_buf_size, 
 }
 
 #endif // #ifndef TINFL_HEADER_FILE_ONLY
-
-static int ltinfl(lua_State* L) {
-  size_t in_len;
-  const char* in_buf = luaL_checklstring(L, 1, &in_len);
-  size_t out_len;
-  int flags = luaL_optint(L, 2, 0);
-  char* out_buf = tinfl_decompress_mem_to_heap(in_buf, in_len, &out_len, flags);
-  lua_pushlstring(L, out_buf, out_len);
-  free(out_buf);
-  return 1;
-}
