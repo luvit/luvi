@@ -3,3 +3,4 @@ app
 sample-app.zip
 *.o
 out
+src/lua/*.c
