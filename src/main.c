@@ -2,7 +2,7 @@
 #include "lualib.h"
 #include "lauxlib.h"
 #include "uv.h"
-#include "luv/src/luv.c"
+#include "../luv/src/luv.c"
 #include "inflate.c"
 #include "env.c"
 

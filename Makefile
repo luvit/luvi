@@ -19,9 +19,9 @@ else
 endif
 
 SOURCE_FILES=\
-	main.c \
-	env.c \
-	inflate.c \
+	src/main.c \
+	src/env.c \
+	src/inflate.c \
 	luv/src/dns.c \
 	luv/src/fs.c \
 	luv/src/handle.c \
@@ -57,11 +57,11 @@ luajit-2.0/src/libluajit.a:
 	$(MAKE) -C luajit-2.0
 
 
-%.lua.o: lib/%.lua luajit-2.0/src/libluajit.a
+%.lua.o: src/lua/%.lua luajit-2.0/src/libluajit.a
 	luajit-2.0/src/luajit -bg $< $@
 
 luvi: ${SOURCE_FILES} ${DEPS}
-	$(CC) -c main.c ${CFLAGS} -o luvi.o
+	$(CC) -c src/main.c ${CFLAGS} -o luvi.o
 	$(CC) luvi.o ${DEPS} ${LDFLAGS} -o $@
 	rm luvi.o
 

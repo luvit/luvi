@@ -8,10 +8,10 @@
         'luv/libuv/uv.gyp:libuv',
       ],
       'sources': [
-        'lib/init.lua',
-        'lib/utils.lua',
-        'lib/zipreader.lua',
-        'main.c',
+        'src/lua/init.lua',
+        'src/lua/utils.lua',
+        'src/lua/zipreader.lua',
+        'src/main.c',
       ],
       'msvs-settings': {
         'VCLinkerTool': {
