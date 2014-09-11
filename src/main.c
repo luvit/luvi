@@ -22,7 +22,9 @@
 #include "../luv/src/luv.c"
 #include "luvi.c"
 
-extern const char* luaJIT_BC_init;
+#include "lua/init.c"
+#include "lua/zipreader.c"
+#include "lua/utils.c"
 
 int main(int argc, char* argv[] ) {
 
