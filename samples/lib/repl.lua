@@ -82,7 +82,7 @@ return function (stdin, stdout, uv, utils)
     uv.write(stdout, prompt .. ' ')
   end
 
-  print("Welcome to the luvi repl!")
+  print("Welcome to the " .. c("Bred") .. "L" .. c("Bgreen") .. "uv" .. c("Bblue") .. "i" .. c() .. " repl!")
 
   displayPrompt '>'
 
