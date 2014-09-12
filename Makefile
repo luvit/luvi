@@ -43,6 +43,7 @@ DEPS =\
 	luv/libuv/libuv.a
 
 all: luvi
+	make -C samples
 
 gyp:
 	# replace with configure
@@ -59,12 +60,11 @@ luajit-2.0/src/libluajit.a:
 %.lua.o: src/lua/%.lua luajit-2.0/src/libluajit.a
 	cd luajit-2.0/src && ./luajit -bg ../../$< ../../$@ && cd ../..
 
-%.lua.o: %.lua.c
-
-luvi: ${SOURCE_FILES} ${DEPS}
+luvi.o: ${SOURCE_FILES}
 	$(CC) -c src/main.c ${CFLAGS} -o luvi.o
+
+luvi: luvi.o ${DEPS}
 	$(CC) luvi.o ${DEPS} ${LDFLAGS} -o $@
-	rm luvi.o
 
 clean-all: clean
 	$(MAKE) -C luajit-2.0 clean
@@ -73,3 +73,4 @@ clean-all: clean
 
 clean:
 	rm -f luvi *.o *.lua.c
+	make -C samples clean
