@@ -1,5 +1,8 @@
 local env = require('luvi').env
 local uv = require('uv')
+local bundle = require('luvi').bundle
+-- Register the utils lib as a module
+package.preload.utils = loadstring(bundle.readfile("utils.lua"))
 local dump = require('utils').dump
 
 local stdout

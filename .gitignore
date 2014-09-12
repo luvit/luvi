@@ -2,5 +2,5 @@ luvi
 app
 sample-app.zip
 *.o
+*.lua.c
 out
-src/lua/*.c

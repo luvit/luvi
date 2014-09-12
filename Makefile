@@ -24,7 +24,6 @@ SOURCE_FILES=\
 	src/tinfl.c \
 	src/lua/init.c \
 	src/lua/zipreader.c \
-	src/lua/utils.c \
 	luv/src/dns.c \
 	luv/src/fs.c \
 	luv/src/handle.c \
@@ -40,6 +39,8 @@ SOURCE_FILES=\
 	luv/src/util.c
 
 DEPS =\
+	init.lua.o \
+	zipreader.lua.o \
 	luajit-2.0/src/libluajit.a \
 	luv/libuv/libuv.a
 
@@ -57,8 +58,10 @@ luajit-2.0/src/libluajit.a:
 	$(MAKE) -C luajit-2.0
 
 
-src/lua/%.c: src/lua/%.lua luajit-2.0/src/libluajit.a
+%.lua.c: src/lua/%.lua luajit-2.0/src/libluajit.a
 	cd luajit-2.0/src && ./luajit -bg ../../$< ../../$@ && cd ../..
+
+%.lua.o: %.lua.c
 
 luvi: ${SOURCE_FILES} ${DEPS}
 	$(CC) -c src/main.c ${CFLAGS} -o luvi.o
@@ -78,4 +81,4 @@ clean-all: clean
 	$(MAKE) -C luv/libuv clean
 
 clean:
-	rm -f luvi *.o app sample-app.zip src/lua/*.c
+	rm -f luvi *.o app sample-app.zip *.lua.c

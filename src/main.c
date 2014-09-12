@@ -22,10 +22,6 @@
 #include "../luv/src/luv.c"
 #include "luvi.c"
 
-#include "lua/init.c"
-#include "lua/zipreader.c"
-#include "lua/utils.c"
-
 int main(int argc, char* argv[] ) {
 
   lua_State* L;

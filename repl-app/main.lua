@@ -1,3 +1,6 @@
+local bundle = require('luvi').bundle
+-- Register the utils lib as a module
+package.preload.utils = loadstring(bundle.readfile("utils.lua"))
 
 local utils = require('utils')
 local uv = require('uv')
