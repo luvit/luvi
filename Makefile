@@ -1,3 +1,5 @@
+PREFIX=/usr/local
+
 XCFLAGS=
 #XCFLAGS+=-DLUAJIT_DISABLE_JIT
 XCFLAGS+=-DLUAJIT_ENABLE_LUA52COMPAT
@@ -74,3 +76,6 @@ clean-all: clean
 clean:
 	rm -f luvi *.o *.lua.c
 	make -C samples clean
+
+install: luvi
+	install $< ${PREFIX}/bin/luvi
