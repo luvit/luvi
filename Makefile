@@ -58,7 +58,7 @@ luajit-2.0/src/libluajit.a:
 
 
 src/lua/%.c: src/lua/%.lua luajit-2.0/src/libluajit.a
-	luajit-2.0/src/luajit -bg $< $@
+	cd luajit-2.0/src && ./luajit -bg ../../$< ../../$@ && cd ../..
 
 luvi: ${SOURCE_FILES} ${DEPS}
 	$(CC) -c src/main.c ${CFLAGS} -o luvi.o
