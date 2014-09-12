@@ -131,6 +131,11 @@ return function(...)
 
   luvi.bundle = bundle
 
+  bundle.register = function (name, path)
+    if not path then path = name + ".lua" end
+    package.preload[name] = loadstring(bundle.readfile(path), path)
+  end
+
   local main = bundle.readfile("main.lua")
   if not main then error("Missing main.lua in bundle") end
   return loadstring(main, "bundle:main.lua")(...)
