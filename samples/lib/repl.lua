@@ -16,11 +16,13 @@ limitations under the License.
 
 --]]
 
-return function (stdin, stdout, uv, utils)
+return function (stdin, stdout, uv, utils, greeting)
 
   local print = function(...)
     uv.write(stdout, table.concat({...}, "\t") .. "\n")
   end
+
+  if greeting then print(greeting) end
 
   local c = utils.color
 
@@ -81,8 +83,6 @@ return function (stdin, stdout, uv, utils)
   local function displayPrompt(prompt)
     uv.write(stdout, prompt .. ' ')
   end
-
-  print("Welcome to the " .. c("Bred") .. "L" .. c("Bgreen") .. "uv" .. c("Bblue") .. "i" .. c() .. " repl!")
 
   displayPrompt '>'
 

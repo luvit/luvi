@@ -26,6 +26,8 @@ else
   utils.init(false)
 end
 
-repl(stdin, stdout, uv, utils)
+local c = utils.color
+local greeting = "Welcome to the " .. c("Bred") .. "L" .. c("Bgreen") .. "uv" .. c("Bblue") .. "i" .. c() .. " repl!"
+repl(stdin, stdout, uv, utils, greeting)
 
 uv.run("default")
