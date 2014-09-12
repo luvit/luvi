@@ -1,5 +1,28 @@
-local p = require('utils').prettyPrint
 local env = require('luvi').env
+local uv = require('uv')
+local dump = require('utils').dump
+
+local stdout
+if uv.guess_handle(1) == "TTY" then
+  stdout = uv.new_tty(1, false)
+  print("STDOUT is TTY")
+else
+  stdout = uv.new_pipe(false)
+  uv.pipe_open(stdout, 1)
+  print("STDOUT is PIPE")
+end
+
+_G.p = function (...)
+  local n = select('#', ...)
+  local arguments = { ... }
+
+  for i = 1, n do
+    arguments[i] = dump(arguments[i])
+  end
+
+  local toWrite = table.concat(arguments, "\t") .. "\n"
+  uv.write(stdout, toWrite);
+end
 
 p("uv", uv)
 p("env", setmetatable({}, {
