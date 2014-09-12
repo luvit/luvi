@@ -9,7 +9,6 @@
       ],
       'sources': [
         'src/lua/init.lua',
-        'src/lua/utils.lua',
         'src/lua/zipreader.lua',
         'src/main.c',
       ],

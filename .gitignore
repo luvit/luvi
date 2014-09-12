@@ -1,6 +1,7 @@
 luvi
-app
-sample-app.zip
 *.o
+*.lua.c
+*.zip
+samples/repl
+samples/test
 out
-src/lua/*.c

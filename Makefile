@@ -1,3 +1,5 @@
+PREFIX=/usr/local
+
 XCFLAGS=
 #XCFLAGS+=-DLUAJIT_DISABLE_JIT
 XCFLAGS+=-DLUAJIT_ENABLE_LUA52COMPAT
@@ -22,9 +24,6 @@ SOURCE_FILES=\
 	src/main.c \
 	src/luvi.c \
 	src/tinfl.c \
-	src/lua/init.c \
-	src/lua/zipreader.c \
-	src/lua/utils.c \
 	luv/src/dns.c \
 	luv/src/fs.c \
 	luv/src/handle.c \
@@ -40,10 +39,13 @@ SOURCE_FILES=\
 	luv/src/util.c
 
 DEPS =\
+	init.lua.o \
+	zipreader.lua.o \
 	luajit-2.0/src/libluajit.a \
 	luv/libuv/libuv.a
 
 all: luvi
+	make -C samples
 
 gyp:
 	# replace with configure
@@ -57,20 +59,14 @@ luajit-2.0/src/libluajit.a:
 	$(MAKE) -C luajit-2.0
 
 
-src/lua/%.c: src/lua/%.lua luajit-2.0/src/libluajit.a
+%.lua.o: src/lua/%.lua luajit-2.0/src/libluajit.a
 	cd luajit-2.0/src && ./luajit -bg ../../$< ../../$@ && cd ../..
 
-luvi: ${SOURCE_FILES} ${DEPS}
+luvi.o: ${SOURCE_FILES}
 	$(CC) -c src/main.c ${CFLAGS} -o luvi.o
+
+luvi: luvi.o ${DEPS}
 	$(CC) luvi.o ${DEPS} ${LDFLAGS} -o $@
-	rm luvi.o
-
-sample-app.zip: sample-app sample-app/main.lua sample-app/greetings.txt sample-app/add/init.lua
-	cd sample-app && zip -r -9 ../sample-app.zip . && cd ..
-
-app: luvi sample-app.zip
-	cat $^ > $@
-	chmod +x $@
 
 clean-all: clean
 	$(MAKE) -C luajit-2.0 clean
@@ -78,4 +74,8 @@ clean-all: clean
 	$(MAKE) -C luv/libuv clean
 
 clean:
-	rm -f luvi *.o app sample-app.zip src/lua/*.c
+	rm -f luvi *.o *.lua.c
+	make -C samples clean
+
+install: luvi
+	install $< ${PREFIX}/bin/luvi

@@ -38,26 +38,21 @@ local colors = {
   Bwhite   = "1;37"
 }
 
-if utils._useColors == nil then
-  utils._useColors = true
-end
+local colorized = false
 
 function utils.color(color_name)
-  if utils._useColors then
-    return "\27[" .. (colors[color_name] or "0") .. "m"
-  else
-    return ""
-  end
+  return "\27[" .. (colors[color_name] or "0") .. "m"
 end
 
 function utils.colorize(color_name, string, reset_name)
+  if not colorized then return string end
   return utils.color(color_name) .. tostring(string) .. utils.color(reset_name)
 end
 
 local backslash, null, newline, carriage, tab, quote, quote2, obracket, cbracket
 
-function utils.loadColors (n)
-  if n ~= nil then utils._useColors = n end
+function utils.init(color)
+  colorized = color
   backslash = utils.colorize("Bgreen", "\\\\", "green")
   null      = utils.colorize("Bgreen", "\\0", "green")
   newline   = utils.colorize("Bgreen", "\\n", "green")
@@ -68,8 +63,6 @@ function utils.loadColors (n)
   obracket  = utils.colorize("B", '[')
   cbracket  = utils.colorize("B", ']')
 end
-
-utils.loadColors ()
 
 function utils.dump(o, depth)
   local t = type(o)

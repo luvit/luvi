@@ -16,43 +16,41 @@ limitations under the License.
 
 --]]
 
-return function(...)
+-- Given a path like /foo/bar and foo//bar/ return foo/bar.bar
+-- This removes leading and trailing slashes as well as multiple internal slashes.
+local function normalizePath(path)
+  local parts = {}
+  for part in string.gmatch(path, '([^/]+)') do
+    table.insert(parts, part)
+  end
+  local skip = 0
+  local reversed = {}
+  for i = #parts, 1, -1 do
+    local part = parts[i]
+    if part == '.' then
+      -- continue
+    elseif part == '..' then
+      skip = skip + 1
+    elseif skip > 0 then
+      skip = skip - 1
+    else
+      table.insert(reversed, part)
+    end
+  end
+  parts = reversed
+  for i = 1, #parts / 2 do
+    local j = #parts - i + 1
+    parts[i], parts[j] = parts[j], parts[i]
+  end
+  return table.concat(parts, '/')
+end
+
+return function(base, ...)
 
   local uv = require('uv')
   local luvi = require('luvi')
-  local env = luvi.env
   local bundle
 
-  -- Given a path like /foo/bar and foo//bar/ return foo/bar.bar
-  -- This removes leading and trailing slashes as well as multiple internal slashes.
-  local function normalizePath(path)
-    local parts = {}
-    for part in string.gmatch(path, '([^/]+)') do
-      table.insert(parts, part)
-    end
-    local skip = 0
-    local reversed = {}
-    for i = #parts, 1, -1 do
-      local part = parts[i]
-      if part == '.' then
-        -- continue
-      elseif part == '..' then
-        skip = skip + 1
-      elseif skip > 0 then
-        skip = skip - 1
-      else
-        table.insert(reversed, part)
-      end
-    end
-    parts = reversed
-    for i = 1, #parts / 2 do
-      local j = #parts - i + 1
-      parts[i], parts[j] = parts[j], parts[i]
-    end
-    return table.concat(parts, '/')
-  end
-
-  local base = env.get("LUVI_IN")
   if base then
     base = base .. "/"
     bundle = {
@@ -93,7 +91,7 @@ return function(...)
       read=uv.fs_read
     })
     if not zip then
-      print("Missing bundle.  Either set LUVI_IN environment variable to path to folder or append zip to this binary.")
+      print("Usage: " .. args[0] .. " path/to/app-folder")
       return 1
     end
 
@@ -131,8 +129,15 @@ return function(...)
 
   luvi.bundle = bundle
 
+  bundle.register = function (name, path)
+    if not path then path = name + ".lua" end
+    package.preload[name] = loadstring(bundle.readfile(path), path)
+  end
+
+  bundle.normalizePath = normalizePath
+
   local main = bundle.readfile("main.lua")
   if not main then error("Missing main.lua in bundle") end
-  return loadstring(main, "bundle:main.lua")(...)
+  return loadstring(main, "bundle:main.lua")(base, ...)
 
 end

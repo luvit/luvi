@@ -8,9 +8,8 @@ CALL msvcbuild.bat static
 @ECHO
 @ECHO "Compiling luvi lua modules to C"
 @ECHO
-luajit.exe -bg ..\..\src\lua\init.lua ..\..\src\lua\init.c
-luajit.exe -bg ..\..\src\lua\utils.lua ..\..\src\lua\utils.c
-luajit.exe -bg ..\..\src\lua\zipreader.lua ..\..\src\lua\zipreader.c
+luajit.exe -bg ..\..\src\lua\init.lua ..\..\init.lua.c
+luajit.exe -bg ..\..\src\lua\zipreader.lua ..\..\zipreader.lua.c
 cd ..\..
 
 @ECHO

@@ -22,9 +22,11 @@
 #include "../luv/src/luv.c"
 #include "luvi.c"
 
-#include "lua/init.c"
-#include "lua/zipreader.c"
-#include "lua/utils.c"
+// The windows build system wants to include these
+#ifdef _WIN32
+#include "../init.lua.c"
+#include "../zipreader.lua.c"
+#endif
 
 int main(int argc, char* argv[] ) {
 

@@ -12,8 +12,7 @@ already.
 
  1. Create your lua program.  This consists of a folder with a `main.lua` in
     it's root.
- 2. Test your unzipped program with bare `luvi` by setting the`LUVI_IN`
-    environment variable to point to your folder.
+ 2. Test your unzipped program with `luvi path/to/folder`.
  3. When you are pleased with the result, zip your folder making sure `main.lua`
     is in the root of the new zip file.  Then concatenate the `luvi` binary with
     your zip to form a new binary.  Mark it as executable and distribute.
@@ -183,6 +182,7 @@ Then run the makefile inside it.
 ```sh
 cd luvi
 make -j4
+make install
 ```
 
 When that's done you should have a shiny little binary `luvi`.
@@ -196,8 +196,7 @@ If you try to run it, it will show usage information:
 
 ```sh
 $ ./luvi
-Missing bundle.  Either set LUVI_IN environment variable to path to folder
-or append zip to this binary
+Usage: luvi path/to/app-folder
 ```
 
 You can run the sample app by doing:
