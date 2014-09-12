@@ -19,7 +19,8 @@ limitations under the License.
 return function(...)
 
   local uv = require('uv')
-  local env = require('luvi').env
+  local luvi = require('luvi')
+  local env = luvi.env
   local bundle
 
   -- Given a path like /foo/bar and foo//bar/ return foo/bar.bar
@@ -128,7 +129,8 @@ return function(...)
     }
   end
 
-  _G.bundle = bundle
+  luvi.bundle = bundle
+
   local main = bundle.readfile("main.lua")
   if not main then error("Missing main.lua in bundle") end
   return loadstring(main, "bundle:main.lua")(...)
