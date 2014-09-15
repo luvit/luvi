@@ -181,8 +181,19 @@ Then run the makefile inside it.
 
 ```sh
 cd luvi
-make -j4
-make install
+mkdir build
+cd build
+cmake ..
+make
+```
+
+To create a release build.
+```sh
+cd luvi
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+make
 ```
 
 When that's done you should have a shiny little binary `luvi`.
