@@ -210,18 +210,23 @@ $ ./luvi
 Usage: luvi path/to/app-folder
 ```
 
-You can run the sample app by doing:
+You can run the sample repl app by doing:
 
 ```sh
-LUVI_IN=sample-app ./luvi
+./luvi ../samples/repl.app
 ```
 
 When you're done creating an app you need to zip your app and concatenate it
-with luvi.
-
-See the `app` makefile target for an example of this.
+with luvi.  Make sure that `main.lua` is at the root of your zip file.  For example on osx or linux:
 
 ```sh
-make app
-./app
+cd my-app
+zip -r -9 ../my-app.zip .
+cd ..
+unzip -l my-app.zip # verify the paths in the zip file
+cat path/to/luvi my-app.zip > my-app.bin
+chmod +x my-app.bin
+./my-app.bin
 ```
+
+
