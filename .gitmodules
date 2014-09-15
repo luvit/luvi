@@ -4,6 +4,3 @@
 [submodule "luajit-2.0"]
 	path = luajit-2.0
 	url = https://github.com/luvit/luajit-2.0.git
-[submodule "tools/gyp"]
-	path = tools/gyp
-	url = https://github.com/luvit/gyp.git
