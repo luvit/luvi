@@ -217,5 +217,16 @@ You can run the sample repl app by doing:
 ```
 
 When you're done creating an app you need to zip your app and concatenate it
-with luvi.
+with luvi.  Make sure that `main.lua` is at the root of your zip file.  For example on osx or linux:
+
+```sh
+cd my-app
+zip -r -9 ../my-app.zip .
+cd ..
+unzip -l my-app.zip # verify the paths in the zip file
+cat path/to/luvi my-app.zip > my-app.bin
+chmod +x my-app.bin
+./my-app.bin
+```
+
 
