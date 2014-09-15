@@ -27,7 +27,11 @@
 
 #include "tinfl.c"
 
+#ifdef WIN32
+#define environ _wenviron
+#else
 extern char **environ;
+#endif
 
 static int lenv_keys(lua_State* L) {
   int size = 0, i;
