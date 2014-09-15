@@ -19,6 +19,7 @@ limitations under the License.
 -- Given a path like /foo/bar and foo//bar/ return foo/bar.bar
 -- This removes leading and trailing slashes as well as multiple internal slashes.
 local function normalizePath(path)
+  local isAbsolute = path:sub(1, 1) == "/"
   local parts = {}
   for part in string.gmatch(path, '([^/]+)') do
     table.insert(parts, part)
@@ -42,7 +43,9 @@ local function normalizePath(path)
     local j = #parts - i + 1
     parts[i], parts[j] = parts[j], parts[i]
   end
-  return table.concat(parts, '/')
+  path = table.concat(parts, '/')
+  if isAbsolute then return "/" .. path end
+  return path
 end
 
 return function(base, ...)
@@ -52,6 +55,11 @@ return function(base, ...)
   local bundle
 
   if base then
+    if base:sub(1,1) == "/" then
+      base = normalizePath(base)
+    else
+      base = normalizePath(uv.cwd() .. "/" .. base)
+    end
     base = base .. "/"
     bundle = {
       stat = function (path)
