@@ -30,9 +30,9 @@ cmake_minimum_required(VERSION 2.8)
 set(LIBUVDIR ${CMAKE_SOURCE_DIR}/luv/libuv)
 
 include_directories(
-  ${LIBUVDIR}/include
-  ${LIBUVDIR}/include/uv-private 
   ${LIBUVDIR}/src
+  ${LIBUVDIR}/include/uv-private 
+  ${LIBUVDIR}/include
 )
 
 set(SOURCES
@@ -44,12 +44,10 @@ set(SOURCES
 
 if(WIN32)
   add_definitions(
-    -DWIN32_LEAN_AND_MEAN
     -D_WIN32_WINNT=0x0600
     -D_CRT_SECURE_NO_WARNINGS
     -D_GNU_SOURCE
   )
-  include_directories(${LIBUVDIR}/src/win)
   set(SOURCES ${SOURCES}
     ${LIBUVDIR}/src/win/async.c
     ${LIBUVDIR}/src/win/core.c
