@@ -22,12 +22,6 @@
 #include "../luv/src/luv.c"
 #include "luvi.c"
 
-// The windows build system wants to include these
-#ifdef _WIN32
-#include "../init.lua.c"
-#include "../zipreader.lua.c"
-#endif
-
 int main(int argc, char* argv[] ) {
 
   lua_State* L;
