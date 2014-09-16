@@ -88,7 +88,6 @@ else()
     ${LIBUVDIR}/src/unix/pipe.c
     ${LIBUVDIR}/src/unix/poll.c
     ${LIBUVDIR}/src/unix/process.c
-    ${LIBUVDIR}/src/unix/proctitle.c
     ${LIBUVDIR}/src/unix/signal.c
     ${LIBUVDIR}/src/unix/stream.c
     ${LIBUVDIR}/src/unix/tcp.c
@@ -104,17 +103,28 @@ if(SIZEOF_VOID_P EQUAL 8)
   add_definitions(-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE)
 endif()
 
+## Freebsd
+if("${CMAKE_SYSTEM_NAME}" MATCHES "FreeBSD")
+  set(SOURCES ${SOURCES}
+    ${LIBUVDIR}/src/unix/kqueue.c
+    ${LIBUVDIR}/src/unix/freebsd.c
+  )
+endif()
+
+## Linux
 if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
   add_definitions(
     -D_GNU_SOURCE
   )
   set(SOURCES ${SOURCES}
+    ${LIBUVDIR}/src/unix/proctitle.c
     ${LIBUVDIR}/src/unix/linux-core.c
     ${LIBUVDIR}/src/unix/linux-syscalls.c
     ${LIBUVDIR}/src/unix/linux-inotify.c
   )
 endif()
 
+## Linux
 if(APPLE)
   add_definitions(
     -D=_DARWIN_USE_64_BIT_INODE
@@ -128,6 +138,13 @@ if(APPLE)
 endif()
 
 add_library(libuv ${SOURCES})
+
+if("${CMAKE_SYSTEM_NAME}" MATCHES "FreeBSD")
+  target_link_libraries(libuv
+    pthread
+    kvm
+  )
+endif()
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
   target_link_libraries(libuv
