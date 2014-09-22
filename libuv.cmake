@@ -134,6 +134,7 @@ if(APPLE)
     ${LIBUVDIR}/src/unix/fsevents.c
     ${LIBUVDIR}/src/unix/kqueue.c
     ${LIBUVDIR}/src/unix/darwin-proctitle.c
+    ${LIBUVDIR}/src/unix/proctitle.c
   )
 endif()
 
