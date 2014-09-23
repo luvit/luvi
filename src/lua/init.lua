@@ -16,35 +16,105 @@ limitations under the License.
 
 --]]
 
--- Given a path like /foo/bar and foo//bar/ return foo/bar.bar
--- This removes leading and trailing slashes as well as multiple internal slashes.
-local function normalizePath(path)
-  local isAbsolute = path:sub(1, 1) == "/"
-  local parts = {}
-  for part in string.gmatch(path, '([^/]+)') do
-    table.insert(parts, part)
+local os = require('ffi').os
+
+local getPrefix, splitPath, joinParts
+
+if os == "Windows" then
+  -- Windows aware path utils
+  function getPrefix(path)
+    return path:match("^%u:\\") or
+           path:match("^/") or
+           path:match("^\\+")
   end
+  function splitPath(path)
+    local parts = {}
+    for part in string.gmatch(path, '([^/\\]+)') do
+      table.insert(parts, part)
+    end
+    return parts
+  end
+  function joinParts(prefix, parts)
+    if prefix == '/' then
+      return prefix .. table.concat(parts, '/')
+    elseif prefix then
+      return prefix .. table.concat(parts, '\\')
+    end
+    return table.concat(parts, '\\')
+  end
+else
+  -- Simple optimized versions for unix systems
+  function getPrefix(path)
+    return path:match("/")
+  end
+  function splitPath(path)
+    local parts = {}
+    for part in string.gmatch(path, '([^/]+)') do
+      table.insert(parts, part)
+    end
+    return parts
+  end
+  function joinParts(prefix, parts)
+    if prefix then
+      return prefix .. table.concat(parts, '/')
+    end
+    return table.concat(parts, '/')
+  end
+end
+
+local function pathJoin(...)
+  local inputs = {...}
+  local l = #inputs
+
+  -- Find the last segment that is an absolute path
+  -- Or if all are relative, prefix will be nil
+  local i = l
+  local prefix
+  while true do
+    prefix = getPrefix(inputs[i])
+    if prefix or i <= 1 then break end
+    i = i - 1
+  end
+
+  -- If there was one, remove it's prefix from it's segment
+  if prefix then
+    inputs[i] = inputs[i]:sub(#prefix)
+  end
+
+  -- Split all the paths segments into one large list
+  local parts = {}
+  while i <= l do
+    local sub = splitPath(inputs[i])
+    for j = 1, #sub do
+      parts[#parts + 1] = sub[j]
+    end
+    i = i + 1
+  end
+
+  -- Evaluate special segments in reverse order.
   local skip = 0
   local reversed = {}
   for i = #parts, 1, -1 do
     local part = parts[i]
     if part == '.' then
-      -- continue
+      -- Ignore
     elseif part == '..' then
       skip = skip + 1
     elseif skip > 0 then
       skip = skip - 1
     else
-      table.insert(reversed, part)
+      reversed[#reversed + 1] = part
     end
   end
+
+  -- Reverse the list again to get the correct order
   parts = reversed
   for i = 1, #parts / 2 do
     local j = #parts - i + 1
     parts[i], parts[j] = parts[j], parts[i]
   end
-  path = table.concat(parts, '/')
-  if isAbsolute then return "/" .. path end
+
+  local path = joinParts(prefix, parts)
   return path
 end
 
@@ -55,15 +125,10 @@ return function(base, ...)
   local bundle
 
   if base then
-    if base:sub(1,1) == "/" then
-      base = normalizePath(base)
-    else
-      base = normalizePath(uv.cwd() .. "/" .. base)
-    end
-    base = base .. "/"
+    base = pathJoin(uv.cwd(), base)
     bundle = {
       stat = function (path)
-        local raw, err = uv.fs_stat(normalizePath(base .. path))
+        local raw, err = uv.fs_stat(pathJoin(base, path))
         if not raw then return nil, err end
         return {
           type = raw.is_directory and "directory" or
@@ -78,10 +143,11 @@ return function(base, ...)
         }
       end,
       readdir = function (path)
-        return uv.fs_readdir(normalizePath(base .. path))
+        return uv.fs_readdir(pathJoin(base, path))
       end,
       readfile = function (path)
-        local fd, err = uv.fs_open(normalizePath(base .. path), "r", tonumber("644", 8))
+        path = pathJoin(base, path)
+        local fd, err = uv.fs_open(path, "r", tonumber("644", 8))
         if not fd then return nil, err end
         local stat, err = uv.fs_fstat(fd)
         if not stat then return nil, err end
@@ -139,10 +205,11 @@ return function(base, ...)
 
   bundle.register = function (name, path)
     if not path then path = name + ".lua" end
-    package.preload[name] = loadstring(bundle.readfile(path), path)
+    local lua = assert(bundle.readfile(path))
+    package.preload[name] = assert(loadstring(lua, path))
   end
 
-  bundle.normalizePath = normalizePath
+  bundle.pathJoin = pathJoin
 
   local main = bundle.readfile("main.lua")
   if not main then error("Missing main.lua in bundle") end
