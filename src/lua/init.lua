@@ -45,7 +45,7 @@ if os == "Windows" then
 else
   -- Simple optimized versions for unix systems
   function getPrefix(path)
-    return path:match("/")
+    return path:match("^/")
   end
   function splitPath(path)
     local parts = {}
