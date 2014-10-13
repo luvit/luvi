@@ -42,21 +42,21 @@ local uv = require('uv')
 local function set_timeout(timeout, callback)
   local timer = uv.new_timer()
   function timer:ontimeout()
-    p("ontimeout", self)
+    print("ontimeout", self)
     uv.timer_stop(timer)
     uv.close(timer)
     callback(self)
   end
   function timer:onclose()
-    p("ontimerclose", self)
+    print("ontimerclose", self)
   end
   uv.timer_start(timer, timeout, 0)
   return timer
 end
 
-setTimeout(function ()
+set_timeout(1000, function ()
   print("This happens later")
-end, 1000)
+end)
 
 print("This happens first")
 
