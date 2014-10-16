@@ -86,15 +86,14 @@ return function (stdin, stdout, uv, utils, greeting)
 
   displayPrompt '>'
 
-  function stdin:ondata(line)
-    local prompt = evaluateLine(line)
-    displayPrompt(prompt)
-  end
-
-  function stdin:onend()
-    uv.close(stdin)
-  end
-
-  uv.read_start(stdin)
+  uv.read_start(stdin, function (self, err, line)
+    assert(not err, err)
+    if line then
+      local prompt = evaluateLine(line)
+      displayPrompt(prompt)
+    else
+      uv.close(stdin)
+    end
+  end)
 
 end

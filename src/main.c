@@ -15,10 +15,7 @@
  *
  */
 
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-#include "uv.h"
+#include "./luvi.h"
 #include "../luv/src/luv.c"
 #include "luvi.c"
 

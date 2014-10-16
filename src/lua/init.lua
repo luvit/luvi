@@ -143,7 +143,13 @@ return function(base, ...)
         }
       end,
       readdir = function (path)
-        return uv.fs_readdir(pathJoin(base, path))
+        local req = uv.fs_scandir(pathJoin(base, path))
+        local files = {}
+        repeat
+          local ent = uv.fs_scandir_next(req)
+          if ent then files[#files + 1] = ent.name end
+        until not ent
+        return files
       end,
       readfile = function (path)
         path = pathJoin(base, path)
@@ -151,7 +157,7 @@ return function(base, ...)
         if not fd then return nil, err end
         local stat, err = uv.fs_fstat(fd)
         if not stat then return nil, err end
-        local data, err = uv.fs_read(fd, stat.size, nil)
+        local data, err = uv.fs_read(fd, stat.size, 0)
         if not data then return nil, err end
         uv.fs_close(fd)
         return data
@@ -159,7 +165,7 @@ return function(base, ...)
     }
   else
 
-    local fd = uv.fs_open(uv.execpath(), 'r', tonumber('644', 8))
+    local fd = uv.fs_open(uv.exepath(), 'r', tonumber('644', 8))
     local zip = require('zipreader')(fd, {
       fstat=uv.fs_fstat,
       read=uv.fs_read

@@ -15,6 +15,8 @@
  *
  */
 
+#include "./luvi.h"
+
 #include <string.h>
 #include <stdlib.h>
 #ifdef _WIN32
@@ -137,7 +139,7 @@ static int lenv_unset(lua_State* L) {
   return 0;
 }
 
-static const luaL_reg lenv_f[] = {
+static const luaL_Reg lenv_f[] = {
   {"keys", lenv_keys},
   {"get", lenv_get},
   {"put", lenv_put},
