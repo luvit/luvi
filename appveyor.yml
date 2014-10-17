@@ -5,6 +5,7 @@ matrix:
 
 build_script:
  - git submodule update --init --recursive
+ - git submodule update --recursive
  - msvcbuild.bat
 
 test_script:
