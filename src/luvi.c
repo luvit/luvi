@@ -39,12 +39,12 @@ extern char **environ;
 static int lenv_keys(lua_State* L) {
 #ifndef _WIN32
 
-  int size = 0;
+  int i, size = 0;
   while (environ[size]) size++;
 
   lua_createtable(L, size, 0);
 
-  for (int i = 0; i < size; ++i) {
+  for (i = 0; i < size; ++i) {
     const char* var = environ[i];
     const char* s = strchr(var, '=');
     const int length = s ? s - var : strlen(var);
