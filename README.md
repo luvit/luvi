@@ -1,6 +1,10 @@
 luvi
 ====
 
+[![Linux Build Status](https://travis-ci.org/luvit/luvi.svg?branch=master)](https://travis-ci.org/luvit/luvi)
+
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/luvit/luvi?branch=master&svg=true)](https://ci.appveyor.com/project/creationix/luvi)
+
 A project in-between [luv][] and [luvit][].
 
 The goal of this is to make building [luvit][] and [derivatives][] much easier.

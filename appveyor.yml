@@ -1,0 +1,18 @@
+configuration: Release
+
+matrix:
+  fast_finish: true
+
+build_script:
+ - git submodule update --init --recursive
+ - msvcbuild.bat
+
+test_script:
+ - luvi.exe samples\test.app
+
+artifacts:
+ - path: luvi.exe
+
+notifications:
+  email: true
+  irc: "irc.freenode.org#luvit"

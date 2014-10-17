@@ -1,0 +1,16 @@
+language: c
+
+os:
+  - linux
+
+before_script:
+  - sudo add-apt-repository --yes ppa:kalakris/cmake
+  - sudo apt-get update -qq
+  - sudo apt-get install cmake
+
+script:
+  - make test
+
+notifications:
+  email: true
+  irc: "irc.freenode.org#luvit"

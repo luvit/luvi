@@ -1,6 +1,9 @@
 
 all: luvi
 
+luv/CMakeLists.txt:
+	git submodule update --init --recursive
+
 build/Makefile: luv/CMakeLists.txt luv/luajit.cmake luv/uv.cmake
 	cmake -H. -Bbuild
 
