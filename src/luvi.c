@@ -37,7 +37,7 @@ extern char **environ;
 #endif
 
 static int lenv_keys(lua_State* L) {
-#ifdef __POSIX__
+#ifndef _WIN32
 
   int size = 0;
   while (environ[size]) size++;
