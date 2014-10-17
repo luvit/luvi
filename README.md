@@ -1,6 +1,10 @@
 luvi
 ====
 
+[![Linux Build Status](https://travis-ci.org/luvit/luvi.svg?branch=master)](https://travis-ci.org/luvit/luvi)
+
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/luvit/luvi?branch=master&svg=true)](https://ci.appveyor.com/project/creationix/luvi)
+
 A project in-between [luv][] and [luvit][].
 
 The goal of this is to make building [luvit][] and [derivatives][] much easier.
@@ -33,7 +37,7 @@ operating system.  This lets you write fast non-blocking network servers or
 frameworks.  The APIs in [luv][] mirror what's in [libuv][] allowing you to add
 whatever API sugar you want on top be it callbacks, coroutines, or whatever.
 
-Just be sure to call `uv.run('default')` and the end of your script to start the
+Just be sure to call `uv.run()` and the end of your script to start the
 event loop if you want to actually wait for any events to happen.
 
 ```lua
@@ -41,27 +45,24 @@ local uv = require('uv')
 
 local function set_timeout(timeout, callback)
   local timer = uv.new_timer()
-  function timer:ontimeout()
-    print("ontimeout", self)
+  local function ontimeout()
+    p("ontimeout", self)
     uv.timer_stop(timer)
     uv.close(timer)
     callback(self)
   end
-  function timer:onclose()
-    print("ontimerclose", self)
-  end
-  uv.timer_start(timer, timeout, 0)
+  uv.timer_start(timer, timeout, 0, ontimeout)
   return timer
 end
 
-set_timeout(1000, function ()
+setTimeout(1000, function ()
   print("This happens later")
 end)
 
 print("This happens first")
 
 -- This blocks till the timer is done
-uv.run("default")
+uv.run()
 ```
 
 ### Integration with C's main function.
@@ -73,11 +74,11 @@ of strings at `args`.
 print("Your arguments were", args)
 ```
 
-The "env" module provides read/write access to your local environment variables
+The "env" table under "luvi" provides read/write access to your local environment variables
 via `env.keys`, `env.get`, `env.put`, `env.set`, and `env.unset`.
 
 ```lua
-local env = require('env')
+local env = require('luvi').env
 
 -- Convert the module to a mutable magic table.
 local environment = setmetatable({}, {

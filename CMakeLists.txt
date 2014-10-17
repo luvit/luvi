@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.9)
 
-include(libuv.cmake)
-include(luajit.cmake)
+include(luv/luajit.cmake)
+include(luv/uv.cmake)
 
 luajit_add_executable(luvi
   src/main.c
@@ -9,4 +9,12 @@ luajit_add_executable(luvi
   src/lua/zipreader.lua
 )
 
-target_link_libraries(luvi libuv libluajit)
+if(APPLE)
+  set(CMAKE_EXE_LINKER_FLAGS "-pagezero_size 10000 -image_base 100000000 ${CMAKE_EXE_LINKER_FLAGS}")
+endif()
+
+if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+  target_link_libraries(luvi uv lua51 rt)
+else()
+  target_link_libraries(luvi uv lua51)
+endif()

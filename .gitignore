@@ -1,7 +1,2 @@
 luvi
-*.o
-*.lua.c
-*.zip
-samples/repl
-samples/test
-out
+build
