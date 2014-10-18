@@ -20,3 +20,8 @@ clean:
 test: luvi build/luvi
 	./luvi samples/test.app
 
+install: build/luvi
+	cp luvi /usr/local/bin/luvi
+
+link: build/luvi
+	ln -sf `pwd`/build/luvi /usr/local/bin/luvi
