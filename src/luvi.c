@@ -29,33 +29,82 @@
 
 #include "tinfl.c"
 
-#ifdef WIN32
-#define environ _wenviron
-#else
+#ifdef __APPLE__
+#include <crt_externs.h>
+#define environ (*_NSGetEnviron())
+#elif !defined(_MSC_VER)
 extern char **environ;
 #endif
 
 static int lenv_keys(lua_State* L) {
-  int size = 0, i;
+#ifndef _WIN32
+
+  unsigned int i, size = 0;
   while (environ[size]) size++;
 
   lua_createtable(L, size, 0);
 
   for (i = 0; i < size; ++i) {
-    size_t length;
     const char* var = environ[i];
     const char* s = strchr(var, '=');
-
-    if (s != NULL) {
-      length = s - var;
-    }
-    else {
-      length =  strlen(var);
-    }
+    const size_t length = s ? s - var : strlen(var);
 
     lua_pushlstring(L, var, length);
     lua_rawseti(L, -2, i + 1);
   }
+
+#else // _WIN32
+  int i = 0;
+  int show_hidden = 0;
+  WCHAR* p;
+  WCHAR* environment = GetEnvironmentStringsW();
+  if (!environment) {
+    return 0;
+  }
+  p = environment;
+  if (lua_type(L, 1) == LUA_TBOOLEAN) {
+    show_hidden = lua_toboolean(L, 1);
+  }
+
+  lua_newtable(L);
+  while (*p) {
+    char* utf8;
+    size_t utf8_len;
+    WCHAR* s;
+
+    if (*p == L'=') {
+      // If the key starts with '=' it is a hidden environment variable.
+      if (show_hidden) {
+        s = wcschr(p + 1, L'=');
+      }
+      else {
+        // Skip it
+        p += wcslen(p) + 1;
+        continue;
+      }
+    }
+    else {
+      s = wcschr(p, L'=');
+    }
+
+    if (!s) {
+      s = p + wcslen(p);
+    }
+    // Convert from WCHAR to UTF-8 encoded char
+    utf8_len = WideCharToMultiByte(CP_UTF8, 0, p, s - p, NULL, 0, NULL, NULL);
+    utf8 = malloc(utf8_len);
+    WideCharToMultiByte(CP_UTF8, 0, p, s - p, utf8, utf8_len, NULL, NULL);
+
+    lua_pushlstring(L, utf8, utf8_len);
+    lua_rawseti(L, -2, ++i);
+
+    free(utf8);
+
+    p = s + wcslen(s) + 1;
+  }
+  FreeEnvironmentStringsW(environment);
+
+#endif
 
   return 1;
 }
@@ -63,61 +112,96 @@ static int lenv_keys(lua_State* L) {
 static int lenv_get(lua_State* L) {
   const char* name = luaL_checkstring(L, 1);
 #ifdef _WIN32
-  char* s = NULL;
-  DWORD size;
-  size = GetEnvironmentVariable(name, NULL, 0);
-  if (size) {
-    DWORD ret_size;
-    s = malloc(size);
-    if (!s) {
-      return luaL_error(L, "Malloc env get string variable failed.");
-    }
-    ret_size = GetEnvironmentVariable(name, s, size);
-    if (ret_size == 0 || ret_size >= size) {
-      free(s);
-      s = NULL;
-    }
+  char* value;
+  WCHAR* wname;
+  WCHAR* wvalue;
+  size_t wsize, size, wname_size;
+
+  // Convert UTF8 char* name to WCHAR* wname with null terminator
+  wname_size = MultiByteToWideChar(CP_UTF8, 0, name, -1, NULL, 0);
+  wname = malloc(wname_size * sizeof(WCHAR));
+  if (!wname) {
+    return luaL_error(L, "Problem allocating memory for environment variable.");
   }
-  lua_pushstring(L, s);
-  free(s);
+  MultiByteToWideChar(CP_UTF8, 0, name, -1, wname, wname_size);
+
+  // Check for the key
+  wsize = GetEnvironmentVariableW(wname, NULL, 0);
+  if (!wsize) {
+    free(wname);
+    return 0;
+  }
+
+  // Read the value
+  wvalue = malloc(wsize * sizeof(WCHAR));
+  if (!wvalue) {
+    free(wname);
+    return luaL_error(L, "Problem allocating memory for environment variable.");
+  }
+  GetEnvironmentVariableW(wname, wvalue, wsize);
+
+  // Convert WCHAR* wvalue to UTF8 char* value
+  size = WideCharToMultiByte(CP_UTF8, 0, wvalue, -1, NULL, 0, NULL, NULL);
+  value = malloc(size);
+  if (!value) {
+    free(wname);
+    free(wvalue);
+    return luaL_error(L, "Problem allocating memory for environment variable.");
+  }
+  WideCharToMultiByte(CP_UTF8, 0, wvalue, -1, value, size, NULL, NULL);
+
+  lua_pushlstring(L, value, size - 1);
+
+  free(wname);
+  free(wvalue);
+  free(value);
+
 #else
   lua_pushstring(L, getenv(name));
 #endif
   return 1;
 }
 
-static int lenv_put(lua_State* L) {
-  const char* string = luaL_checkstring(L, 1);
-  int r = putenv((char*)string);
-#ifdef _WIN32
-  if (r) {
-    return luaL_error(L, "Unknown error putting new environment");
-  }
-#else
-  if (r) {
-    if (r == ENOMEM)
-      return luaL_error(L, "Insufficient space to allocate new environment.");
-    return luaL_error(L, "Unknown error putting new environment");
-  }
-#endif
-  return 0;
-}
-
 static int lenv_set(lua_State* L) {
   const char* name = luaL_checkstring(L, 1);
   const char* value = luaL_checkstring(L, 2);
-  int overwrite = luaL_checkint(L, 3);
 
 #ifdef _WIN32
-  if (SetEnvironmentVariable(name, value) == 0) {
+  WCHAR* wname;
+  WCHAR* wvalue;
+  size_t wname_size, wvalue_size;
+  int r;
+  // Convert UTF8 char* name to WCHAR* wname with null terminator
+  wname_size = MultiByteToWideChar(CP_UTF8, 0, name, -1, NULL, 0);
+  wname = malloc(wname_size * sizeof(WCHAR));
+  if (!wname) return luaL_error(L, "Problem allocating memory for environment variable.");
+  MultiByteToWideChar(CP_UTF8, 0, name, -1, wname, wname_size);
+
+  // Convert UTF8 char* value to WCHAR* wvalue with null terminator
+  wvalue_size = MultiByteToWideChar(CP_UTF8, 0, value, -1, NULL, 0);
+  wvalue = malloc(wvalue_size * sizeof(WCHAR));
+  if (!wvalue) {
+    free(wname);
+    return luaL_error(L, "Problem allocating memory for environment variable.");
+  }
+  MultiByteToWideChar(CP_UTF8, 0, value, -1, wvalue, wvalue_size);
+
+  r = SetEnvironmentVariableW(wname, wvalue);
+
+  free(wname);
+  free(wvalue);
+  if (r == 0) {
     return luaL_error(L, "Failed to set environment variable");
   }
 #else
-  if (setenv(name, value, overwrite)) {
-    return luaL_error(L, "Insufficient space in environment.");
+  int r = setenv(name, value, 1);
+  if (r) {
+    if (r == EINVAL) {
+      return luaL_error(L, "EINVAL: Invalid name.");
+    }
+    return luaL_error(L, "ENOMEM: Insufficient memory to add a new variable to the environment.");
   }
 #endif
-
   return 0;
 }
 
@@ -131,18 +215,25 @@ static int lenv_unset(lua_State* L) {
     return luaL_error(L, "unsetenv: Unknown error");
   }
 #elif defined(_WIN32)
-  SetEnvironmentVariable(name, NULL);
+  WCHAR* wname;
+  size_t wname_size;
+  // Convert UTF8 char* name to WCHAR* wname with null terminator
+  wname_size = MultiByteToWideChar(CP_UTF8, 0, name, -1, NULL, 0);
+  wname = malloc(wname_size * sizeof(WCHAR));
+  if (!wname) {
+    return luaL_error(L, "Problem allocating memory for environment variable.");
+  }
+  MultiByteToWideChar(CP_UTF8, 0, name, -1, wname, wname_size);
+  SetEnvironmentVariableW(wname, NULL);
 #else
   unsetenv(name);
 #endif
-
   return 0;
 }
 
 static const luaL_Reg lenv_f[] = {
   {"keys", lenv_keys},
   {"get", lenv_get},
-  {"put", lenv_put},
   {"set", lenv_set},
   {"unset", lenv_unset},
   {NULL, NULL}

@@ -31,10 +31,9 @@ _G.p = function (...)
   uv.write(stdout, toWrite);
 end
 
-p("uv", uv)
-p("env", setmetatable({}, {
+local env = setmetatable({}, {
   __pairs = function (table)
-    local keys = env.keys()
+    local keys = env.keys(true)
     local index = 0
     return function (...)
       index = index + 1
@@ -45,18 +44,25 @@ p("env", setmetatable({}, {
     end
   end,
   __index = function (table, name)
-    return env.get(name)
+    local value = env.get(name)
+    return value
   end,
   __newindex = function (table, name, value)
     if value then
-      env.set(name, value, 1)
+      env.set(name, value)
     else
       env.unset(name)
     end
   end
-}))
+})
+
+-- Make sure unicode can round-trip in unicode environment variable names and values.
+local r1 = "На берегу пустынных волн"
+local r2 = "Стоял он, дум великих полн"
+env[r1] = r2
+assert(env[r1] == r2)
+p(env)
 p{
-  keys=env.keys(),
   args=args,
   bundle=bundle
 }
