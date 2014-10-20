@@ -9,7 +9,8 @@ build_script:
  - msvcbuild.bat
 
 test_script:
- - luvi.exe samples\test.app
+ - set LUVI_DIR=samples\test.app
+ - luvi.exe
 
 artifacts:
  - path: luvi.exe

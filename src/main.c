@@ -51,27 +51,21 @@ int main(int argc, char* argv[] ) {
   lua_pushcfunction(L, luaopen_luvi);
   lua_setfield(L, -2, "luvi");
 
-  // Expose command line arguments via global `args`
-  lua_createtable (L, argc, 0);
-  for (index = 0; index < argc; index++) {
-    lua_pushstring(L, argv[index]);
-    lua_rawseti(L, -2, index);
-  }
-  lua_setglobal(L, "args");
-
   // Load the init.lua script
   if (luaL_loadstring(L, "return require('init')(...)")) {
     fprintf(stderr, "%s\n", lua_tostring(L, -1));
     return -1;
   }
 
-  // Also expose arguments via (...) in main.lua
-  for (index = 1; index < argc; index++) {
+  // Pass the command-line arguments to init as a zero-indexed table
+  lua_createtable (L, argc, 0);
+  for (index = 0; index < argc; index++) {
     lua_pushstring(L, argv[index]);
+    lua_rawseti(L, -2, index);
   }
 
   // Start the main script.
-  if (lua_pcall(L, argc - 1, 1, 0)) {
+  if (lua_pcall(L, 1, 1, 0)) {
     fprintf(stderr, "%s\n", lua_tostring(L, -1));
     return -1;
   }
