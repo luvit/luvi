@@ -14,7 +14,6 @@
  *  limitations under the License.
  *
  */
-
 #include "./luvi.h"
 
 #include <string.h>

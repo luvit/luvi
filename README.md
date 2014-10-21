@@ -16,7 +16,7 @@ already.
 
  1. Create your lua program.  This consists of a folder with a `main.lua` in
     it's root.
- 2. Test your unzipped program with `luvi path/to/folder`.
+ 2. From somewhere inside your app, type `luvi` to run the current app.
  3. When you are pleased with the result, zip your folder making sure `main.lua`
     is in the root of the new zip file.  Then concatenate the `luvi` binary with
     your zip to form a new binary.  Mark it as executable and distribute.
@@ -178,43 +178,31 @@ First clone this repo recursively.
 git clone --recursive git@github.com:luvit/luvi.git
 ```
 
-Then run the makefile inside it.
+Then run the makefile inside it. (Note this assumes you have cmake in your path.)
 
 ```sh
 cd luvi
-mkdir build
-cd build
-cmake ..
 make
 ```
 
-To create a release build.
+When that's done you should have a shiny little binary `in build/luvi`.
+
 ```sh
-cd luvi
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=RELEASE ..
-make
+$ ls -lh build/luvi
+-rwxr-xr-x 1 tim tim 878K Oct 20 17:55 build/luvi
 ```
 
-When that's done you should have a shiny little binary `luvi`.
+If you try to run it outside an app, it will fail:
 
 ```sh
-$ ls -lh luvi
--rwxr-xr-x  1 tim  staff   795K Sep  9 22:56 luvi
-```
-
-If you try to run it, it will show usage information:
-
-```sh
-$ ./luvi
-Usage: luvi path/to/app-folder
+$ ./build/luvi
+Not a luvi app tree.
 ```
 
 You can run the sample repl app by doing:
 
 ```sh
-./luvi ../samples/repl.app
+LUVI_DIR=samples/repl.app build/luvi
 ```
 
 When you're done creating an app you need to zip your app and concatenate it
@@ -230,4 +218,7 @@ chmod +x my-app.bin
 ./my-app.bin
 ```
 
+Building on Windows is also pretty simple.  Make sure to install visual studio desktop or some C compiler and enter the appropriate command shell.
+
+Run the `msvcbuild.bat` script to build luvi using cmake and MSVC.  The final binary will copied to `luvi.exe` in the root for convenience.
 

@@ -34,13 +34,13 @@ if os == "Windows" then
     end
     return parts
   end
-  function joinParts(prefix, parts)
+  function joinParts(prefix, parts, i, j)
     if prefix == '/' then
-      return prefix .. table.concat(parts, '/')
+      return prefix .. table.concat(parts, '/', i, j)
     elseif prefix then
-      return prefix .. table.concat(parts, '\\')
+      return prefix .. table.concat(parts, '\\', i, j)
     end
-    return table.concat(parts, '\\')
+    return table.concat(parts, '\\', i, j)
   end
 else
   -- Simple optimized versions for unix systems
@@ -54,11 +54,11 @@ else
     end
     return parts
   end
-  function joinParts(prefix, parts)
+  function joinParts(prefix, parts, i, j)
     if prefix then
-      return prefix .. table.concat(parts, '/')
+      return prefix .. table.concat(parts, '/', i, j)
     end
-    return table.concat(parts, '/')
+    return table.concat(parts, '/', i, j)
   end
 end
 
@@ -118,15 +118,30 @@ local function pathJoin(...)
   return path
 end
 
-return function(base, ...)
+return function(args)
 
   local uv = require('uv')
   local luvi = require('luvi')
-  local bundle
 
-  if base then
-    base = pathJoin(uv.cwd(), base)
-    bundle = {
+  local function commonBundle(bundle)
+    luvi.bundle = bundle
+
+    bundle.register = function (name, path)
+      if not path then path = name + ".lua" end
+      local lua = assert(bundle.readfile(path))
+      package.preload[name] = assert(loadstring(lua, path))
+    end
+
+    bundle.pathJoin = pathJoin
+
+    local main = bundle.readfile("main.lua")
+    if not main then error("Missing main.lua in bundle") end
+    _G.args = args
+    return loadstring(main, "bundle:main.lua")(base, unpack(args))
+  end
+
+  local function folderBundle(base)
+    return commonBundle({
       stat = function (path)
         local raw, err = uv.fs_stat(pathJoin(base, path))
         if not raw then return nil, err end
@@ -162,20 +177,11 @@ return function(base, ...)
         uv.fs_close(fd)
         return data
       end,
-    }
-  else
-
-    local fd = uv.fs_open(uv.exepath(), 'r', tonumber('644', 8))
-    local zip = require('zipreader')(fd, {
-      fstat=uv.fs_fstat,
-      read=uv.fs_read
     })
-    if not zip then
-      print("Usage: " .. args[0] .. " path/to/app-folder")
-      return 1
-    end
+  end
 
-    bundle = {
+  local function zipBundle(zip)
+    return commonBundle({
       stat = function (path)
         if path == "" then
           return {
@@ -204,21 +210,61 @@ return function(base, ...)
         return keys
       end,
       readfile = zip.readfile,
-    }
+    })
   end
 
-  luvi.bundle = bundle
-
-  bundle.register = function (name, path)
-    if not path then path = name + ".lua" end
-    local lua = assert(bundle.readfile(path))
-    package.preload[name] = assert(loadstring(lua, path))
+  local function getZip(path)
+    local fd, err = uv.fs_open(path, 'r', tonumber('644', 8))
+    if not fd then return nil, err end
+    local zip = require('zipreader')(fd, {
+      fstat=uv.fs_fstat,
+      read=uv.fs_read
+    })
+    if not zip then return nil, "Not a zip file " .. path end
+    return zip
   end
 
-  bundle.pathJoin = pathJoin
+  -- If the user specified a zip file, load that
+  local path = luvi.env.get("LUVI_ZIP")
+  if path then
+    path = pathJoin(uv.cwd(), path)
+    local zip = getZip(path)
+    -- And error out if it's not a valid zip
+    if not zip then error(path .. " is not a zip file") end
+    return zipBundle(zip)
+  end
 
-  local main = bundle.readfile("main.lua")
-  if not main then error("Missing main.lua in bundle") end
-  return loadstring(main, "bundle:main.lua")(base, ...)
+  -- Same for specefied directory root
+  path = luvi.env.get("LUVI_DIR")
+  if path then
+    path = pathJoin(uv.cwd(), path)
+    if not uv.fs_stat(pathJoin(path, "main.lua")) then
+      error(path .. " is missing main.lua at it's root")
+    end
+    return folderBundle(path)
+  end
+
+  -- Try to auto-detect if the exe itself contains a zip
+  local zip = getZip(uv.exepath())
+  if zip then
+    return zipBundle(zip)
+  end
+
+  -- If not search the filesystem for the folder
+  -- Start at cwd and go up to the root looking for main.lua
+  local dir = uv.cwd()
+  local prefix = getPrefix(dir)
+  local parts = splitPath(dir:sub(#prefix))
+  local last = #parts
+  repeat
+    dir = joinParts(prefix, parts, i, last)
+    if uv.fs_stat(pathJoin(dir, "main.lua")) then
+      return folderBundle(dir)
+    end
+    last = last - 1
+  until last < 0
+
+  print("Not a luvi app tree.")
+  return 1
 
 end

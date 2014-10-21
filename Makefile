@@ -1,5 +1,6 @@
 
-all: luvi
+all: build/luvi
+
 
 luv/CMakeLists.txt:
 	git submodule update --init --recursive
@@ -11,12 +12,14 @@ build/Makefile: luv/CMakeLists.txt luv/luajit.cmake luv/uv.cmake
 build/luvi: build/Makefile
 	cmake --build build --config Release
 
-luvi: build/luvi
-	ln -sf build/luvi
-
 clean:
-	rm -rf build luvi
+	rm -rf build
 
-test: luvi build/luvi
-	./luvi samples/test.app
+test: build/luvi
+	LUVI_DIR=samples/test.app build/luvi
 
+install: build/luvi
+	cp build/luvi /usr/local/bin/luvi
+
+link: build/luvi
+	ln -sf `pwd`/build/luvi /usr/local/bin/luvi
