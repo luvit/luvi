@@ -9,9 +9,6 @@ A project in-between [luv][] and [luvit][].
 
 The goal of this is to make building [luvit][] and [derivatives][] much easier.
 
-This project is still in progress, but it's complete enough to be useful
-already.
-
 ## Usage
 
  1. Create your lua program.  This consists of a folder with a `main.lua` in
@@ -30,7 +27,7 @@ things added.  This means you can use the luajit [extensions][] including
 ### LibUV is baked in.
 
 The "uv" module containt bindings to [libuv][] as defined in the [luv][]
-project.  Simple `require("uv")` to access it.
+project.  Simply `require("uv")` to access it.
 
 Use this for file I/O, network I/O, timers, or various interfaces with the
 operating system.  This lets you write fast non-blocking network servers or
