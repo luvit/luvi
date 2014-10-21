@@ -16,7 +16,7 @@ clean:
 	rm -rf build
 
 test: build/luvi
-	LUVI_DIR=samples/test.app build/luvi
+	LUVI_DIR=samples/test.app build/luvi 1 2 3 4
 
 install: build/luvi
 	cp build/luvi /usr/local/bin/luvi

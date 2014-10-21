@@ -126,13 +126,20 @@ return function(args)
   local function commonBundle(bundle)
     luvi.bundle = bundle
 
+    luvi.path = {
+      join = pathJoin,
+      getPrefix = getPrefix,
+      splitPath = splitPath,
+      joinparts = joinParts,
+    }
+
     bundle.register = function (name, path)
       if not path then path = name + ".lua" end
-      local lua = assert(bundle.readfile(path))
-      package.preload[name] = assert(loadstring(lua, path))
+      package.preload[name] = function (...)
+        local lua = assert(bundle.readfile(path))
+        return assert(loadstring(lua, path))(...)
+      end
     end
-
-    bundle.pathJoin = pathJoin
 
     local main = bundle.readfile("main.lua")
     if not main then error("Missing main.lua in bundle") end
