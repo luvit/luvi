@@ -15,7 +15,7 @@ build/luvi: build/Makefile
 clean:
 	rm -rf build
 
-test: luvi build/luvi
+test: build/luvi
 	LUVI_DIR=samples/test.app build/luvi
 
 install: build/luvi
