@@ -137,7 +137,7 @@ return function(args)
     local main = bundle.readfile("main.lua")
     if not main then error("Missing main.lua in bundle") end
     _G.args = args
-    return loadstring(main, "bundle:main.lua")(base, unpack(args))
+    return loadstring(main, "bundle:main.lua")(unpack(args))
   end
 
   local function folderBundle(base)
@@ -168,11 +168,12 @@ return function(args)
       end,
       readfile = function (path)
         path = pathJoin(base, path)
-        local fd, err = uv.fs_open(path, "r", tonumber("644", 8))
+        local fd, stat, data, err
+        fd, err = uv.fs_open(path, "r", tonumber("644", 8))
         if not fd then return nil, err end
-        local stat, err = uv.fs_fstat(fd)
+        stat, err = uv.fs_fstat(fd)
         if not stat then return nil, err end
-        local data, err = uv.fs_read(fd, stat.size, 0)
+        data, err = uv.fs_read(fd, stat.size, 0)
         if not data then return nil, err end
         uv.fs_close(fd)
         return data
@@ -203,7 +204,7 @@ return function(args)
         if not entries then return nil, err end
         local keys={}
         local n = 0
-        for k,v in pairs(entries) do
+        for k in pairs(entries) do
           n = n + 1
           keys[n] = k
         end
@@ -257,7 +258,7 @@ return function(args)
   local parts = splitPath(dir:sub(#prefix))
   local last = #parts
   repeat
-    dir = joinParts(prefix, parts, i, last)
+    dir = joinParts(prefix, parts, 1, last)
     if uv.fs_stat(pathJoin(dir, "main.lua")) then
       return folderBundle(dir)
     end
