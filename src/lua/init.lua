@@ -137,7 +137,7 @@ return function(args)
       if not path then path = name + ".lua" end
       package.preload[name] = function (...)
         local lua = assert(bundle.readfile(path))
-        return assert(loadstring(lua, path))(...)
+        return assert(loadstring(lua, "bundle:" .. path))(...)
       end
     end
 
