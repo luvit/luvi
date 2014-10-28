@@ -35,12 +35,13 @@ if os == "Windows" then
     return parts
   end
   function joinParts(prefix, parts, i, j)
-    if prefix == '/' then
-      return prefix .. table.concat(parts, '/', i, j)
-    elseif prefix then
+    if not prefix then
+      return table.concat(parts, '/', i, j)
+    elseif prefix ~= '/' then
       return prefix .. table.concat(parts, '\\', i, j)
+    else
+      return prefix .. table.concat(parts, '/', i, j)
     end
-    return table.concat(parts, '\\', i, j)
   end
 else
   -- Simple optimized versions for unix systems
