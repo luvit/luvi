@@ -17,6 +17,9 @@
 
 #include "./luvi.h"
 #include "../luv/src/luv.c"
+#ifdef WITH_OPENSSL
+#include "openssl.h"
+#endif
 #include "luvi.c"
 
 int main(int argc, char* argv[] ) {
@@ -50,6 +53,12 @@ int main(int argc, char* argv[] ) {
   // Store luvi module definition at preload.luvi
   lua_pushcfunction(L, luaopen_luvi);
   lua_setfield(L, -2, "luvi");
+
+#ifdef WITH_OPENSSL
+  // Store luvi module definition at preload.openssl
+  lua_pushcfunction(L, luaopen_openssl);
+  lua_setfield(L, -2, "openssl");
+#endif
 
   // Load the init.lua script
   if (luaL_loadstring(L, "return require('init')(...)")) {

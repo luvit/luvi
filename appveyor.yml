@@ -1,5 +1,10 @@
 configuration: Release
 
+environment:
+  matrix:
+    - BUILD_TYPE: tiny
+    - BUILD_TYPE: large
+
 matrix:
   fast_finish: true
 

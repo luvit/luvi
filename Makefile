@@ -1,6 +1,11 @@
 
 all: build/luvi
 
+tiny:
+	cmake -H. -Bbuild
+
+large:
+	cmake -H. -Bbuild -DWithOpenSSL=ON
 
 luv/CMakeLists.txt:
 	git submodule update --init --recursive

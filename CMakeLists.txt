@@ -1,7 +1,14 @@
 cmake_minimum_required(VERSION 2.8.9)
 
+option(WithOpenSSL "Include OpenSSL" OFF)
+option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
+
 include(luv/luajit.cmake)
 include(luv/uv.cmake)
+
+if (WithOpenSSL)
+  include(deps/openssl.cmake)
+endif (WithOpenSSL)
 
 luajit_add_executable(luvi
   src/main.c
@@ -14,7 +21,7 @@ if(APPLE)
 endif()
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
-  target_link_libraries(luvi uv lua51 rt)
+  target_link_libraries(luvi uv lua51 rt ${EXTRA_LIBS})
 else()
-  target_link_libraries(luvi uv lua51)
+  target_link_libraries(luvi uv lua51 ${EXTRA_LIBS})
 endif()
