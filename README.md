@@ -222,5 +222,7 @@ Run the `msvcbuild.bat` script to build luvi using cmake and MSVC.  The final bi
 ## Cmake Flags
 
 ```
-WithOpenSSL (Default: OFF) - Enable OpenSSL Support
+WithOpenSSL (Default: OFF)      - Enable OpenSSL Support
+WithSharedOpenSSL (Default: ON) - Use System OpenSSL Library
+                                  Otherwise use static library
 ```
