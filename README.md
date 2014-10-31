@@ -239,7 +239,8 @@ Example (Static OpenSSL):
 ```
 cmake \
   -DWithOpenSSL=ON \
-  -DWithSharedOpenSSL=OFF
+  -DWithSharedOpenSSL=OFF \
+  ..
 ```
 
 Example (Shared OpenSSL):
@@ -248,5 +249,6 @@ cmake \
   -DWithSharedOpenSSL=ON \
   -DWithOpenSSL=ON \
   -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-  -DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include
+  -DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include \
+  ..
 ```
