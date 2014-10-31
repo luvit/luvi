@@ -203,7 +203,8 @@ LUVI_DIR=samples/repl.app build/luvi
 ```
 
 When you're done creating an app you need to zip your app and concatenate it
-with luvi.  Make sure that `main.lua` is at the root of your zip file.  For example on osx or linux:
+with luvi.  Make sure that `main.lua` is at the root of your zip file.  For
+example on osx or linux:
 
 ```sh
 cd my-app
@@ -215,9 +216,11 @@ chmod +x my-app.bin
 ./my-app.bin
 ```
 
-Building on Windows is also pretty simple.  Make sure to install visual studio desktop or some C compiler and enter the appropriate command shell.
+Building on Windows is also pretty simple.  Make sure to install visual studio
+desktop or some C compiler and enter the appropriate command shell.
 
-Run the `msvcbuild.bat` script to build luvi using cmake and MSVC.  The final binary will copied to `luvi.exe` in the root for convenience.
+Run the `msvcbuild.bat` script to build luvi using cmake and MSVC.  The final
+binary will copied to `luvi.exe` in the root for convenience.
 
 ## Cmake Flags
 
@@ -225,4 +228,25 @@ Run the `msvcbuild.bat` script to build luvi using cmake and MSVC.  The final bi
 WithOpenSSL (Default: OFF)      - Enable OpenSSL Support
 WithSharedOpenSSL (Default: ON) - Use System OpenSSL Library
                                   Otherwise use static library
+
+OPENSSL_ROOT_DIR                - Override the OpenSSL Root Directory                        
+OPENSSL_INCLUDE_DIR             - Override the OpenSSL Include Directory
+OPENSSL_LIBRARIES               - Override the OpenSSL Library Path
+```
+
+Example (Static OpenSSL):
+
+```
+cmake \
+  -DWithOpenSSL=ON \
+  -DWithSharedOpenSSL=OFF
+```
+
+Example (Shared OpenSSL):
+```
+cmake \
+  -DWithSharedOpenSSL=ON \
+  -DWithOpenSSL=ON \
+  -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+  -DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include
 ```
