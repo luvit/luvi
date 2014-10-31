@@ -219,3 +219,10 @@ Building on Windows is also pretty simple.  Make sure to install visual studio d
 
 Run the `msvcbuild.bat` script to build luvi using cmake and MSVC.  The final binary will copied to `luvi.exe` in the root for convenience.
 
+## Cmake Flags
+
+```
+WithOpenSSL (Default: OFF)      - Enable OpenSSL Support
+WithSharedOpenSSL (Default: ON) - Use System OpenSSL Library
+                                  Otherwise use static library
+```

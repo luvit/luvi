@@ -1,5 +1,9 @@
 language: c
 
+env:
+  - BUILD_TYPE=tiny
+  - BUILD_TYPE=large
+
 os:
   - linux
 
@@ -13,7 +17,7 @@ before_script:
   - sudo apt-get install cmake
 
 script:
-  - make
+  - make ${BUILD_TYPE}
   - make test
 
 notifications:

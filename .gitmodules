@@ -1,3 +1,9 @@
 [submodule "luv"]
 	path = luv
 	url = https://github.com/luvit/luv.git
+[submodule "deps/lua-openssl"]
+	path = deps/lua-openssl
+	url = https://github.com/zhaozg/lua-openssl.git
+[submodule "deps/openssl"]
+	path = deps/openssl
+	url = https://github.com/luvit/openssl.git
