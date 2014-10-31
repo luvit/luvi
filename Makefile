@@ -7,6 +7,9 @@ tiny:
 large:
 	cmake -H. -Bbuild -DWithOpenSSL=ON
 
+static:
+	cmake -H. -Bbuild -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF
+
 luv/CMakeLists.txt:
 	git submodule update --init --recursive
 	git submodule update --recursive
