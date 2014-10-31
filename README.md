@@ -222,7 +222,7 @@ desktop or some C compiler and enter the appropriate command shell.
 Run the `msvcbuild.bat` script to build luvi using cmake and MSVC.  The final
 binary will copied to `luvi.exe` in the root for convenience.
 
-## Cmake Flags
+## CMake Flags
 
 ```
 WithOpenSSL (Default: OFF)      - Enable OpenSSL Support
@@ -250,5 +250,6 @@ cmake \
   -DWithOpenSSL=ON \
   -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
   -DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include \
+  -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib \
   ..
 ```
