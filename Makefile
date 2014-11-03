@@ -19,7 +19,7 @@ build/Makefile: luv/CMakeLists.txt luv/luajit.cmake luv/uv.cmake
 	cmake -H. -Bbuild
 
 luvi: build/Makefile
-	cmake --build build --config Release
+	cmake --build build
 
 clean:
 	rm -rf build
