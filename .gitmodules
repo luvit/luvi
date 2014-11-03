@@ -7,3 +7,6 @@
 [submodule "deps/openssl"]
 	path = deps/openssl
 	url = https://github.com/luvit/openssl.git
+[submodule "luvi-binaries"]
+	path = luvi-binaries
+	url = https://github.com/luvit/luvi-binaries.git
