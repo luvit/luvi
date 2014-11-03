@@ -1,5 +1,5 @@
 
-all: build/luvi
+all: luvi
 
 tiny:
 	cmake -H. -Bbuild
@@ -17,17 +17,17 @@ luv/CMakeLists.txt:
 build/Makefile: luv/CMakeLists.txt luv/luajit.cmake luv/uv.cmake
 	cmake -H. -Bbuild
 
-build/luvi: build/Makefile
-	cmake --build build --config Release
+luvi: build/Makefile
+	cmake --build build --config Debug
 
 clean:
 	rm -rf build
 
-test: build/luvi
+test: luvi
 	LUVI_DIR=samples/test.app build/luvi 1 2 3 4
 
-install: build/luvi
+install: luvi
 	cp build/luvi /usr/local/bin/luvi
 
-link: build/luvi
+link: luvi
 	ln -sf `pwd`/build/luvi /usr/local/bin/luvi
