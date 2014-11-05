@@ -20,3 +20,12 @@ goto build
 cmake --build build --config Release
 copy build\Release\luvi.exe .
 
+:publish
+rmdir /s /q build
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild
+cmake --build build --config Release
+copy build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
+rmdir /s /q build
+cmake -H. -Bbuild
+cmake --build build --config Release
+copy build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe

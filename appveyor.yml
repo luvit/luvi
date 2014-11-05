@@ -11,7 +11,7 @@ matrix:
 build_script:
  - git submodule update --init --recursive
  - git submodule update --recursive
- - msvcbuild.bat
+ - make.bat
 
 test_script:
  - set LUVI_DIR=samples\test.app
