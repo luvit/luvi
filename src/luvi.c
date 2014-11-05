@@ -255,5 +255,9 @@ LUALIB_API int luaopen_luvi(lua_State *L) {
   lua_setfield(L, -2, "env");
   lua_pushcfunction(L, ltinfl);
   lua_setfield(L, -2, "inflate");
+#ifdef LUVI_VERSION
+  lua_pushstring(L, ""LUVI_VERSION"");
+  lua_setfield(L, -2, "version");
+#endif
   return 1;
 }

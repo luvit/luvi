@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 2.8.9)
 
+exec_program(
+    "git"
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ARGS "describe" "--tags"
+    OUTPUT_VARIABLE LUVI_VERSION)
+
 option(WithOpenSSL "Include OpenSSL" OFF)
 option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
 
@@ -9,6 +15,8 @@ include(luv/uv.cmake)
 if (WithOpenSSL)
   include(deps/openssl.cmake)
 endif (WithOpenSSL)
+
+add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 
 luajit_add_executable(luvi
   src/main.c
