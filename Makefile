@@ -34,12 +34,16 @@ link: luvi
 	ln -sf `pwd`/build/luvi /usr/local/bin/luvi
 
 publish-linux:
+	git submodule update --init --recursive
+	git submodule update --recursive
 	mkdir -p $(BIN_ROOT)
 	$(MAKE) clean tiny test && cp build/luvi $(BIN_ROOT)/luvi-tiny
 	$(MAKE) clean static test && cp build/luvi $(BIN_ROOT)/luvi-static
 	$(MAKE) clean large test && cp build/luvi $(BIN_ROOT)/luvi
 
 publish-darwin:
+	git submodule update --init --recursive
+	git submodule update --recursive
 	mkdir -p $(BIN_ROOT)
 	$(MAKE) clean tiny test && cp build/luvi $(BIN_ROOT)/luvi-tiny
 	$(MAKE) clean static test && cp build/luvi $(BIN_ROOT)/luvi
