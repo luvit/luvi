@@ -40,12 +40,12 @@ event loop if you want to actually wait for any events to happen.
 ```lua
 local uv = require('uv')
 
-local function set_timeout(timeout, callback)
+local function setTimeout(timeout, callback)
   local timer = uv.new_timer()
   local function ontimeout()
     p("ontimeout", self)
     uv.timer_stop(timer)
-    uv.close(timer)
+    uv.close(timer
     callback(self)
   end
   uv.timer_start(timer, timeout, 0, ontimeout)
