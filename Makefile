@@ -2,6 +2,12 @@ BIN_ROOT=luvi-binaries/$(shell uname -s)_$(shell uname -m)
 
 NPROCS:=1
 OS:=$(shell uname -s)
+GENERATOR?=Unix Makefiles
+MAKEFILE_TARGET?="build/Makefile"
+
+ifeq ($(GENERATOR),Ninja)
+	MAKEFILE_TARGET="build/build.ninja"
+endif
 
 ifeq ($(OS),Linux)
 	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
@@ -14,22 +20,22 @@ EXTRA_OPTIONS:=-j${NPROCS}
 all: luvi
 
 tiny:
-	cmake -H. -Bbuild
+	cmake -G"${GENERATOR}" -H. -Bbuild
 
 large:
-	cmake -H. -Bbuild -DWithOpenSSL=ON
+	cmake -G"${GENERATOR}" -H. -Bbuild -DWithOpenSSL=ON
 
 static:
-	cmake -H. -Bbuild -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF
+	cmake -G"${GENERATOR}" -H. -Bbuild -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF
 
 luv/CMakeLists.txt:
 	git submodule update --init --recursive
 	git submodule update --recursive
 
-build/Makefile: luv/CMakeLists.txt luv/luajit.cmake luv/uv.cmake
-	cmake -H. -Bbuild
+${MAKEFILE_TARGET}: luv/CMakeLists.txt luv/luajit.cmake luv/uv.cmake
+	cmake -G"${GENERATOR}" -H. -Bbuild
 
-luvi: build/Makefile
+luvi: ${MAKEFILE_TARGET}
 	cmake --build build -- ${EXTRA_OPTIONS}
 
 clean:
