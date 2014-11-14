@@ -26,7 +26,7 @@
 #include <errno.h>
 #endif
 
-#include "tinfl.c"
+#include "miniz.c"
 
 #ifdef __APPLE__
 #include <crt_externs.h>
@@ -249,12 +249,24 @@ static int ltinfl(lua_State* L) {
   return 1;
 }
 
+static int ltdefl(lua_State* L) {
+  size_t in_len;
+  const char* in_buf = luaL_checklstring(L, 1, &in_len);
+  size_t out_len;
+  int flags = luaL_optint(L, 2, 0);
+  char* out_buf = tdefl_compress_mem_to_heap(in_buf, in_len, &out_len, flags);
+  lua_pushlstring(L, out_buf, out_len);
+  free(out_buf);
+}
+
 LUALIB_API int luaopen_luvi(lua_State *L) {
   lua_newtable(L);
   luaL_newlib(L, lenv_f);
   lua_setfield(L, -2, "env");
   lua_pushcfunction(L, ltinfl);
   lua_setfield(L, -2, "inflate");
+  lua_pushcfunction(L, ltdefl);
+  lua_setfield(L, -2, "deflate");
 #ifdef LUVI_VERSION
   lua_pushstring(L, ""LUVI_VERSION"");
   lua_setfield(L, -2, "version");
