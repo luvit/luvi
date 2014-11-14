@@ -1,5 +1,16 @@
 BIN_ROOT=luvi-binaries/$(shell uname -s)_$(shell uname -m)
 
+NPROCS:=1
+OS:=$(shell uname -s)
+
+ifeq ($(OS),Linux)
+	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
+else ifeq ($(OS),Darwin)
+	NPROCS:=$(shell sysctl hw.ncpu | awk '{print $$2}')
+endif
+
+EXTRA_OPTIONS:=-j${NPROCS}
+
 all: luvi
 
 tiny:
@@ -19,7 +30,7 @@ build/Makefile: luv/CMakeLists.txt luv/luajit.cmake luv/uv.cmake
 	cmake -H. -Bbuild
 
 luvi: build/Makefile
-	cmake --build build
+	cmake --build build -- ${EXTRA_OPTIONS}
 
 clean:
 	rm -rf build
