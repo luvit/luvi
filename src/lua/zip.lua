@@ -18,6 +18,7 @@ limitations under the License.
 
 local ffi = require('ffi')
 local inflate = require('luvi').inflate
+local deflate = require('luvi').deflate
 
 ffi.cdef[[
   struct zip_LFH {
@@ -105,7 +106,7 @@ end
 -- fsFstat(fd) takes a fd and returns a table with a .size property for file length
 -- fs.read(fd, length, offset) reads from a file at offset and for a set number of bytes
 --  return a string of all data
-return function (fd, fs)
+local function reader(fd, fs)
 
   local cd = {}
 
@@ -242,7 +243,7 @@ return function (fd, fs)
       pattern = "^([^/]+)$"
     end
     for name, entry in pairs(cd) do
-      local a, b, match = string.find(name, pattern)
+      local match = string.match(name, pattern)
       if match then
         entries[match] = entry
       end
@@ -291,7 +292,7 @@ return function (fd, fs)
     local eocd = readEoCD(position)
     position = position - eocd.central_dir_size
     local start = position - eocd.central_dir_offset
-    for i = 1, eocd.central_dir_disk_records do
+    for _ = 1, eocd.central_dir_disk_records do
       local cdfh = readCDFH(position, start)
       cd[normalizePath(cdfh.file_name)] = cdfh
       position = position + cdfh.header_size
@@ -308,3 +309,12 @@ return function (fd, fs)
   return load()
 
 end
+
+local function writer()
+  error("TODO: Implement zipwriter")
+end
+
+return {
+  reader = reader,
+  writer = writer,
+}

@@ -257,6 +257,7 @@ static int ltdefl(lua_State* L) {
   char* out_buf = tdefl_compress_mem_to_heap(in_buf, in_len, &out_len, flags);
   lua_pushlstring(L, out_buf, out_len);
   free(out_buf);
+  return 1;
 }
 
 LUALIB_API int luaopen_luvi(lua_State *L) {

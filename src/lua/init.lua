@@ -225,7 +225,7 @@ return function(args)
   local function getZip(path)
     local fd, err = uv.fs_open(path, 'r', tonumber('644', 8))
     if not fd then return nil, err end
-    local zip = require('zipreader')(fd, {
+    local zip = require('zip').reader(fd, {
       fstat=uv.fs_fstat,
       read=uv.fs_read
     })
