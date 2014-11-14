@@ -310,8 +310,70 @@ local function reader(fd, fs)
 
 end
 
-local function writer()
-  error("TODO: Implement zipwriter")
+
+local function writer(emit)
+  local directory = {}
+  local offset = 0
+  local start
+  return function (name, contents)
+    if name then
+      local lfh = LFH()
+      lfh.signature = 0x04034b50
+      lfh.version_needed = 2.0 -- 2.0 in 1993 was the first to enable deflate compression
+      lfh.flags = 0
+      local data = deflate(contents, 0)
+      if #data < #contents then
+        lfh.compression_method = 8
+      else
+        data = contents
+        lfh.compression_method = 0
+      end
+      -- TODO: set lfh.crc_32
+      lfh.compressed_size = #data
+      lfh.uncompressed_size = #contents
+      lfh.file_name_length = #name
+      lfh.extra_field_length = 0
+      data = ffi.string(lfh, ffi.sizeof(lfh)) .. name .. data
+
+      local cdfh = CDFH()
+      cdfh.signature = 0x02014b50
+      cdfh.version = 3 -- Unix
+      cdfh.version_needed = lfh.version_needed
+      cdfh.compression_method = lfh.compression_method
+      cdfh.last_mod_file_time = lfh.last_mod_file_time
+      cdfh.last_mod_file_date = lfh.last_mod_file_date
+      cdfh.crc_32 = lfh.crc_32
+      cdfh.compressed_size = lfh.compressed_size
+      cdfh.uncompressed_size = lfh.uncompressed_size
+      cdfh.file_name_length = lfh.file_name_length
+      cdfh.extra_field_length = lfh.extra_field_length
+      cdfh.local_file_header_offset = offset
+
+      offset = offset + #data
+      directory[#directory + 1] = ffi.string(cdfh, ffi.sizeof(cdfh)) .. name
+      emit(data)
+    else
+      start = offset
+      for i = 1, #directory do
+        local data = directory[i]
+        emit(data)
+        offset = offset + #data
+      end
+
+      local eocd = EoCD()
+      eocd.signature = 0x06054b50
+      eocd.disk_number = 0
+      eocd.central_dir_disk_number = 0
+      eocd.central_dir_disk_records = #directory
+      eocd.central_dir_total_records = #directory
+      eocd.central_dir_size = offset - start
+      eocd.central_dir_offset = offset - start
+      eocd.file_comment_length = 0
+
+      local data = ffi.string(eocd, ffi.sizeof(eocd))
+      emit(data)
+    end
+  end
 end
 
 return {
