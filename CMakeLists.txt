@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.9)
 
+project(luvi C)
+
 exec_program(
     "git"
     ${CMAKE_CURRENT_SOURCE_DIR}
