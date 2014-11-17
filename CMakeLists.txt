@@ -23,7 +23,6 @@ add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 luajit_add_executable(luvi
   src/main.c
   src/lua/init.lua
-  src/lua/zip.lua
 )
 
 if(APPLE)

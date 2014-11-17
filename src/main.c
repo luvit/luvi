@@ -17,10 +17,12 @@
 
 #include "./luvi.h"
 #include "../luv/src/luv.c"
+#include "lenv.c"
+#include "luvi.c"
+#include "lminiz.c"
 #ifdef WITH_OPENSSL
 #include "openssl.h"
 #endif
-#include "luvi.c"
 
 int main(int argc, char* argv[] ) {
 
@@ -49,6 +51,12 @@ int main(int argc, char* argv[] ) {
   // Store uv module definition at preload.uv
   lua_pushcfunction(L, luaopen_luv);
   lua_setfield(L, -2, "uv");
+
+  lua_pushcfunction(L, luaopen_env);
+  lua_setfield(L, -2, "env");
+
+  lua_pushcfunction(L, luaopen_miniz);
+  lua_setfield(L, -2, "miniz");
 
   // Store luvi module definition at preload.luvi
   lua_pushcfunction(L, luaopen_luvi);
