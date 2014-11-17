@@ -44,11 +44,14 @@ clean:
 	rm -rf build
 
 test: luvi
-	LUVI_DIR=samples/test.app build/luvi 1 2 3 4
+	LUVI_DIR=samples/test.app LUVI_ZIP='' build/luvi 1 2 3 4
 	rm -f samples/test.zip
 	cd samples/test.app && zip -r ../test.zip . && cd ../..
-	LUVI_ZIP=samples/test.zip build/luvi 1 2 3 4
-	rm -f samples/test.zip
+	LUVI_DIR='' LUVI_ZIP=samples/test.zip build/luvi 1 2 3 4
+	cat build/luvi samples/test.zip > test.bin
+	chmod +x test.bin
+	LUVI_DIR='' LUVI_ZIP='' ./test.bin 1 2 3 4
+	rm -f samples/test.zip test.bin
 
 install: luvi
 	install -p build/luvi /usr/local/bin
