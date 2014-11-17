@@ -169,4 +169,22 @@ assert(thread)
 assert(ismain)
 
 
+print("Testing miniz")
+local miniz = require('miniz')
+p(miniz)
+
+local writer = miniz.new_writer()
+
+-- local reader = miniz.new_reader("../luvit/app.zip")
+-- for i = 1, reader:get_num_files() do
+--   writer:add_from_zip(reader, i)
+-- end
+
+writer:add("README.md", "# A Readme\n\nThis is neat?", 9)
+writer:add("data.json", '{"name":"Tim","age":32}\n', 9)
+writer:add("a/big/file.dat", string.rep("12345\n", 10000), 9)
+writer:add("main.lua", 'print(require("luvi").version)', 9)
+
+p(writer:finalize())
+
 print("All tests pass!\n")
