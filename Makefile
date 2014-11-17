@@ -45,6 +45,10 @@ clean:
 
 test: luvi
 	LUVI_DIR=samples/test.app build/luvi 1 2 3 4
+	rm -f samples/test.zip
+	cd samples/test.app && zip -r ../test.zip . && cd ../..
+	LUVI_ZIP=samples/test.zip build/luvi 1 2 3 4
+	rm -f samples/test.zip
 
 install: luvi
 	install -p build/luvi /usr/local/bin
