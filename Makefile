@@ -47,7 +47,7 @@ test: luvi
 	LUVI_DIR=samples/test.app build/luvi 1 2 3 4
 
 install: luvi
-	install -s -p build/luvi /usr/local/bin
+	install -p build/luvi /usr/local/bin
 
 uninstall:
 	rm -f /usr/local/bin/luvi
