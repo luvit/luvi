@@ -2,11 +2,6 @@ BIN_ROOT=luvi-binaries/$(shell uname -s)_$(shell uname -m)
 
 NPROCS:=1
 OS:=$(shell uname -s)
-MAKEFILE_TARGET?="build/Makefile"
-
-ifeq ($(GENERATOR),Ninja)
-	MAKEFILE_TARGET="build/build.ninja"
-endif
 
 CMAKE_FLAGS+= -H. -Bbuild
 ifdef GENERATOR
@@ -21,26 +16,29 @@ endif
 
 EXTRA_OPTIONS:=-j${NPROCS}
 
-all: luvi
+# This does the actual build and configures as default flavor is there is no build folder.
+luvi: build
+	cmake --build build -- ${EXTRA_OPTIONS}
 
-tiny:
+# The default flavor is tiny
+build: tiny
+
+# Configure the build with minimal dependencies
+tiny: luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS)
 
-large:
+# Configure the build with everything, use shared libs when possible
+large: luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON
 
-static:
+# Configure the build with everything, but statically link the deps
+static: luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF
 
+# In case the user forgot to pull in submodules, grab them.
 luv/CMakeLists.txt:
 	git submodule update --init --recursive
 	git submodule update --recursive
-
-${MAKEFILE_TARGET}: luv/CMakeLists.txt luv/luajit.cmake luv/uv.cmake
-	cmake $(CMAKE_FLAGS)
-
-luvi: ${MAKEFILE_TARGET}
-	cmake --build build -- ${EXTRA_OPTIONS}
 
 clean:
 	rm -rf build
@@ -49,10 +47,10 @@ test: luvi
 	LUVI_DIR=samples/test.app build/luvi 1 2 3 4
 
 install: luvi
-	cp build/luvi /usr/local/bin/luvi
+	install -s -p build/luvi /usr/local/bin
 
-link: luvi
-	ln -sf `pwd`/build/luvi /usr/local/bin/luvi
+uninstall:
+	rm -f /usr/local/bin/luvi
 
 publish-linux:
 	git submodule update --init --recursive
