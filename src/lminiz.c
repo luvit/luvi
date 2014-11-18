@@ -166,6 +166,13 @@ static int lmz_reader_extract(lua_State *L) {
   return 1;
 }
 
+static int lmz_reader_get_offset(lua_State *L) {
+  lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
+  mz_zip_archive* archive = &(zip->archive);
+  lua_pushinteger(L, archive->m_start_ofs);
+  return 1;
+}
+
 static int lmz_writer_init(lua_State *L) {
   size_t size_to_reserve_at_beginning = luaL_optint(L, 1, 0);
   size_t initial_allocation_size = luaL_optint(L, 2, 128 * 1024);
@@ -242,6 +249,7 @@ static const luaL_Reg lminiz_read_m[] = {
   {"is_directory", lmz_reader_is_file_a_directory},
   {"extract", lmz_reader_extract},
   {"locate_file", lmz_reader_locate_file},
+  {"get_offset", lmz_reader_get_offset},
   {NULL, NULL}
 };
 
