@@ -176,12 +176,14 @@ p(miniz)
 local writer = miniz.new_writer()
 
 local reader = miniz.new_reader(uv.exepath()) or miniz.new_reader("samples/test.zip")
-p {
-  reader=reader,
-  offset=reader:get_offset(),
-}
-for i = 1, reader:get_num_files() do
-  writer:add_from_zip(reader, i)
+if reader then
+  p {
+    reader=reader,
+    offset=reader:get_offset(),
+  }
+  for i = 1, reader:get_num_files() do
+    writer:add_from_zip(reader, i)
+  end
 end
 
 writer:add("README.md", "# A Readme\n\nThis is neat?", 9)
