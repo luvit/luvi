@@ -1,4 +1,4 @@
-local env = require('luvi').env
+local env = require('env')
 local uv = require('uv')
 local bundle = require('luvi').bundle
 -- Register the utils lib as a module
@@ -19,6 +19,43 @@ else
   print("STDOUT is PIPE")
 end
 
+
+local function deepEqual(expected, actual, path)
+  if expected == actual then
+    return true
+  end
+  local prefix = path and (path .. ": ") or ""
+  local expectedType = type(expected)
+  local actualType = type(actual)
+  if expectedType ~= actualType then
+    return false, prefix .. "Expected type " .. expectedType .. " but found " .. actualType
+  end
+  if expectedType ~= "table" then
+    return false, prefix .. "Expected " .. tostring(expected) .. " but found " .. tostring(actual)
+  end
+  local expectedLength = #expected
+  local actualLength = #actual
+  for key in pairs(expected) do
+    if actual[key] == nil then
+      return false, prefix .. "Missing table key " .. key
+    end
+    local newPath = path and (path .. '.' .. key) or key
+    local same, message = deepEqual(expected[key], actual[key], newPath)
+    if not same then
+      return same, message
+    end
+  end
+  if expectedLength ~= actualLength then
+    return false, prefix .. "Expected table length " .. expectedLength .. " but found " .. actualLength
+  end
+  for key in pairs(actual) do
+    if expected[key] == nil then
+      return false, prefix .. "Unexpected table key " .. key
+    end
+  end
+  return true
+end
+
 _G.p = function (...)
   local n = select('#', ...)
   local arguments = { ... }
@@ -35,7 +72,7 @@ local env = setmetatable({}, {
   __pairs = function (table)
     local keys = env.keys(true)
     local index = 0
-    return function (...)
+    return function ()
       index = index + 1
       local name = keys[index]
       if name then
@@ -43,11 +80,11 @@ local env = setmetatable({}, {
       end
     end
   end,
-  __index = function (table, name)
+  __index = function (_, name)
     local value = env.get(name)
     return value
   end,
-  __newindex = function (table, name, value)
+  __newindex = function (_, name, value)
     if value then
       env.set(name, value)
     else
@@ -73,10 +110,85 @@ p{
   ["fake"] = bundle.stat("fake"),
 }
 p(bundle.readfile("greetings.txt"))
-p("readdir", bundle.readdir(""))
-p{
-  ["1"] = bundle.stat("1"),
-  ["2"] = bundle.stat("2"),
-}
 
-p(coroutine.running())
+
+print("Testing bundle.stat")
+local rootStat = bundle.stat("")
+assert(rootStat.type == "directory")
+local addStat = bundle.stat("add")
+assert(addStat.type == "directory")
+local mainStat = bundle.stat("main.lua")
+assert(mainStat.type == "file")
+assert(mainStat.size > 3000)
+local tests = {
+  "", rootStat,
+  "/", rootStat,
+  "/a/../", rootStat,
+  "add", addStat,
+  "add/", addStat,
+  "/add/", addStat,
+  "foo/../add/", addStat,
+  "main.lua", mainStat,
+  "/main.lua", mainStat,
+}
+for i = 1, #tests, 2 do
+  local path = tests[i]
+  local expected = tests[i + 1]
+  local actual = bundle.stat(path)
+  p(path, actual)
+  assert(deepEqual(expected, actual), "ERROR: stat(" .. path .. ")")
+end
+
+print("Testing bundle.readdir")
+local rootTree = { "add", "greetings.txt", "main.lua", "utils.lua" }
+local addTree = { "a.lua", "b.lua", "init.lua" }
+tests = {
+  "", rootTree,
+  "/", rootTree,
+  "/a/../", rootTree,
+  "add", addTree,
+  "add/", addTree,
+  "/add/", addTree,
+  "foo/../add/", addTree,
+}
+table.sort(rootTree)
+table.sort(addTree)
+for i = 1, #tests, 2 do
+  local path = tests[i]
+  local expected = tests[i + 1]
+  local actual = bundle.readdir(path)
+  table.sort(actual)
+  p(path, actual)
+  assert(deepEqual(expected, actual), "ERROR: readdir(" .. path .. ")")
+end
+
+print("Testing for lua 5.2 extensions")
+local thread, ismain = coroutine.running()
+p(thread, ismain)
+assert(thread)
+assert(ismain)
+
+
+print("Testing miniz")
+local miniz = require('miniz')
+p(miniz)
+
+local writer = miniz.new_writer()
+
+local reader = miniz.new_reader(uv.exepath()) or miniz.new_reader("samples/test.zip")
+p {
+  reader=reader,
+  offset=reader:get_offset(),
+}
+for i = 1, reader:get_num_files() do
+  writer:add_from_zip(reader, i)
+end
+
+writer:add("README.md", "# A Readme\n\nThis is neat?", 9)
+writer:add("data.json", '{"name":"Tim","age":32}\n', 9)
+writer:add("a/big/file.dat", string.rep("12345\n", 10000), 9)
+writer:add("main.lua", 'print(require("luvi").version)', 9)
+
+p(writer:finalize())
+
+print("All tests pass!\n")

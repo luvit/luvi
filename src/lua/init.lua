@@ -123,6 +123,7 @@ return function(args)
 
   local uv = require('uv')
   local luvi = require('luvi')
+  local env = require('env')
 
   local function commonBundle(bundle)
     luvi.bundle = bundle
@@ -151,22 +152,20 @@ return function(args)
   local function folderBundle(base)
     return commonBundle({
       stat = function (path)
-        local raw, err = uv.fs_stat(pathJoin(base, path))
+        path = pathJoin(base, "./" .. path)
+        local raw, err = uv.fs_stat(path)
         if not raw then return nil, err end
         return {
-          type = raw.is_directory and "directory" or
-                 raw.is_file and "file" or
-                 raw.is_symbolic_link and "symbolic_link" or
-                 raw.is_socket and "socket" or
-                 raw.is_block_device and "block_device" or
-                 raw.is_character_device and "is_character_device" or
-                 "unknown",
+          type = string.lower(raw.type),
           size = raw.size,
           mtime = raw.mtime,
         }
       end,
       readdir = function (path)
-        local req = uv.fs_scandir(pathJoin(base, path))
+        path = pathJoin(base, "./" .. path)
+        local req, err = uv.fs_scandir(path)
+        if not req then return nil, err end
+
         local files = {}
         repeat
           local ent = uv.fs_scandir_next(req)
@@ -175,9 +174,9 @@ return function(args)
         return files
       end,
       readfile = function (path)
-        path = pathJoin(base, path)
+        path = pathJoin(base, "./" .. path)
         local fd, stat, data, err
-        fd, err = uv.fs_open(path, "r", tonumber("644", 8))
+        fd, err = uv.fs_open(path, "r", 0644)
         if not fd then return nil, err end
         stat, err = uv.fs_fstat(fd)
         if not stat then return nil, err end
@@ -190,8 +189,10 @@ return function(args)
   end
 
   local function zipBundle(zip)
+
     return commonBundle({
       stat = function (path)
+        path = pathJoin("./" .. path)
         if path == "" then
           return {
             type = "directory",
@@ -199,53 +200,70 @@ return function(args)
             mtime = 0
           }
         end
-        local raw, err = zip.stat(path)
-        if not raw then return nil, err end
+        local index, err = zip:locate_file(path)
+        if not index then
+          index, err = zip:locate_file(path .. "/")
+          if not index then return nil, err end
+        end
+        local raw = zip:stat(index)
+
         return {
-          type = raw.file_name:sub(-1) == "/" and "directory" or "file",
-          size = raw.uncompressed_size,
-          mtime = 0, -- TODO: parse last_mod_file_date and last_mod_file_time
+          type = raw.filename:sub(-1) == "/" and "directory" or "file",
+          size = raw.uncomp_size,
+          mtime = raw.time,
         }
       end,
       readdir = function (path)
-        local entries, err = zip.readdir(path)
-        if not entries then return nil, err end
-        local keys={}
-        local n = 0
-        for k in pairs(entries) do
-          n = n + 1
-          keys[n] = k
+        path = pathJoin("./" .. path)
+        local index, err
+        if path == "" then
+          index = 0
+        else
+          path = path .. "/"
+          index, err = zip:locate_file(path )
+          if not index then return nil, err end
+          if not zip:is_directory(index) then
+            return nil, path .. " is not a directory"
+          end
         end
-        return keys
+        local files = {}
+        for i = index + 1, zip:get_num_files() do
+          local filename = zip:get_filename(i)
+          if string.sub(filename, 1, #path) ~= path then break end
+          filename = filename:sub(#path + 1)
+          local n = string.find(filename, "/")
+          if n == #filename then
+            filename = string.sub(filename, 1, #filename - 1)
+            n = nil
+          end
+          if not n then
+            files[#files + 1] = filename
+          end
+        end
+        return files
       end,
-      readfile = zip.readfile,
+      readfile = function (path)
+        path = pathJoin("./" .. path)
+        local index, err = zip:locate_file(path)
+        if not index then return nil, err end
+        return zip:extract(index)
+      end
     })
-  end
-
-  local function getZip(path)
-    local fd, err = uv.fs_open(path, 'r', tonumber('644', 8))
-    if not fd then return nil, err end
-    local zip = require('zipreader')(fd, {
-      fstat=uv.fs_fstat,
-      read=uv.fs_read
-    })
-    if not zip then return nil, "Not a zip file " .. path end
-    return zip
   end
 
   -- If the user specified a zip file, load that
-  local path = luvi.env.get("LUVI_ZIP")
-  if path then
+  local path = env.get("LUVI_ZIP")
+  if path and #path > 0 then
     path = pathJoin(uv.cwd(), path)
-    local zip = getZip(path)
+    local zip = require('miniz').new_reader(path)
     -- And error out if it's not a valid zip
     if not zip then error(path .. " is not a zip file") end
     return zipBundle(zip)
   end
 
   -- Same for specefied directory root
-  path = luvi.env.get("LUVI_DIR")
-  if path then
+  path = env.get("LUVI_DIR")
+  if path and #path > 0 then
     path = pathJoin(uv.cwd(), path)
     if not uv.fs_stat(pathJoin(path, "main.lua")) then
       error(path .. " is missing main.lua at it's root")
@@ -254,7 +272,7 @@ return function(args)
   end
 
   -- Try to auto-detect if the exe itself contains a zip
-  local zip = getZip(uv.exepath())
+  local zip = require('miniz').new_reader(uv.exepath())
   if zip then
     return zipBundle(zip)
   end
