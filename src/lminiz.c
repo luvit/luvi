@@ -26,7 +26,6 @@ typedef struct {
 } lmz_file_t;
 
 static size_t lmz_file_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_t n) {
-  // printf("READ: opaque=%p, offset=%llu buf=%p, size=%lu\n", pOpaque, file_ofs, pBuf, n);
   lmz_file_t* zip = pOpaque;
   const uv_buf_t buf = uv_buf_init(pBuf, n);
   uv_fs_read(zip->loop, &(zip->req), zip->fd, &buf, 1, file_ofs, NULL);
@@ -38,9 +37,9 @@ static int lmz_reader_init(lua_State* L) {
   mz_uint32 flags = luaL_optint(L, 2, 0);
   mz_uint64 size;
   lmz_file_t* zip = lua_newuserdata(L, sizeof(*zip));
+  mz_zip_archive* archive = &(zip->archive);
   luaL_getmetatable(L, "miniz_reader");
   lua_setmetatable(L, -2);
-  mz_zip_archive* archive = &(zip->archive);
   memset(archive, 0, sizeof(*archive));
   zip->loop = uv_default_loop();
   zip->fd = uv_fs_open(zip->loop, &(zip->req), path, O_RDONLY, 0644, NULL);
@@ -172,9 +171,9 @@ static int lmz_writer_init(lua_State *L) {
   size_t size_to_reserve_at_beginning = luaL_optint(L, 1, 0);
   size_t initial_allocation_size = luaL_optint(L, 2, 128 * 1024);
   lmz_file_t* zip = lua_newuserdata(L, sizeof(*zip));
+  mz_zip_archive* archive = &(zip->archive);
   luaL_getmetatable(L, "miniz_writer");
   lua_setmetatable(L, -2);
-  mz_zip_archive* archive = &(zip->archive);
   memset(archive, 0, sizeof(*archive));
   zip->loop = uv_default_loop();
   if (!mz_zip_writer_init_heap(archive, size_to_reserve_at_beginning, initial_allocation_size)) {
