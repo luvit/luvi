@@ -33,11 +33,6 @@ static size_t lmz_file_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_
   return zip->req.result;
 }
 
-static size_t lmz_file_write(void *pOpaque, mz_uint64 file_ofs, const void *pBuf, size_t n) {
-  printf("WRITE: opaque=%p, offset=%llu buf=%p, size=%lu\n", pOpaque, file_ofs, pBuf, n);
-  return 0;
-}
-
 static int lmz_reader_init(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
   mz_uint32 flags = luaL_optint(L, 2, 0);
