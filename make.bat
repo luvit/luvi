@@ -17,7 +17,7 @@ cmake -H. -Bbuild
 goto build
 
 :build
-cmake --build build --config Release
+cmake --build build --config Release -- /maxcpucount
 copy build\Release\luvi.exe .
 
 :publish
