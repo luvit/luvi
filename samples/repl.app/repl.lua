@@ -86,7 +86,7 @@ return function (stdin, stdout, uv, utils, greeting)
 
   displayPrompt '>'
 
-  uv.read_start(stdin, function (self, err, line)
+  uv.read_start(stdin, function (err, line)
     assert(not err, err)
     if line then
       local prompt = evaluateLine(line)
