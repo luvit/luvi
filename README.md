@@ -258,6 +258,39 @@ Ot the test suite with:
 LUVI_APP=samples/test.app build/luvi
 ```
 
+## Multiple Mains
+
+Luvi also has a feature where you can reuse the same binary bundle for
+multiple commands.  This is done by reading the value of `argv[0]` and looking
+for a main in `"main/" .. basename(args[0]) .. ".lua"`. before looking in
+`main.lua`.
+
+To use this you will typically create multiple mains in your bundle, one for
+each command you want to support.  Then when installing your app/utility,
+create a symlink to the main binary in the user's `$PATH` but named after each
+command.
+
+Here is an example that has two entry points, `add` and `subtract`
+
+```sh
+mkdir main
+vi main/add.lua
+vi main/subtract.lua
+```
+
+Then create symlinks somewhere points to luvi (or an old version of your
+binary)
+
+```sh
+ln -s luvi add
+ln -s luvi subtract
+```
+
+Then when you run theses symlinks, luvi will use the custom mains.
+
+All the previous rules about LUVI_APP and bundled zips in the binary still
+apply here.
+
 ## CMake Flags
 
 You can use the predefined makefile targets if you want or use cmake directly
