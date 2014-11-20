@@ -48,9 +48,9 @@ test: luvi
 	cd samples/test.app && zip -r ../test.zip . && cd ../..
 	cat build/luvi samples/test.zip > test.bin
 	chmod +x test.bin
-	LUVI_DIR=samples/test.app LUVI_ZIP='' build/luvi 1 2 3 4
-	LUVI_DIR='' LUVI_ZIP=samples/test.zip build/luvi 1 2 3 4
-	LUVI_DIR='' LUVI_ZIP='' ./test.bin 1 2 3 4
+	LUVI_APP=samples/test.app LUVI_ZIP='' build/luvi 1 2 3 4
+	LUVI_APP=samples/test.zip build/luvi 1 2 3 4
+	LUVI_APP='' ./test.bin 1 2 3 4
 	rm -f samples/test.zip test.bin
 
 install: luvi

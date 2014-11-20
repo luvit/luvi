@@ -382,12 +382,12 @@ return function(args)
         if stat.type == "directory" then
           copyFolder(child)
         elseif stat.type == "file" then
-          print("Adding", child)
-          writer:add(child, bundle.readfile(child))
+          print("    " .. child)
+          writer:add(child, bundle.readfile(child), 9)
         end
       end
     end
-    print("Building zip file")
+    print("Zipping " .. bundle.base)
     copyFolder("")
     print("Writing zip file")
     uv.fs_write(fd, writer:finalize(), binSize)
