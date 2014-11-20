@@ -11,8 +11,8 @@ exec_program(
 option(WithOpenSSL "Include OpenSSL" OFF)
 option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
 
-include(luv/luajit.cmake)
-include(luv/uv.cmake)
+include(deps/luv/luajit.cmake)
+include(deps/luv/uv.cmake)
 
 if (WithOpenSSL)
   include(deps/openssl.cmake)

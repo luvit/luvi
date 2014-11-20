@@ -4,8 +4,8 @@
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
-#include "../luv/libuv/include/uv.h"
-#include "../luv/src/luv.h"
+#include "../deps/luv/libuv/include/uv.h"
+#include "../deps/luv/src/luv.h"
 
 #include <string.h>
 #include <stdlib.h>

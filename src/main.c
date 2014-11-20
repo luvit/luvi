@@ -16,7 +16,7 @@
  */
 
 #include "./luvi.h"
-#include "../luv/src/luv.c"
+#include "../deps/luv/src/luv.c"
 #include "lenv.c"
 #include "luvi.c"
 #include "lminiz.c"
