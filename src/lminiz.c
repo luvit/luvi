@@ -16,7 +16,7 @@
  */
 
 #include "./luvi.h"
-#include "miniz.c"
+#include "../deps/miniz.c"
 
 typedef struct {
   mz_zip_archive archive;
