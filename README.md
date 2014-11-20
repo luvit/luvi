@@ -13,10 +13,10 @@ The goal of this is to make building [luvit][] and [derivatives][] much easier.
 
  1. Create your lua program.  This consists of a folder with a `main.lua` in
     it's root.
- 2. From somewhere inside your app, type `luvi` to run the current app.
- 3. When you are pleased with the result, zip your folder making sure `main.lua`
-    is in the root of the new zip file.  Then concatenate the `luvi` binary with
-    your zip to form a new binary.  Mark it as executable and distribute.
+ 2. Run `luvi` with `LUVI_APP` pointing to your root folder.
+ 3. When you are pleased with the result, *build* your final binary by adding
+    the `LUVI_TARGET` environment variable pointing to where you want the
+    binary created.  This is a self-contained binary with luvi and you app.
 
 ## Main API
 
@@ -71,11 +71,11 @@ of strings at `args`.
 print("Your arguments were", args)
 ```
 
-The "env" table under "luvi" provides read/write access to your local environment variables
+The "env" module provides read/write access to your local environment variables
 via `env.keys`, `env.get`, `env.put`, `env.set`, and `env.unset`.
 
 ```lua
-local env = require('luvi').env
+local env = require('env')
 
 -- Convert the module to a mutable magic table.
 local environment = setmetatable({}, {
@@ -166,8 +166,11 @@ end
 
 ## Building from Source
 
-If you want to not wait for pre-built binaries and dive right in, building on
-Linux or OSX is pretty simple.
+[Prebuilt binaries][] are kept for most platforms including Windows, OSX, Linux
+x64 and Linux for Raspberry Pi.
+
+If you want to not wait for pre-built binaries and dive right in, building is
+based on CMake and is pretty simple.
 
 First clone this repo recursively.
 
@@ -176,6 +179,9 @@ git clone --recursive git@github.com:luvit/luvi.git
 ```
 
 Then run the makefile inside it. (Note this assumes you have cmake in your path.)
+If you're on windows, there is a `make.bat` file that works mostly like the unix
+`Makefile`.
+
 
 ```sh
 cd luvi
@@ -189,47 +195,68 @@ $ ls -lh build/luvi
 -rwxr-xr-x 1 tim tim 878K Oct 20 17:55 build/luvi
 ```
 
-If you try to run it outside an app, it will fail:
+Run it to see usage information:
 
 ```sh
 $ ./build/luvi
-Not a luvi app tree.
+
+Luvi Usage Instructions:
+
+    Bare Luvi uses environment variables to configure it's runtime parameters.
+
+    LUVI_APP is a colon separated list of paths to folders and/or zip files to
+             be used as the bundle virtual file system.  Items are searched in
+             the paths from left to right.
+
+    LUVI_TARGET is set when you wish to build a new binary instead of running
+                directly out of the raw folders.  Set this in addition to
+                LUVI_APP and luvi will build a new binary with the vfs embedded
+                inside as a single zip file at the end of the executable.
+
+    Examples:
+
+      # Run luvit directly from the filesystem (like a git checkout)
+      LUVI_APP=luvit/app ./build/luvi
+
+      # Run an app that layers on top of luvit
+      LUVI_APP=myapp:luvit/app ./build/luvi
+
+      # Build the luvit binary
+      LUVI_APP=luvit/app LUVI_TARGET=./luvit ./build/luvi
+
+      # Run the new luvit binary
+      ./luvit
+
+      # Run an app that layers on top of luvit (note trailing colon)
+      LUVI_APP=myapp: ./luvit
+
+      # Build your app
+      LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit
 ```
 
 You can run the sample repl app by doing:
 
 ```sh
-LUVI_DIR=samples/repl.app build/luvi
+LUVI_APP=samples/repl.app build/luvi
 ```
 
-When you're done creating an app you need to zip your app and concatenate it
-with luvi.  Make sure that `main.lua` is at the root of your zip file.  For
-example on osx or linux:
+Ot the test suite with:
 
 ```sh
-cd my-app
-zip -r -9 ../my-app.zip .
-cd ..
-unzip -l my-app.zip # verify the paths in the zip file
-cat path/to/luvi my-app.zip > my-app.bin
-chmod +x my-app.bin
-./my-app.bin
+LUVI_APP=samples/test.app build/luvi
 ```
 
-Building on Windows is also pretty simple.  Make sure to install visual studio
-desktop or some C compiler and enter the appropriate command shell.
-
-Run the `msvcbuild.bat` script to build luvi using cmake and MSVC.  The final
-binary will copied to `luvi.exe` in the root for convenience.
-
 ## CMake Flags
+
+You can use the predefined makefile targets if you want or use cmake directly
+for more control.
 
 ```
 WithOpenSSL (Default: OFF)      - Enable OpenSSL Support
 WithSharedOpenSSL (Default: ON) - Use System OpenSSL Library
                                   Otherwise use static library
 
-OPENSSL_ROOT_DIR                - Override the OpenSSL Root Directory                        
+OPENSSL_ROOT_DIR                - Override the OpenSSL Root Directory
 OPENSSL_INCLUDE_DIR             - Override the OpenSSL Include Directory
 OPENSSL_LIBRARIES               - Override the OpenSSL Library Path
 ```
@@ -253,3 +280,6 @@ cmake \
   -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib \
   ..
 ```
+
+
+[Prebuilt binaries]: https://github.com/luvit/luvi-binaries
