@@ -12,7 +12,7 @@ The goal of this is to make building [luvit][] and [derivatives][] much easier.
 ## Usage
 
  1. Create your lua program.  This consists of a folder with a `main.lua` in
-    it's root.
+    its root.
  2. Run `luvi` with `LUVI_APP` pointing to your root folder.
  3. When you are pleased with the result, *build* your final binary by adding
     the `LUVI_TARGET` environment variable pointing to where you want the
@@ -192,17 +192,17 @@ When that's done you should have a shiny little binary `in build/luvi`.
 
 ```sh
 $ ls -lh build/luvi
--rwxr-xr-x 1 tim tim 878K Oct 20 17:55 build/luvi
+-rwxr-xr-x 1 tim tim 948K Nov 20 16:39 build/luvi
 ```
 
 Run it to see usage information:
 
-```sh
+```shgit
 $ ./build/luvi
 
 Luvi Usage Instructions:
 
-    Bare Luvi uses environment variables to configure it's runtime parameters.
+    Bare Luvi uses environment variables to configure its runtime parameters.
 
     LUVI_APP is a colon separated list of paths to folders and/or zip files to
              be used as the bundle virtual file system.  Items are searched in

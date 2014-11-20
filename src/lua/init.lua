@@ -77,7 +77,7 @@ local function pathJoin(...)
     i = i - 1
   end
 
-  -- If there was one, remove it's prefix from it's segment
+  -- If there was one, remove its prefix from its segment
   if prefix then
     inputs[i] = inputs[i]:sub(#prefix)
   end
@@ -404,7 +404,7 @@ return function(args)
   end
   local usage = [[Luvi Usage Instructions:
 
-    Bare Luvi uses environment variables to configure it's runtime parameters.
+    Bare Luvi uses environment variables to configure its runtime parameters.
 
     LUVI_APP is a colon separated list of paths to folders and/or zip files to
              be used as the bundle virtual file system.  Items are searched in
