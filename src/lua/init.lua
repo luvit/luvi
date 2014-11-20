@@ -125,32 +125,66 @@ return function(args)
   local luvi = require('luvi')
   local env = require('env')
 
-  local function commonBundle(bundle)
-    luvi.bundle = bundle
-
-    luvi.path = {
-      join = pathJoin,
-      getPrefix = getPrefix,
-      splitPath = splitPath,
-      joinparts = joinParts,
-    }
-
-    bundle.register = function (name, path)
-      if not path then path = name + ".lua" end
-      package.preload[name] = function (...)
-        local lua = assert(bundle.readfile(path))
-        return assert(loadstring(lua, "bundle:" .. path))(...)
-      end
+  -- Given a list of bundles, merge them into a single vfs.  Lower indexed items overshawdow later items.
+  local function combinedBundle(bundles)
+    local bases = {}
+    for i = 1, #bundles do
+      bases[i] = bundles[i].base
     end
-
-    local main = bundle.readfile("main.lua")
-    if not main then error("Missing main.lua in bundle") end
-    _G.args = args
-    return loadstring(main, "bundle:main.lua")(unpack(args))
+    return {
+      base = table.concat(bases, " : "),
+      stat = function (path)
+        local err
+        for i = 1, #bundles do
+          local stat
+          stat, err = bundles[i].stat(path)
+          if stat then return stat end
+        end
+        return nil, err
+      end,
+      readdir = function (path)
+        local has = {}
+        local files, err
+        for i = 1, #bundles do
+          local list
+          list, err = bundles[i].readdir(path)
+          if list then
+            for j = 1, #list do
+              local name = list[j]
+              if has[name] then
+                print("Warning multiple overlapping versions of " .. name)
+              else
+                has[name] = true
+                if files then
+                  files[#files + 1] = name
+                else
+                  files = { name }
+                end
+              end
+            end
+          end
+        end
+        if files then
+          return files
+        else
+          return nil, err
+        end
+      end,
+      readfile = function (path)
+        local err
+        for i = 1, #bundles do
+          local data
+          data, err = bundles[i].readfile(path)
+          if data then return data end
+        end
+        return nil, err
+      end
+    }
   end
 
   local function folderBundle(base)
-    return commonBundle({
+    return {
+      base = base,
       stat = function (path)
         path = pathJoin(base, "./" .. path)
         local raw, err = uv.fs_stat(path)
@@ -185,12 +219,12 @@ return function(args)
         uv.fs_close(fd)
         return data
       end,
-    })
+    }
   end
 
-  local function zipBundle(zip)
-
-    return commonBundle({
+  local function zipBundle(base, zip)
+    return {
+      base = base,
       stat = function (path)
         path = pathJoin("./" .. path)
         if path == "" then
@@ -248,50 +282,161 @@ return function(args)
         if not index then return nil, err end
         return zip:extract(index)
       end
-    })
+    }
   end
 
-  -- If the user specified a zip file, load that
-  local path = env.get("LUVI_ZIP")
-  if path and #path > 0 then
-    path = pathJoin(uv.cwd(), path)
-    local zip = require('miniz').new_reader(path)
-    -- And error out if it's not a valid zip
-    if not zip then error(path .. " is not a zip file") end
-    return zipBundle(zip)
-  end
-
-  -- Same for specefied directory root
-  path = env.get("LUVI_DIR")
-  if path and #path > 0 then
-    path = pathJoin(uv.cwd(), path)
-    if not uv.fs_stat(pathJoin(path, "main.lua")) then
-      error(path .. " is missing main.lua at it's root")
+  local function makeBundle(app)
+    local miniz = require('miniz')
+    if app and (#app > 0) then
+      -- Split the string by : leaving empty strings on ends
+      local parts = {}
+      local n = 1
+      for part in string.gmatch(app, '([^:]*)') do
+        if not parts[n] then
+          local path
+          if part == "" then
+            path = uv.exepath()
+          else
+            path = pathJoin(uv.cwd(), part)
+          end
+          local bundle
+          local zip = miniz.new_reader(path)
+          if zip then
+            bundle = zipBundle(path, zip)
+          else
+            local stat = uv.fs_stat(path)
+            if not stat or stat.type ~= "DIRECTORY" then
+              print("ERROR: " .. path .. " is not a zip file or a folder")
+              return
+            end
+            bundle = folderBundle(path)
+          end
+          parts[n] = bundle
+        end
+        if part == "" then n = n + 1 end
+      end
+      if #parts == 1 then
+        return parts[1]
+      end
+      return combinedBundle(parts)
     end
-    return folderBundle(path)
+    local path = uv.exepath()
+    local zip = miniz.new_reader(path)
+    if zip then return zipBundle(path, zip) end
   end
 
-  -- Try to auto-detect if the exe itself contains a zip
-  local zip = require('miniz').new_reader(uv.exepath())
-  if zip then
-    return zipBundle(zip)
-  end
+  local function commonBundle(bundle)
+    luvi.bundle = bundle
 
-  -- If not search the filesystem for the folder
-  -- Start at cwd and go up to the root looking for main.lua
-  local dir = uv.cwd()
-  local prefix = getPrefix(dir)
-  local parts = splitPath(dir:sub(#prefix))
-  local last = #parts
-  repeat
-    dir = joinParts(prefix, parts, 1, last)
-    if uv.fs_stat(pathJoin(dir, "main.lua")) then
-      return folderBundle(dir)
+    luvi.path = {
+      join = pathJoin,
+      getPrefix = getPrefix,
+      splitPath = splitPath,
+      joinparts = joinParts,
+    }
+
+    bundle.register = function (name, path)
+      if not path then path = name + ".lua" end
+      package.preload[name] = function (...)
+        local lua = assert(bundle.readfile(path))
+        return assert(loadstring(lua, "bundle:" .. path))(...)
+      end
     end
-    last = last - 1
-  until last < 0
 
-  print("Not a luvi app tree.")
-  return 1
+    local main = bundle.readfile("main.lua")
+    if not main then error("Missing main.lua in " .. bundle.base) end
+    _G.args = args
+    return loadstring(main, "bundle:main.lua")(unpack(args))
+  end
+
+  local function buildBundle(target, bundle)
+    local miniz = require('miniz')
+    target = pathJoin(uv.cwd(), target)
+    print("Creating new binary: " .. target)
+    local fd = assert(uv.fs_open(target, "w", 511)) -- 0777
+    local binSize
+    do
+      local source = uv.exepath()
+
+      local reader = miniz.new_reader(source)
+      if reader then
+        -- If contains a zip, find where the zip starts
+        binSize = reader:get_offset()
+      else
+        -- Otherwise just read the file size
+        binSize = uv.fs_stat(source).size
+      end
+      local fd2 = assert(uv.fs_open(source, "r", 384)) -- 0600
+      print("Copying initial " .. binSize .. " bytes from " .. source)
+      uv.fs_sendfile(fd, fd2, 0, binSize)
+      uv.fs_close(fd2)
+    end
+
+    local writer = miniz.new_writer()
+    local function copyFolder(path)
+      local files = bundle.readdir(path)
+      for i = 1, #files do
+        local name = files[i]
+        local child = pathJoin(path, name)
+        local stat = bundle.stat(child)
+        if stat.type == "directory" then
+          copyFolder(child)
+        elseif stat.type == "file" then
+          print("Adding", child)
+          writer:add(child, bundle.readfile(child))
+        end
+      end
+    end
+    print("Building zip file")
+    copyFolder("")
+    print("Writing zip file")
+    uv.fs_write(fd, writer:finalize(), binSize)
+    uv.fs_close(fd)
+    print("Done building " .. target)
+    return
+  end
+
+  local bundle = makeBundle(env.get("LUVI_APP"))
+  if bundle then
+    local target = env.get("LUVI_TARGET")
+    if not target or #target == 0 then return commonBundle(bundle) end
+    return buildBundle(target, bundle)
+  end
+  local usage = [[Luvi Usage Instructions:
+
+    Bare Luvi uses environment variables to configure it's runtime parameters.
+
+    LUVI_APP is a colon separated list of paths to folders and/or zip files to
+             be used as the bundle virtual file system.  Items are searched in
+             the paths from left to right.
+
+    LUVI_TARGET is set when you wish to build a new binary instead of running
+                directly out of the raw folders.  Set this in addition to
+                LUVI_APP and luvi will build a new binary with the vfs embedded
+                inside as a single zip file at the end of the executable.
+
+    Examples:
+
+      # Run luvit directly from the filesystem (like a git checkout)
+      LUVI_APP=luvit/app $(LUVI)
+
+      # Run an app that layers on top of luvit
+      LUVI_APP=myapp:luvit/app $(LUVI)
+
+      # Build the luvit binary
+      LUVI_APP=luvit/app LUVI_TARGET=./luvit $(LUVI)
+
+      # Run the new luvit binary
+      ./luvit
+
+      # Run an app that layers on top of luvit (note trailing colon)
+      LUVI_APP=myapp: ./luvit
+
+      # Build your app
+      LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit
+  ]]
+  usage = "\n" .. string.gsub(usage, "%$%(LUVI%)", args[0])
+  print(usage)
+  return -1
 
 end
