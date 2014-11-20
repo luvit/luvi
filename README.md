@@ -9,14 +9,24 @@ A project in-between [luv][] and [luvit][].
 
 The goal of this is to make building [luvit][] and [derivatives][] much easier.
 
-## Usage
+## Workflow
 
- 1. Create your lua program.  This consists of a folder with a `main.lua` in
-    its root.
- 2. Run `luvi` with `LUVI_APP` pointing to your root folder.
- 3. When you are pleased with the result, *build* your final binary by adding
-    the `LUVI_TARGET` environment variable pointing to where you want the
-    binary created.  This is a self-contained binary with luvi and you app.
+Luvi has a somewhat unique, but very easy workflow for creating self-contained
+binaries on systems that don't have a compiler.
+
+```sh
+# Make a folder
+git init myapp
+# Write the app
+vim myapp/main.lua
+# Run the app
+LUVI_APP=myapp luvi
+# Build the binary when done
+LUVI_APP=myapp LUVI_TARGET=mybinary luvi
+# Run the new self-contained binary
+./mybinary
+# Deploy / Publish / Profit!
+```
 
 ## Main API
 
@@ -195,9 +205,11 @@ $ ls -lh build/luvi
 -rwxr-xr-x 1 tim tim 948K Nov 20 16:39 build/luvi
 ```
 
+## Usage
+
 Run it to see usage information:
 
-```shgit
+```sh
 $ ./build/luvi
 
 Luvi Usage Instructions:
