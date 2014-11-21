@@ -43,15 +43,11 @@ clean:
 	rm -rf build
 
 test: luvi
-	rm -f samples/test.zip test.bin
-	cd samples/test.app && zip -r ../test.zip . && cd ../..
-	cat build/luvi samples/test.zip > test.bin
-	chmod +x test.bin
-	LUVI_APP=samples/test.app LUVI_ZIP='' build/luvi 1 2 3 4
-	LUVI_APP=samples/test.zip build/luvi 1 2 3 4
-	LUVI_APP='' ./test.bin 1 2 3 4
-	rm -f samples/test.zip test.bin
-
+	rm -f test.bin
+	LUVI_APP=samples/test.app build/luvi 1 2 3 4
+	LUVI_APP=samples/test.app LUVI_TARGET=test.bin build/luvi
+	LUVI_app= ./test.bin 1 2 3 4
+	rm -f test.bin
 install: luvi
 	install -p build/luvi /usr/local/bin
 

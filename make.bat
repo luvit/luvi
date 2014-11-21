@@ -11,27 +11,36 @@ if "x%BUILD_TYPE%" == "x" (
 :large
 echo "Building large"
 cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild
-goto build
+goto :build
 
 :tiny
 echo "Building tiny"
 cmake -H. -Bbuild
-goto build
+goto :build
 
 :build
 cmake --build build --config Release -- /maxcpucount
 copy build\Release\luvi.exe .
-goto end
+goto :end
+
+:test
+set LUVI_APP=samples\test.app
+luvi.exe
+set LUVI_TARGET=test.exe
+luvi.exe
+set "LUVI_APP="
+set "LUVI_TARGET="
+test.exe
+del test.exe
+goto :end
 
 :publish
 echo "Building all versions"
 rmdir /s /q build
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild
-cmake --build build --config Release -- /maxcpucount
+make.bat tiny
 copy build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
 rmdir /s /q build
-cmake -H. -Bbuild
-cmake --build build --config Release -- /maxcpucount
+make.bat large
 copy build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe
 
 :end

@@ -14,11 +14,7 @@ build_script:
  - make.bat
 
 test_script:
- - set LUVI_APP=samples\test.app
- - luvi.exe
- - set LUVI_TARGET=test.exe
- - luvi.exe
- - test.exe
+ - make.bat test
 
 artifacts:
  - path: luvi.exe

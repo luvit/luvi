@@ -381,6 +381,7 @@ return function(args)
         local child = pathJoin(path, name)
         local stat = bundle.stat(child)
         if stat.type == "directory" then
+          writer:add(child .. "/", "")
           copyFolder(child)
         elseif stat.type == "file" then
           print("    " .. child)
