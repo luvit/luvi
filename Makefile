@@ -38,7 +38,6 @@ static: luv/CMakeLists.txt
 # In case the user forgot to pull in submodules, grab them.
 luv/CMakeLists.txt:
 	git submodule update --init --recursive
-	git submodule update --recursive
 
 clean:
 	rm -rf build
@@ -61,15 +60,19 @@ uninstall:
 
 publish-linux:
 	git submodule update --init --recursive
-	git submodule update --recursive
 	mkdir -p $(BIN_ROOT)
 	$(MAKE) clean tiny test && cp build/luvi $(BIN_ROOT)/luvi-tiny
 	$(MAKE) clean static test && cp build/luvi $(BIN_ROOT)/luvi-static
 	$(MAKE) clean large test && cp build/luvi $(BIN_ROOT)/luvi
 
+publish-raspberry:
+	git submodule update --init --recursive
+	mkdir -p $(BIN_ROOT)
+	$(MAKE) clean tiny test && cp build/luvi $(BIN_ROOT)/luvi-tiny
+	$(MAKE) clean large test && cp build/luvi $(BIN_ROOT)/luvi
+
 publish-darwin:
 	git submodule update --init --recursive
-	git submodule update --recursive
 	mkdir -p $(BIN_ROOT)
 	$(MAKE) clean tiny test && cp build/luvi $(BIN_ROOT)/luvi-tiny
 	$(MAKE) clean static test && cp build/luvi $(BIN_ROOT)/luvi

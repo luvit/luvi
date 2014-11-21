@@ -1,5 +1,7 @@
 @echo off
 
+if NOT "x%1" == "x" goto :%1
+
 if "x%BUILD_TYPE%" == "x" (
   goto :tiny
 ) ELSE (
