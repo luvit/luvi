@@ -1,46 +1,50 @@
-@echo off
+@ECHO off
 
-if NOT "x%1" == "x" goto :%1
+IF NOT "x%1" == "x" GOTO :%1
 
-if "x%BUILD_TYPE%" == "x" (
-  goto :tiny
-) ELSE (
-  goto :%BUILD_TYPE%
-)
+GOTO :tiny
 
 :large
-echo "Building large"
+ECHO "Building large"
 cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild
-goto :build
+GOTO :build
 
 :tiny
-echo "Building tiny"
+ECHO "Building tiny"
 cmake -H. -Bbuild
-goto :build
+GOTO :build
 
 :build
 cmake --build build --config Release -- /maxcpucount
-copy build\Release\luvi.exe .
-goto :end
+COPY build\Release\luvi.exe .
+GOTO :end
 
 :test
-set LUVI_APP=samples\test.app
+SET LUVI_APP=samples\test.app
 luvi.exe
-set LUVI_TARGET=test.exe
+SET LUVI_TARGET=test.exe
 luvi.exe
-set "LUVI_APP="
-set "LUVI_TARGET="
+SET "LUVI_APP="
+SET "LUVI_TARGET="
 test.exe
-del test.exe
-goto :end
+DEL /Q test.exe
+GOTO :end
+
+:clean
+IF EXIST build RMDIR /S /Q build
+IF EXIST luvi.exe DEL /F /Q luvi.exe
+GOTO :end
 
 :publish
-echo "Building all versions"
-rmdir /s /q build
-make.bat tiny
-copy build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
-rmdir /s /q build
-make.bat large
-copy build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe
+ECHO "Building all versions"
+git submodule update --init --recursive
+CALL make.bat clean
+CALL make.bat tiny
+CALL make.bat test
+COPY build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
+CALL make.bat clean
+CALL make.bat large
+CALL make.bat test
+COPY build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe
 
 :end

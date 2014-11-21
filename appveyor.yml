@@ -10,8 +10,7 @@ matrix:
 
 build_script:
  - git submodule update --init --recursive
- - git submodule update --recursive
- - make.bat
+ - make.bat %BUILD_TYPE%
 
 test_script:
  - make.bat test
