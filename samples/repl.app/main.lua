@@ -8,26 +8,11 @@ bundle.register("repl", "repl.lua")
 local utils = require('utils')
 local repl = require('repl')
 
-local stdin
-if uv.guess_handle(0) == "TTY" then
-  stdin = uv.new_tty(0, true)
-else
-  stdin = uv.new_pipe(false)
-  uv.pipe_open(0)
-end
-
-local stdout
-if uv.guess_handle(1) == "TTY" then
-  stdout = uv.new_tty(1, false)
-  utils.init(true)
-else
-  stdout = uv.new_pipe(false)
-  uv.pipe_open(1)
-  utils.init(false)
-end
+local stdin = utils.stdin
+local stdout = utils.stdout
 
 local c = utils.color
-local greeting = "Welcome to the " .. c("Bred") .. "L" .. c("Bgreen") .. "uv" .. c("Bblue") .. "i" .. c() .. " repl!"
+local greeting = "Welcome to the " .. c("err") .. "L" .. c("quotes") .. "uv" .. c("table") .. "i" .. c() .. " repl!"
 repl(stdin, stdout, uv, utils, greeting)
 
 uv.run("default")

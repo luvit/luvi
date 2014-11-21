@@ -7,17 +7,7 @@ bundle.register("utils", "utils.lua")
 local utils = require('utils')
 local dump = require('utils').dump
 
-local stdout
-if uv.guess_handle(1) == "TTY" then
-  stdout = uv.new_tty(1, false)
-  utils.init(true)
-  print("STDOUT is TTY")
-else
-  stdout = uv.new_pipe(false)
-  uv.pipe_open(stdout, 1)
-  utils.init(false)
-  print("STDOUT is PIPE")
-end
+local stdout = utils.stdout
 
 
 local function deepEqual(expected, actual, path)
