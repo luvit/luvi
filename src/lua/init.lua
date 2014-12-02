@@ -305,7 +305,7 @@ return function(args)
             bundle = zipBundle(path, zip)
           else
             local stat = uv.fs_stat(path)
-            if not stat or stat.type ~= "DIRECTORY" then
+            if not stat or stat.type ~= "directory" then
               print("ERROR: " .. path .. " is not a zip file or a folder")
               return
             end
