@@ -41,10 +41,16 @@ git submodule update --init --recursive
 CALL make.bat clean
 CALL make.bat tiny
 CALL make.bat test
-COPY build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
+COPY build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe
 CALL make.bat clean
 CALL make.bat large
 CALL make.bat test
-COPY build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe
+COPY build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
+CD luvi-binaries
+git pull
+git add Windows
+git commit
+git push
+CD ..
 
 :end
