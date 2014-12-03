@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v0.5.1
+
+ - Use lowercase for uv type strings ("TCP" is now "tcp", "TTY" is "tty")
+
 ## v0.5.0
 
 This release contains some breaking changes and is mostly a luv update.
