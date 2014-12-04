@@ -1,4 +1,4 @@
-set(ZLIB_SHARED zlib)
+set(ZLIB_SHARED z)
 set(ZLIB_STATIC zlibstatic)
 
 set(LUA_ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua-zlib)
