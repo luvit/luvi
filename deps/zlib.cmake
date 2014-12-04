@@ -10,7 +10,6 @@ if (WithSharedZLIB)
 else (WithSharedZLIB)
   message("Enabling Static ZLIB")
   add_subdirectory(deps/zlib)
-  list(APPEND LIB_LIST zlibstatic)
 endif (WithSharedZLIB)
 
 add_definitions(-DWITH_ZLIB)
