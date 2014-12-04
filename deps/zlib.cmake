@@ -6,7 +6,6 @@ if (WithSharedZLIB)
 
   include_directories(${ZLIB_INCLUDE_DIR})
   link_directories(${ZLIB_ROOT_DIR}/lib)
-  list(APPEND LIB_LIST ${ZLIB_LIBRARIES})
 else (WithSharedZLIB)
   message("Enabling Static ZLIB")
   add_subdirectory(deps/zlib)
