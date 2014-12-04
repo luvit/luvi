@@ -10,6 +10,8 @@ exec_program(
 
 option(WithOpenSSL "Include OpenSSL" OFF)
 option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
+option(WithZLIB "Include ZLIB" OFF)
+option(WithSharedZLIB "Shared or Static ZLIB" ON)
 
 include(deps/luv/luajit.cmake)
 include(deps/luv/uv.cmake)
@@ -17,6 +19,10 @@ include(deps/luv/uv.cmake)
 if (WithOpenSSL)
   include(deps/openssl.cmake)
 endif (WithOpenSSL)
+
+if (WithZLIB)
+  include(deps/zlib.cmake)
+endif (WithZLIB)
 
 add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 
@@ -34,3 +40,6 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
 else()
   target_link_libraries(luvi uv lua51 ${EXTRA_LIBS})
 endif()
+
+
+
