@@ -14,5 +14,3 @@ endif (WithSharedZLIB)
 
 add_definitions(-DWITH_ZLIB)
 include(deps/lua-zlib.cmake)
-
-
