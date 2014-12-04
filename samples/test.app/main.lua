@@ -184,21 +184,24 @@ writer:add("main.lua", 'print(require("luvi").version)', 9)
 p(writer:finalize())
 
 
-print("Testing zlib")
-local zlib = require("zlib")
-p("zlib version", zlib.version())
-local tozblob = bundle.readfile("sonnet-133.txt")
-local defstreamf = zlib.deflate()
-local infstreamf = zlib.inflate()
-local deflated, def_eof, def_bytes_in, def_bytes_out = defstreamf(tozblob, 'finish')
-assert(def_eof, "deflate not finished?")
-assert(def_bytes_in > def_bytes_out, "deflate failed")
-local inflated, inf_eof, inf_bytes_in, inf_bytes_out = infstreamf(deflated)
-assert(inf_eof, "inflate not finished?")
-assert(inf_bytes_in < inf_bytes_out, "inflate failed")
-assert(inf_bytes_in == def_bytes_out, "inflate byte in count != deflate byte out count")
-assert(def_bytes_in == inf_bytes_out, "inflate byte out count != deflate byte in count")
-assert(inflated == tozblob, "inflated data doesn't match original")
-
+local zlib 
+if not pcall(function() zlib = require("zlib") end) then
+  print("zlib unavailable")
+else
+  print("Testing zlib")
+  p("zlib version", zlib.version())
+  local tozblob = bundle.readfile("sonnet-133.txt")
+  local defstreamf = zlib.deflate()
+  local infstreamf = zlib.inflate()
+  local deflated, def_eof, def_bytes_in, def_bytes_out = defstreamf(tozblob, 'finish')
+  assert(def_eof, "deflate not finished?")
+  assert(def_bytes_in > def_bytes_out, "deflate failed")
+  local inflated, inf_eof, inf_bytes_in, inf_bytes_out = infstreamf(deflated)
+  assert(inf_eof, "inflate not finished?")
+  assert(inf_bytes_in < inf_bytes_out, "inflate failed")
+  assert(inf_bytes_in == def_bytes_out, "inflate byte in count != deflate byte out count")
+  assert(def_bytes_in == inf_bytes_out, "inflate byte out count != deflate byte in count")
+  assert(inflated == tozblob, "inflated data doesn't match original")
+end
 
 print("All tests pass!\n")
