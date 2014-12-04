@@ -7,3 +7,9 @@
 [submodule "deps/luv"]
 	path = deps/luv
 	url = https://github.com/luvit/luv.git
+[submodule "deps/zlib"]
+	path = deps/zlib
+	url = https://github.com/luvit/zlib.git
+[submodule "deps/lua-zlib"]
+	path = deps/lua-zlib
+	url = https://github.com/brimworks/lua-zlib.git
