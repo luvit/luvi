@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v0.5.2
+
+ - Add zlib bindings [Rob Emanuele]
+ - luv: Fix return value for uv.fs_mkdtemp [Tim Caswell]
+
 ## v0.5.1
 
  - Use lowercase for uv type strings ("TCP" is now "tcp", "TTY" is "tty")
