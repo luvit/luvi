@@ -6,7 +6,7 @@ GOTO :tiny
 
 :large
 ECHO "Building large"
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild
 GOTO :build
 
 :tiny
