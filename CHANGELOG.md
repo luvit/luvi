@@ -2,6 +2,12 @@
 
 High-level changes between release versions.
 
+## v0.5.3
+
+ - lua-openssl: Update upstream with various crasher fixes.
+ - luv: Fixed return type for uv.is_active and uv.has_ref [Thorbjørn Lindeijer]
+ - luv: Add more uv.fs_open mode strings [Tim Caswell]
+
 ## v0.5.2
 
  - Add zlib bindings [Rob Emanuele]
