@@ -2,6 +2,12 @@
 
 High-level changes between release versions.
 
+## v0.5.4
+
+ - lua-openssl: Update upstream with various crasher fixes.
+ - luv: enable passing a table of strings to uv.write [Tim Caswell]
+ - luv: make the callback optional in uv.signal_start [Tim Caswell]
+
 ## v0.5.3
 
  - lua-openssl: Update upstream with various crasher fixes.
