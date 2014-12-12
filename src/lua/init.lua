@@ -376,16 +376,19 @@ return function(args)
     local writer = miniz.new_writer()
     local function copyFolder(path)
       local files = bundle.readdir(path)
+      if not files then return end
       for i = 1, #files do
         local name = files[i]
-        local child = pathJoin(path, name)
-        local stat = bundle.stat(child)
-        if stat.type == "directory" then
-          writer:add(child .. "/", "")
-          copyFolder(child)
-        elseif stat.type == "file" then
-          print("    " .. child)
-          writer:add(child, bundle.readfile(child), 9)
+        if string.sub(name, 1, 1) ~= "." then
+          local child = pathJoin(path, name)
+          local stat = bundle.stat(child)
+          if stat.type == "directory" then
+            writer:add(child .. "/", "")
+            copyFolder(child)
+          elseif stat.type == "file" then
+            print("    " .. child)
+            writer:add(child, bundle.readfile(child), 9)
+          end
         end
       end
     end
