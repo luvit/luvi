@@ -4,6 +4,7 @@ High-level changes between release versions.
 
 ## v0.5.5
 
+ - lua-openssl: Update upstream with various fixes
  - libuv: Update to v1.0.2
  - luajit: Update to latest in v2.1 branch
  - luv: Start docs at https://github.com/luvit/luv/blob/master/docs.md [Tim Caswell]
