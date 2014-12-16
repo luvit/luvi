@@ -2,6 +2,14 @@
 
 High-level changes between release versions.
 
+## v0.5.5
+
+ - libuv: Update to v1.0.2
+ - luajit: Update to latest in v2.1 branch
+ - luv: Start docs at https://github.com/luvit/luv/blob/master/docs.md [Tim Caswell]
+ - luv: use boolean return for uv_loop_alive and uv_run [Tim Caswell]
+ - luvi: Fix bundle logic to skip hidden files and to not crash. [Tim Caswell]
+
 ## v0.5.4
 
  - lua-openssl: Update upstream with various crasher fixes.
