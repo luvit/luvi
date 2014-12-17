@@ -3,7 +3,7 @@ luvi
 
 [![Linux Build Status](https://travis-ci.org/luvit/luvi.svg?branch=master)](https://travis-ci.org/luvit/luvi)
 
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/luvit/luvi?branch=master&svg=true)](https://ci.appveyor.com/project/creationix/luvi)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/h643wg5hkwsnu0wd/branch/master?svg=true)](https://ci.appveyor.com/project/racker-buildbot/luvi/branch/master)
 
 A project in-between [luv][] and [luvit][].
 
