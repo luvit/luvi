@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v0.5.6
+
+ - lua-openssl: Update upstream with various fixes
+
 ## v0.5.5
 
  - lua-openssl: Update upstream with various fixes
