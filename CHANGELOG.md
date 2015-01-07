@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v0.5.7
+
+ - lua: Fix handle leak for invalid commands [Ryan Phillips]
+
 ## v0.5.6
 
  - lua-openssl: Update upstream with various fixes
