@@ -6,12 +6,12 @@ GOTO :tiny
 
 :large
 ECHO "Building large"
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild -G"Visual Studio 12 2013 Win64"
 GOTO :build
 
 :tiny
 ECHO "Building tiny"
-cmake -H. -Bbuild
+cmake -H. -Bbuild -G"Visual Studio 12 2013 Win64"
 GOTO :build
 
 :build
