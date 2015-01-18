@@ -30,6 +30,25 @@ test.exe
 DEL /Q test.exe
 GOTO :end
 
+:winsvc
+DEL /Q winsvc.exe
+SET LUVI_APP=samples\winsvc.app
+SET LUVI_TARGET=winsvc.exe
+luvi.exe
+SET "LUVI_APP="
+SET "LUVI_TARGET="
+GOTO :end
+
+:repl
+DEL /Q repl.exe
+SET LUVI_APP=samples\repl.app
+SET LUVI_TARGET=repl.exe
+luvi.exe
+SET "LUVI_APP="
+SET "LUVI_TARGET="
+GOTO :end
+
+
 :clean
 IF EXIST build RMDIR /S /Q build
 IF EXIST luvi.exe DEL /F /Q luvi.exe
