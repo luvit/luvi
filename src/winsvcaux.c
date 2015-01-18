@@ -6,9 +6,9 @@
 
 static int lua_GetModuleFileName(lua_State *L)
 {
-  const char* handle = lua_tolstring(L, 1, NULL);
+  HMODULE handle = lua_touserdata(L, 1);
   TCHAR name[MAX_PATH + 1];
-  DWORD ret = GetModuleFileName((HMODULE)handle, name, MAX_PATH + 1);
+  DWORD ret = GetModuleFileName(handle, name, MAX_PATH + 1);
   if (ret > 0)
   {
     lua_pushstring(L, name);

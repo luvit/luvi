@@ -106,7 +106,7 @@ end
 
 
 local function SvcInstall()
-  local svcPath, err = winsvcaux.GetModuleFileName('')
+  local svcPath, err = winsvcaux.GetModuleFileName()
   if svcPath == nil then
     print('Cannot install service, service path unobtainable', winsvcaux.GetErrorString(err))
     return
@@ -189,11 +189,10 @@ end
 
 
 -- Main Code
-
-if args[2] == 'install' then
+if args[1] == 'install' then
   SvcInstall()
   return
-elseif args[2] == 'delete' then
+elseif args[1] == 'delete' then
   SvcDelete()
   return
 end
