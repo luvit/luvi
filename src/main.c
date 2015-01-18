@@ -26,6 +26,10 @@
 #ifdef WITH_ZLIB
 LUALIB_API int luaopen_zlib(lua_State * const L);
 #endif
+#ifdef WITH_WINSVC
+#include "winsvc.h"
+#include "winsvcaux.h"
+#endif
 
 int main(int argc, char* argv[] ) {
 
@@ -75,6 +79,14 @@ int main(int argc, char* argv[] ) {
   // Store luvi module definition at preload.openssl
   lua_pushcfunction(L, luaopen_zlib);
   lua_setfield(L, -2, "zlib");
+#endif
+
+#ifdef WITH_WINSVC
+  // Store luvi module definition at preload.openssl
+  lua_pushcfunction(L, luaopen_winsvc);
+  lua_setfield(L, -2, "winsvc");
+  lua_pushcfunction(L, luaopen_winsvcaux);
+  lua_setfield(L, -2, "winsvcaux");
 #endif
 
   // Load the init.lua script
