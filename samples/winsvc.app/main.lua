@@ -120,7 +120,7 @@ local function SvcInstall()
   end
 
   -- Create the Service
-  local schService, err = winsvc.CreateService(
+  local schService, tagid, err = winsvc.CreateService(
     schSCManager,
     svcname,
     svcname,
@@ -132,11 +132,10 @@ local function SvcInstall()
     nil,
     nil,
     nil,
-    nil,
     nil)
 
   if schService == nil then
-    print('CreateService failed', err)
+    print('CreateService failed', winsvcaux.GetErrorString(err))
     winsvc.CloseServiceHandle(schSCManager)
     return
   end

@@ -1,6 +1,7 @@
 #include "luvi.h"
 
 #include <windows.h>
+#include <winsvc.h>
 #include <strsafe.h>
 
 #define SERVICE_CONTROL_USER_REGISTER_HANDLER_FAIL		0x00000080
@@ -252,8 +253,8 @@ static int lua_SpawnServiceCtrlDispatcher(lua_State *L)
 
 static int lua_OpenSCManager(lua_State *L)
 {
-  const char* machinename = luaL_checkstring(L, 1);
-  const char* databasename = luaL_checkstring(L, 2);
+  const char* machinename = lua_tostring(L, 1);
+  const char* databasename = lua_tostring(L, 2);
   DWORD access = luaL_checkint(L, 3);
   SC_HANDLE h = OpenSCManager(machinename, databasename, access);
   if (h != NULL)
@@ -298,14 +299,15 @@ static int lua_CreateService(lua_State *L)
   DWORD starttype = luaL_checkint(L, 6);
   DWORD errorcontrol = luaL_checkint(L, 7);
   const char* pathname = luaL_checkstring(L, 8);
-  const char* loadordergroup = luaL_checkstring(L, 9);
+  const char* loadordergroup = lua_tostring(L, 9);
   DWORD tagid = 0;
-  const char* deps = luaL_checkstring(L, 10);
-  const char* username = luaL_checkstring(L, 11);
-  const char* password = luaL_checkstring(L, 12);
+  DWORD *tagidp = loadordergroup?&tagid:NULL;
+  const char* deps = lua_tostring(L, 10);
+  const char* username = lua_tostring(L, 11);
+  const char* password = lua_tostring(L, 12);
 
 
-  SC_HANDLE h = CreateService(hSCManager, servicename, displayname, access, servicetype, starttype, errorcontrol, pathname, loadordergroup, &tagid, deps, username, password);
+  SC_HANDLE h = CreateService(hSCManager, servicename, displayname, access, servicetype, starttype, errorcontrol, pathname, loadordergroup, tagidp, deps, username, password);
   if (h != NULL)
   {
     lua_pushlightuserdata(L, h);
@@ -382,6 +384,35 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
   SETINT(ERROR);
   SETINT(ERROR_CALL_NOT_IMPLEMENTED);
   SETINT(NO_ERROR);
+
+  // Service defines from winnt.h
+  SETINT(SERVICE_KERNEL_DRIVER);
+  SETINT(SERVICE_FILE_SYSTEM_DRIVER);
+  SETINT(SERVICE_ADAPTER);
+  SETINT(SERVICE_RECOGNIZER_DRIVER);
+  SETINT(SERVICE_DRIVER);
+  SETINT(SERVICE_WIN32_OWN_PROCESS);
+  SETINT(SERVICE_WIN32_SHARE_PROCESS);
+  SETINT(SERVICE_WIN32);
+  SETINT(SERVICE_INTERACTIVE_PROCESS);
+  SETINT(SERVICE_TYPE_ALL);
+
+  SETINT(SERVICE_BOOT_START);
+  SETINT(SERVICE_SYSTEM_START);
+  SETINT(SERVICE_AUTO_START);
+  SETINT(SERVICE_DEMAND_START);
+  SETINT(SERVICE_DISABLED);
+
+  SETINT(SERVICE_ERROR_IGNORE);
+  SETINT(SERVICE_ERROR_NORMAL);
+  SETINT(SERVICE_ERROR_SEVERE);
+  SETINT(SERVICE_ERROR_CRITICAL);
+
+  SETINT(DELETE);
+  SETINT(READ_CONTROL);
+  SETINT(WRITE_DAC);
+  SETINT(WRITE_OWNER);
+  SETINT(SYNCHRONIZE);
 
   // Service Defines
   SETLITERAL(SERVICES_ACTIVE_DATABASE);
