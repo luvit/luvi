@@ -54,19 +54,6 @@ typedef struct _svc_baton {
 /* linked list of batons */
 svc_baton* gBatons = NULL;
 
-static lua_State* luv_state(uv_loop_t* loop) {
-  return loop->data;
-}
-
-static uv_loop_t* luv_loop(lua_State* L) {
-  uv_loop_t* loop;
-  lua_pushstring(L, "uv_loop");
-  lua_rawget(L, LUA_REGISTRYINDEX);
-  loop = lua_touserdata(L, -1);
-  lua_pop(L, 1);
-  return loop;
-}
-
 static DWORD GetDWFromTable(lua_State *L, const char* name) {
   DWORD result;
   lua_pushstring(L, name);
