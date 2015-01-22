@@ -5,26 +5,54 @@
 #include <strsafe.h>
 
 #define SERVICE_CONTROL_USER_REGISTER_HANDLER_FAIL		0x00000080
-#define SERVICE_CONTROL_USER_DISPATCHER_RUNNING			0x00000081
+#define SERVICE_CONTROL_USER_DISPATCHER_RUNNING       0x00000081
 
-struct svc_baton {
-  const char* name;
-  HANDLE end_event;
-  SERVICE_STATUS_HANDLE status_handle;
-  HANDLE* pipe;
-  DWORD dwArgc;
-  LPTSTR *lpszArgv;
-};
+typedef struct {
+  SERVICE_TABLE_ENTRY* svc_table;
+  uv_async_t end_async_handle;
+  int lua_cb_ref;
+  BOOL return_code;
+  DWORD error;
+} svc_dispatch_info;
 
-struct svc_handler_block {
+typedef struct {
+  HANDLE block_end_event;
   DWORD dwControl;
   DWORD dwEventType;
   LPVOID lpEventData;
   LPVOID lpContext;
-};
+  DWORD return_code;
+} svc_handler_block;
 
-DWORD GetDWFromTable(lua_State *L, const char* name)
-{
+typedef struct _svc_baton {
+  char* name;
+  int lua_cb_ref;
+  uv_async_t async_handle;
+  HANDLE svc_end_event;
+  SERVICE_STATUS_HANDLE status_handle;
+  DWORD dwArgc;
+  LPTSTR *lpszArgv;
+  svc_handler_block block;
+  struct _svc_baton* next;
+} svc_baton;
+
+/* linked list of batons */
+svc_baton* gBatons = NULL;
+
+static lua_State* luv_state(uv_loop_t* loop) {
+  return loop->data;
+}
+
+static uv_loop_t* luv_loop(lua_State* L) {
+  uv_loop_t* loop;
+  lua_pushstring(L, "uv_loop");
+  lua_rawget(L, LUA_REGISTRYINDEX);
+  loop = lua_touserdata(L, -1);
+  lua_pop(L, 1);
+  return loop;
+}
+
+static DWORD GetDWFromTable(lua_State *L, const char* name) {
   DWORD result;
   lua_pushstring(L, name);
   lua_gettable(L, -2);  /* get table[key] */
@@ -33,130 +61,104 @@ DWORD GetDWFromTable(lua_State *L, const char* name)
   return result;
 }
 
-HANDLE* GetPipeHandle(const char* name)
-{
-  char pipename[MAX_PATH] = { '\0' };
-  StringCchCat(pipename, MAX_PATH, TEXT("\\\\.\\pipe\\"));
-  StringCchCat(pipename, MAX_PATH, name);
-  HANDLE pipe = CreateFile(
-    pipename,
-    GENERIC_READ |  // read and write access 
-    GENERIC_WRITE,
-    0,              // no sharing 
-    NULL,           // default security attributes
-    OPEN_EXISTING,  // opens existing pipe 
-    0,              // default attributes 
-    NULL);          // no template file
+DWORD WINAPI HandlerEx(_In_  DWORD dwControl, _In_  DWORD dwEventType, _In_  LPVOID lpEventData, _In_  LPVOID lpContext) {
+  svc_baton *baton = lpContext;
+  baton->block.dwControl = dwControl;
+  baton->block.dwEventType = dwEventType;
+  baton->block.lpEventData = lpEventData;
+  baton->block.lpContext = lpContext;
 
-  return pipe;
+  ResetEvent(baton->block.block_end_event);
+  uv_async_send(&baton->async_handle);
+  WaitForSingleObject(baton->block.block_end_event, INFINITE);
+  return baton->block.return_code;
 }
 
-DWORD WINAPI HandlerEx(
-  _In_  DWORD dwControl,
-  _In_  DWORD dwEventType,
-  _In_  LPVOID lpEventData,
-  _In_  LPVOID lpContext)
-{
-  struct svc_baton *baton = lpContext;
-  struct svc_handler_block block = { dwControl, dwEventType, lpEventData, lpContext };
-  DWORD byteswritten, bytesread;
-  DWORD returncode = ERROR;
+static void svchandler_cb(uv_async_t* handle) {
+  lua_State* L = luv_state(handle->loop);
+  svc_baton* baton = handle->data;
+  lua_rawgeti(L, LUA_REGISTRYINDEX, baton->lua_cb_ref);
+  lua_pushlightuserdata(L, baton->block.lpContext);
+  lua_pushlightuserdata(L, baton->block.lpEventData);
+  lua_pushinteger(L, baton->block.dwEventType);
+  lua_pushinteger(L, baton->block.dwControl);
+  lua_call(L, 4, 0);
+  baton->block.return_code = luaL_checkint(L, 1);
+  SetEvent(baton->block.block_end_event);
+}
 
-  BOOL ret = WriteFile(baton->pipe, &block, sizeof(block), &byteswritten, NULL);
-  if (ret) {
-    BOOL ret = ReadFile(baton->pipe, &returncode, sizeof(returncode), &bytesread, NULL);
+static svc_baton* svc_create_baton(uv_loop_t* loop, const char* name, int cb_ref) {
+  svc_baton* baton = LocalAlloc(LPTR, sizeof(svc_baton));
+  baton->lua_cb_ref = cb_ref;
+  baton->name = _strdup(name);
+  uv_async_init(loop, &baton->async_handle, svchandler_cb);
+  baton->svc_end_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+  baton->block.block_end_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+  baton->next = NULL;
+  return baton;
+}
+
+static void svc_destroy_baton(lua_State* L, svc_baton* baton) {
+  luaL_unref(L, LUA_REGISTRYINDEX, baton->lua_cb_ref);
+  free(baton->name);
+  uv_close((uv_handle_t*)&baton->async_handle, NULL);
+  CloseHandle(baton->svc_end_event);
+  CloseHandle(baton->block.block_end_event);
+  LocalFree(baton);
+}
+
+static svc_baton* find_baton(const char* name)
+{
+  svc_baton* it = gBatons;
+  while (it != NULL)
+  {
+    if (strcmp(it->name, name) == 0)
+    {
+      break;
+    }
+    it = it->next;
   }
 
-  return returncode;
+  return it;
 }
+
 
 VOID WINAPI ServiceMain(_In_  DWORD dwArgc, _In_  LPTSTR *lpszArgv)
 {
-  struct svc_baton baton;
-  baton.name = lpszArgv[0];
-  baton.end_event = CreateEvent(NULL, FALSE, FALSE, baton.name);
-  baton.pipe = GetPipeHandle(baton.name);
-  baton.status_handle = RegisterServiceCtrlHandlerEx(baton.name, HandlerEx, &baton);
-  baton.dwArgc = dwArgc;
-  baton.lpszArgv = lpszArgv;
+  svc_baton *baton = find_baton(lpszArgv[0]);
+  baton->status_handle = RegisterServiceCtrlHandlerEx(baton->name, HandlerEx, &baton);
+  baton->dwArgc = dwArgc;
+  baton->lpszArgv = lpszArgv;
 
-  if (baton.status_handle == 0)
+  if (baton->status_handle == 0)
   {
     HandlerEx(SERVICE_CONTROL_USER_REGISTER_HANDLER_FAIL, 0, 0, &baton);
   }
   else
   {
     HandlerEx(SERVICE_CONTROL_USER_DISPATCHER_RUNNING, 0, 0, &baton);
-    WaitForSingleObject(baton.end_event, INFINITE);
+    WaitForSingleObject(baton->svc_end_event, INFINITE);
   }
-  CloseHandle(baton.pipe);
-  CloseHandle(baton.end_event);
+  CloseHandle(baton->svc_end_event);
 }
 
 static int lua_GetStatusHandleFromContext(lua_State *L)
 {
-  struct svc_baton* baton = lua_touserdata(L, 1);
+  svc_baton* baton = lua_touserdata(L, 1);
   lua_pushlightuserdata(L, baton->status_handle);
   return 1;
 }
 
 static int lua_EndService(lua_State *L)
 {
-  struct svc_baton* baton = lua_touserdata(L, 1);
-  SetEvent(baton->end_event);
+  svc_baton* baton = lua_touserdata(L, 1);
+  SetEvent(baton->svc_end_event);
   return 0;
-}
-
-static int lua_FormatPipeReturn(lua_State *L)
-{
-  DWORD ret = luaL_checkint(L, 1);
-  lua_pushlstring(L, (char*)&ret, sizeof(ret));
-  return 1;
-}
-
-static int lua_FormatPipeReadChunk(lua_State *L)
-{
-  size_t chunklen, blocklen;
-  const char* block = luaL_checklstring(L, 1, &blocklen);
-  const char* chunk = luaL_checklstring(L, 2, &chunklen);
-  size_t combinedlen = blocklen + chunklen;
-  char* combined = (char*)malloc(combinedlen);
-
-  memcpy(combined, block, blocklen);
-  memcpy(combined + blocklen, chunk, chunklen);
-
-  if (blocklen + chunklen >= sizeof(struct svc_handler_block))
-  {
-    struct svc_handler_block svcblock;
-    char * blockreturned;
-    size_t blockreturnedsz;
-
-    memcpy(&svcblock, combined, sizeof(svcblock));
-    blockreturned = combined + sizeof(svcblock);
-    blockreturnedsz = combinedlen - sizeof(svcblock);
-
-    // block, success, dwControl, dwEventType, lpEventData, lpContext
-    lua_pushlstring(L, blockreturned, blockreturnedsz);
-    lua_pushboolean(L, TRUE);
-    lua_pushinteger(L, svcblock.dwControl);
-    lua_pushinteger(L, svcblock.dwEventType);
-    lua_pushlightuserdata(L, svcblock.lpEventData);
-    lua_pushlightuserdata(L, svcblock.lpContext);
-    free(combined);
-    return 6;
-  }
-  else
-  {
-    lua_pushlstring(L, combined, combinedlen);
-    lua_pushboolean(L, FALSE);
-    free(combined);
-    return 2;
-  }
 }
 
 static int lua_GetServiceArgsFromContext(lua_State *L)
 {
-  struct svc_baton* baton = lua_touserdata(L, 1);
+  svc_baton* baton = lua_touserdata(L, 1);
   lua_newtable(L);
   for (unsigned int i = 0; i <= baton->dwArgc; i++) {
     lua_pushnumber(L, i + 1);   /* Push the table index */
@@ -197,46 +199,104 @@ static int lua_SetServiceStatus(lua_State *L)
   return 2;
 }
 
-DWORD StartServiceCtrlDispatcherThread(LPVOID lpdwThreadParam)
+static void svcdispatcher_end_cb(uv_handle_t* handle) {
+  svc_dispatch_info *info = (svc_dispatch_info*)handle->data;
+  lua_State* L = luv_state(handle->loop);
+
+  /* Cleanup baton linked list */
+  svc_baton *svc_baton_it = gBatons;
+  while (svc_baton_it != NULL) {
+    svc_baton *old = svc_baton_it;
+    svc_baton_it = svc_baton_it->next;
+    svc_destroy_baton(L, old);
+  }
+
+  uv_close((uv_handle_t*)&info->end_async_handle, NULL);
+  gBatons = NULL;
+
+  lua_rawgeti(L, LUA_REGISTRYINDEX, info->lua_cb_ref);
+  lua_pushboolean(L, info->return_code);
+  if (info->return_code) {
+    lua_pushnil(L);
+  }
+  else {
+    lua_pushinteger(L, info->error);
+  }
+  lua_call(L, 2, 0);
+  luaL_unref(L, LUA_REGISTRYINDEX, info->lua_cb_ref);
+
+  LocalFree(info->svc_table);
+  LocalFree(info);
+}
+
+DWORD StartServiceCtrlDispatcherThread(LPVOID lpThreadParam)
 {
-  SERVICE_TABLE_ENTRY *svc_table = (SERVICE_TABLE_ENTRY*)lpdwThreadParam;
-  return StartServiceCtrlDispatcher(svc_table);
+  svc_dispatch_info *info = (svc_dispatch_info*)lpThreadParam;
+  info->return_code = StartServiceCtrlDispatcher(info->svc_table);
+  if (!info->return_code) {
+    info->error = GetLastError();
+  }
+  info->end_async_handle.data = info;
+  uv_async_send(&info->end_async_handle);
+  return 0;
 }
 
 static int lua_SpawnServiceCtrlDispatcher(lua_State *L)
 {
-  /* Get a table */
-  BOOL ret = FALSE;
-  if (!lua_istable(L, 1))
-  {
-    return luaL_error(L, "table expected");
+  Sleep(15000);
+
+  luaL_checktype(L, 1, LUA_TTABLE);
+  luaL_checktype(L, 2, LUA_TFUNCTION);
+  if (gBatons) {
+    return luaL_error(L, "ServiceCtrlDispatcher is already running");
   }
 
-  size_t len = lua_objlen(L, 1);
-  unsigned int i = 0;
-  SERVICE_TABLE_ENTRY *svc_table = malloc(sizeof(SERVICE_TABLE_ENTRY) * (len + 1));
-  /* Convert the table to a service table */
+  /* structure allocation/setup */
+  BOOL ret = FALSE;
+  size_t len = 0;
+  svc_dispatch_info *info = LocalAlloc(LPTR, sizeof(svc_dispatch_info));
+  uv_async_init(luv_loop(L), &info->end_async_handle, svcdispatcher_end_cb);
+  svc_baton** baton_pp = &gBatons;
+
+  /* Convert the table to a service table and setup the baton table */
   lua_pushnil(L);  /* first key */
   while (lua_next(L, 1) != 0) {
     /* uses 'key' (at index -2) and 'value' (at index -1) */
     const char* name = luaL_checkstring(L, -2);
-    int svchandler = luaL_ref(L, -1);
 
-    svc_table[i].lpServiceName = (LPSTR)name;
-    svc_table[i].lpServiceProc = ServiceMain;
+    luaL_checktype(L, -1, LUA_TFUNCTION);
+    lua_pushvalue(L, -1);
+    *baton_pp = svc_create_baton(luv_loop(L), _strdup(name), luaL_ref(L, LUA_REGISTRYINDEX));
+    baton_pp = &(*baton_pp)->next;
 
-    ++i;
+    // count the entries
+    ++len;
 
     /* removes 'value'; keeps 'key' for next iteration */
     lua_pop(L, 1);
   }
 
-  svc_table[i].lpServiceName = NULL;
-  svc_table[i].lpServiceProc = NULL;
+  if (len == 0) {
+    return luaL_error(L, "Service Dispatch Table is empty");
+  }
+
+  lua_pushvalue(L, 2);
+  info->lua_cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+  /* Create Windows Service Entry Table */
+  info->svc_table = LocalAlloc(LPTR, sizeof(SERVICE_TABLE_ENTRY) * (len + 1));
+  svc_baton* baton_it = gBatons;
+  SERVICE_TABLE_ENTRY* entry_it = info->svc_table;
+  while(baton_it) {
+    entry_it->lpServiceName = baton_it->name;
+    entry_it->lpServiceProc = ServiceMain;
+    baton_it = baton_it->next;
+    ++entry_it;
+  }
 
 
   /* Start */
-  HANDLE thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&StartServiceCtrlDispatcherThread, svc_table, 0, NULL);
+  HANDLE thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&StartServiceCtrlDispatcherThread, info, 0, NULL);
   ret = thread != NULL;
 
   lua_pushboolean(L, ret);
@@ -358,8 +418,6 @@ static int lua_DeleteService(lua_State *L)
 static const luaL_Reg winsvclib[] = {
     { "GetStatusHandleFromContext", lua_GetStatusHandleFromContext },
     { "GetServiceArgsFromContext", lua_GetServiceArgsFromContext },
-    { "FormatPipeReadChunk", lua_FormatPipeReadChunk },
-    { "FormatPipeReturn", lua_FormatPipeReturn },
     { "EndService", lua_EndService },
     { "SetServiceStatus", lua_SetServiceStatus },
     { "SpawnServiceCtrlDispatcher", lua_SpawnServiceCtrlDispatcher },

@@ -199,22 +199,14 @@ end
 local DispatchTable = {}
 DispatchTable[svcname] = SvcHandler;
 
--- Need to roll this into SpawnServiceCtrlDispatch to do it for each svcname
-local svcpipe = uv.new_pipe(false)
-svcpipe:bind(svcname)
-local block
-
-svcpipe:read_start(function(err, chunk)
-  local success, dwControl, dwEventType, lpEventData, lpContext
-  block, success, dwControl, dwEventType, lpEventData, lpContext = winsvc.FormatPipeReadChunk(block, chunk)
+if not winsvc.SpawnServiceCtrlDispatcher(DispatchTable, function(success, err)
   if success then
-    ret = SvcHandler(dwControl, dwEventType, lpEventData, lpContext)
-    svcpipe:write(winsvc.FormatPipeReturn(ret))
+    print('Service ControlDispatcher returned after threads exited ok')
+  else
+    print('Service ControlDispatcher returned eith err', winsvcaux.GetErrorString(err))
   end
-end)
-
-if not winsvc.SpawnServiceCtrlDispatcher(DispatchTable) then
-  SvcReportEvent('ServiceCtrlDispatcher Succeeded')
+end) then
+  SvcReportEvent('SpawnServiceCtrlDispatcher Succeeded')
 end
 
 uv.run('default')
