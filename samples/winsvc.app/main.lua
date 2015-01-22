@@ -4,7 +4,8 @@ local uv = require('uv')
 
 local svcname = 'Test Lua Service'
 local gSvcStatus = {}
-local gServiceStatusHandle
+local gSvcStatusHandle
+local gRunning = true
 
 local function ReportSvcStatus(dwCurrentState, dwWin32ExitCode, dwWaitHint)
   local dwCheckPoint = 1
@@ -37,11 +38,7 @@ end
 local function SvcHandler(dwControl, dwEventType, lpEventData, lpContext)
   -- Handle the requested control code. 
 
-  if dwControl == winsvc.SERVICE_CONTROL_USER_DISPATCHER_RUNNING then
-    gServiceStatusHandle = winsvc.GetStatusHandleFrmContext(lpContext)
-    ServiceMain(winsvc.GetArgsFromContext(lpContext), lpContext)
-    return winsvc.NO_ERROR
-  elseif dwControl == winsvc.SERVICE_CONTROL_STOP then 
+  if dwControl == winsvc.SERVICE_CONTROL_STOP then 
     ReportSvcStatus(winsvc.SERVICE_STOP_PENDING, winsvc.NO_ERROR, 0)
 
     -- Signal the service to stop.
@@ -79,7 +76,7 @@ local function SvcInit(args, context)
   local timer = uv.new_timer()
   uv.timer_start(timer, 1000, 0, function()
     if gRunning then
-      uv.time_set_repeat(timer, 1000)
+      uv.timer_set_repeat(timer, 1000)
     else
       uv.timer_stop(timer)
       ReportSvcStatus(winsvc.SERVICE_STOPPED, winsvc.NO_ERROR, 0);
@@ -90,6 +87,7 @@ end
 
 
 local function SvcMain(args, context)
+  gSvcStatusHandle = winsvc.GetStatusHandleFromContext(context)
   -- These SERVICE_STATUS members remain as set here
 
   gSvcStatus.dwServiceType = winsvc.SERVICE_WIN32_OWN_PROCESS
@@ -197,7 +195,7 @@ elseif args[1] == 'delete' then
 end
 
 local DispatchTable = {}
-DispatchTable[svcname] = SvcHandler;
+DispatchTable[svcname] = { SvcMain, SvcHandler };
 
 if not winsvc.SpawnServiceCtrlDispatcher(DispatchTable, function(success, err)
   if success then
