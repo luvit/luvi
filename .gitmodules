@@ -13,3 +13,6 @@
 [submodule "deps/lua-zlib"]
 	path = deps/lua-zlib
 	url = https://github.com/brimworks/lua-zlib.git
+[submodule "deps/lua-sqlite"]
+	path = deps/lua-sqlite
+	url = https://github.com/silentbicycle/lua-sqlite.git

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.9)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 project(luvi C)
 
 exec_program(
@@ -12,6 +14,8 @@ option(WithOpenSSL "Include OpenSSL" OFF)
 option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
 option(WithZLIB "Include ZLIB" OFF)
 option(WithSharedZLIB "Shared or Static ZLIB" ON)
+option(WithSqlite "Include Sqlite" OFF)
+option(WithSharedSqlite "Shared or Static Sqlite" ON)
 
 include(deps/luv/luajit.cmake)
 include(deps/luv/uv.cmake)
@@ -23,6 +27,10 @@ endif (WithOpenSSL)
 if (WithZLIB)
   include(deps/zlib.cmake)
 endif (WithZLIB)
+
+if (WithSqlite)
+  include(deps/sqlite.cmake)
+endif (WithSqlite)
 
 add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 

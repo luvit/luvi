@@ -26,6 +26,9 @@
 #ifdef WITH_ZLIB
 LUALIB_API int luaopen_zlib(lua_State * const L);
 #endif
+#ifdef WITH_SQLITE
+LUALIB_API int luaopen_sqlite(lua_State * const L);
+#endif
 
 int main(int argc, char* argv[] ) {
 
@@ -75,6 +78,11 @@ int main(int argc, char* argv[] ) {
   // Store luvi module definition at preload.openssl
   lua_pushcfunction(L, luaopen_zlib);
   lua_setfield(L, -2, "zlib");
+#endif
+
+#ifdef WITH_SQLITE
+  lua_pushcfunction(L, luaopen_sqlite);
+  lua_setfield(L, -2, "sqlite");
 #endif
 
   // Load the init.lua script
