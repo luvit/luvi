@@ -29,11 +29,11 @@ tiny: luv/CMakeLists.txt
 
 # Configure the build with everything, use shared libs when possible
 large: luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithZLIB=ON -DWithSqlite=ON
+	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithZLIB=ON -DWithSqlite=ON -DWithCjson=ON
 
 # Configure the build with everything, but statically link the deps
 static: luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -DWithSqlite=ON -DWithSharedSqlite=OFF
+	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -DWithSqlite=ON -DWithSharedSqlite=OFF -DWithCjson=ON
 
 # In case the user forgot to pull in submodules, grab them.
 luv/CMakeLists.txt:

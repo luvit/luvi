@@ -16,6 +16,7 @@ option(WithZLIB "Include ZLIB" OFF)
 option(WithSharedZLIB "Shared or Static ZLIB" ON)
 option(WithSqlite "Include Sqlite" OFF)
 option(WithSharedSqlite "Shared or Static Sqlite" ON)
+option(WithCjson "Include Cjson" OFF)
 
 include(deps/luv/luajit.cmake)
 include(deps/luv/uv.cmake)
@@ -31,6 +32,10 @@ endif (WithZLIB)
 if (WithSqlite)
   include(deps/sqlite.cmake)
 endif (WithSqlite)
+
+if (WithCjson)
+  include(deps/lua-cjson.cmake)
+endif (WithCjson)
 
 add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 

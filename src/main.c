@@ -29,6 +29,9 @@ LUALIB_API int luaopen_zlib(lua_State * const L);
 #ifdef WITH_SQLITE
 LUALIB_API int luaopen_sqlite(lua_State * const L);
 #endif
+#ifdef WITH_CJSON
+LUALIB_API int luaopen_cjson(lua_State * const L);
+#endif
 
 int main(int argc, char* argv[] ) {
 
@@ -83,6 +86,11 @@ int main(int argc, char* argv[] ) {
 #ifdef WITH_SQLITE
   lua_pushcfunction(L, luaopen_sqlite);
   lua_setfield(L, -2, "sqlite");
+#endif
+
+#ifdef WITH_CJSON
+  lua_pushcfunction(L, luaopen_cjson);
+  lua_setfield(L, -2, "cjson");
 #endif
 
   // Load the init.lua script

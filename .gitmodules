@@ -16,3 +16,6 @@
 [submodule "deps/lua-sqlite"]
 	path = deps/lua-sqlite
 	url = https://github.com/silentbicycle/lua-sqlite.git
+[submodule "deps/lua-cjson"]
+	path = deps/lua-cjson
+	url = https://github.com/mpx/lua-cjson/
