@@ -74,9 +74,9 @@ local function SvcInit(args, context)
   -- TO_DO: Setup Serive Work To Be done
   
   local timer = uv.new_timer()
-  uv.timer_start(timer, 1000, 0, function()
+  uv.timer_start(timer, 0, 1000, function()
     if gRunning then
-      uv.timer_set_repeat(timer, 1000)
+      uv.timer_again(timer)
     else
       uv.timer_stop(timer)
       ReportSvcStatus(winsvc.SERVICE_STOPPED, winsvc.NO_ERROR, 0);
