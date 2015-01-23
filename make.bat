@@ -6,7 +6,7 @@ GOTO :tiny
 
 :large
 ECHO "Building large"
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -DWithSqlite=ON -DWithSharedSqlite=OFF -DWithCjson=ON -H. -Bbuild
 GOTO :build
 
 :tiny
@@ -43,7 +43,7 @@ cmake -H. -Bbuild -G"Visual Studio 12 2013 Win64"
 CALL make.bat test
 COPY build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe
 CALL make.bat clean
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild -G"Visual Studio 12 2013 Win64"
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -DWithSqlite=ON -DWithSharedSqlite=OFF -DWithCjson=ON -H. -Bbuild -G"Visual Studio 12 2013 Win64"
 CALL make.bat test
 COPY build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
 CD luvi-binaries
