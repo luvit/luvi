@@ -79,19 +79,27 @@ DWORD WINAPI HandlerEx(_In_  DWORD dwControl, _In_  DWORD dwEventType, _In_  LPV
 static void svchandler_cb(uv_async_t* handle) {
   lua_State* L = luv_state(handle->loop);
   svc_baton* baton = handle->data;
+  lua_pushstring(L, "winsvc_error_cb");
+  lua_gettable(L, LUA_REGISTRYINDEX);
   lua_rawgeti(L, LUA_REGISTRYINDEX, baton->block.lua_cb_ref);
   lua_pushinteger(L, baton->block.dwControl);
   lua_pushinteger(L, baton->block.dwEventType);
   lua_pushlightuserdata(L, baton->block.lpEventData);
   lua_pushlightuserdata(L, baton->block.lpContext);
-  lua_call(L, 4, 1);
-  baton->block.return_code = luaL_checkint(L, -1);
+  if (lua_pcall(L, 4, 1, -6) == 0) {
+    baton->block.return_code = luaL_checkint(L, -1);
+  }
+  else {
+    baton->block.return_code = ERROR;
+  }
   SetEvent(baton->block.block_end_event);
 }
 
 static void svcmain_cb(uv_async_t* handle) {
   lua_State* L = luv_state(handle->loop);
   svc_baton* baton = handle->data;
+  lua_pushstring(L, "winsvc_error_cb");
+  lua_gettable(L, LUA_REGISTRYINDEX);
   lua_rawgeti(L, LUA_REGISTRYINDEX, baton->lua_main_ref);
   lua_newtable(L);
   for (unsigned int i = 0; i < baton->dwArgc; i++) {
@@ -100,7 +108,7 @@ static void svcmain_cb(uv_async_t* handle) {
     lua_rawset(L, -3);      /* Stores the pair in the table */
   }
   lua_pushlightuserdata(L, baton);
-  lua_call(L, 2, 0);
+  lua_pcall(L, 2, 0, -4);
 }
 
 static svc_baton* svc_create_baton(uv_loop_t* loop, const char* name, int main_ref, int cb_ref) {
@@ -235,6 +243,7 @@ DWORD StartServiceCtrlDispatcherThread(LPVOID lpThreadParam) {
 static int lua_SpawnServiceCtrlDispatcher(lua_State *L) {
   luaL_checktype(L, 1, LUA_TTABLE);
   luaL_checktype(L, 2, LUA_TFUNCTION);
+  luaL_checktype(L, 3, LUA_TFUNCTION);
   if (gBatons) {
     return luaL_error(L, "ServiceCtrlDispatcher is already running");
   }
@@ -282,6 +291,11 @@ static int lua_SpawnServiceCtrlDispatcher(lua_State *L) {
 
   lua_pushvalue(L, 2);
   info->lua_cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+  /* store the error cb in the registry */
+  lua_pushstring(L, "winsvc_error_cb");
+  lua_pushvalue(L, 3);
+  lua_settable(L, LUA_REGISTRYINDEX);
 
   /* Create Windows Service Entry Table */
   info->svc_table = LocalAlloc(LPTR, sizeof(SERVICE_TABLE_ENTRY) * (len + 1));

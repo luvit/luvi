@@ -16,6 +16,7 @@ limitations under the License.
 
 --]]
 
+local table = require('table')
 local winsvc = require('winsvc')
 local winsvcaux = require('winsvcaux')
 local uv = require('uv')
@@ -73,8 +74,24 @@ local function SvcHandler(dwControl, dwEventType, lpEventData, lpContext)
 end
 
 
-local function SvcReportEvent(msg)
+local function SvcReportEvent(...)
   -- Log that somewhere
+  local args = {...}
+  local s
+  if type(args) == 'string' then
+    s = args
+  else
+    s = table.concat(args, ' ')
+  end
+  print(s)
+  s = s .. '\n'
+  uv.fs_open('logfile.txt', 'a', tonumber('644', 8), function(err, fd)
+    if not err then
+      uv.fs_write(fd, s, -1, function()
+        uv.fs_close(fd)
+      end)
+    end
+  end)
 end
 
 
@@ -92,8 +109,9 @@ local function SvcInit(args, context)
   -- TO_DO: Setup Serive Work To Be done
   
   local timer = uv.new_timer()
-  uv.timer_start(timer, 0, 1000, function()
+  uv.timer_start(timer, 0, 2000, function()
     if gRunning then
+      SvcReportEvent('Just waiting...')
       uv.timer_again(timer)
     else
       uv.timer_stop(timer)
@@ -125,14 +143,14 @@ end
 local function SvcInstall()
   local svcPath, err = winsvcaux.GetModuleFileName()
   if svcPath == nil then
-    print('Cannot install service, service path unobtainable', winsvcaux.GetErrorString(err))
+    SvcReportEvent('Cannot install service, service path unobtainable', winsvcaux.GetErrorString(err))
     return
   end
 
   -- Get a handle to the SCM database
   local schSCManager, err = winsvc.OpenSCManager(nil, nil, winsvc.SC_MANAGER_ALL_ACCESS)
   if schSCManager == nil then
-    print('OpenSCManager failed', winsvcaux.GetErrorString(err))
+    SvcReportEvent('OpenSCManager failed', winsvcaux.GetErrorString(err))
     return
   end
 
@@ -152,12 +170,12 @@ local function SvcInstall()
     nil)
 
   if schService == nil then
-    print('CreateService failed', winsvcaux.GetErrorString(err))
+    SvcReportEvent('CreateService failed', winsvcaux.GetErrorString(err))
     winsvc.CloseServiceHandle(schSCManager)
     return
   end
 
-  print('Service installed successfully')
+  SvcReportEvent('Service installed successfully')
 
   winsvc.CloseServiceHandle(schService)
   winsvc.CloseServiceHandle(schSCManager)
@@ -169,7 +187,7 @@ local function SvcDelete()
   -- Get a handle to the SCM database
   local schSCManager, err = winsvc.OpenSCManager(nil, nil, winsvc.SC_MANAGER_ALL_ACCESS)
   if schSCManager == nil then
-    print('OpenSCManager failed', winsvcaux.GetErrorString(err))
+    SvcReportEvent('OpenSCManager failed', winsvcaux.GetErrorString(err))
     return
   end
 
@@ -180,7 +198,7 @@ local function SvcDelete()
     winsvc.DELETE)
 
   if schService == nil then
-    print('OpenService failed', winsvcaux.GetErrorString(err))
+    SvcReportEvent('OpenService failed', winsvcaux.GetErrorString(err))
     winsvc.CloseServiceHandle(schSCManager)
     return
   end
@@ -193,9 +211,9 @@ local function SvcDelete()
 
   local delsuccess, err = winsvc.DeleteService(schService)
   if not delsuccess then
-    print('DeleteService failed', winsvcaux.GetErrorString(err))
+    SvcReportEvent('DeleteService failed', winsvcaux.GetErrorString(err))
   else
-    print('DeleteService succeeded')
+    SvcReportEvent('DeleteService succeeded')
   end
 
   winsvc.CloseServiceHandle(schService)
@@ -218,10 +236,12 @@ DispatchTable[svcname] = { SvcMain, SvcHandler };
 
 if not winsvc.SpawnServiceCtrlDispatcher(DispatchTable, function(success, err)
   if success then
-    print('Service ControlDispatcher returned after threads exited ok')
+    SvcReportEvent('Service Control Dispatcher returned after threads exited ok')
   else
-    print('Service ControlDispatcher returned eith err', winsvcaux.GetErrorString(err))
+    SvcReportEvent('Service Control Dispatcher returned with err', winsvcaux.GetErrorString(err))
   end
+end, function(err)
+  SvcReportEvent('A Service function returned with err', err)
 end) then
   SvcReportEvent('SpawnServiceCtrlDispatcher Succeeded')
 end
