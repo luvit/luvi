@@ -85,13 +85,12 @@ local function SvcReportEvent(...)
   end
   print(s)
   s = s .. '\n'
-  uv.fs_open('logfile.txt', 'a', tonumber('644', 8), function(err, fd)
-    if not err then
-      uv.fs_write(fd, s, -1, function()
-        uv.fs_close(fd)
-      end)
-    end
-  end)
+  -- synchronous file i/o for the logging so it can work even outside the event loop
+  local fd, err = uv.fs_open('logfile.txt', 'a', tonumber('644', 8))
+  if not err then
+    uv.fs_write(fd, s, -1)
+    uv.fs_close(fd)
+  end
 end
 
 
@@ -234,7 +233,7 @@ end
 local DispatchTable = {}
 DispatchTable[svcname] = { SvcMain, SvcHandler };
 
-if not winsvc.SpawnServiceCtrlDispatcher(DispatchTable, function(success, err)
+local ret, err = winsvc.SpawnServiceCtrlDispatcher(DispatchTable, function(success, err)
   if success then
     SvcReportEvent('Service Control Dispatcher returned after threads exited ok')
   else
@@ -242,8 +241,12 @@ if not winsvc.SpawnServiceCtrlDispatcher(DispatchTable, function(success, err)
   end
 end, function(err)
   SvcReportEvent('A Service function returned with err', err)
-end) then
+end)
+
+if ret then
   SvcReportEvent('SpawnServiceCtrlDispatcher Succeeded')
+else
+  SvcReportEvent('SpawnServiceCtrlDispatcher Failed', winsvcaux.GetErrorString(err))
 end
 
 uv.run('default')
