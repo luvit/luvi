@@ -26,7 +26,13 @@ endif (WithZLIB)
 
 add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 
+if(MSVC)
+  set(winsvc src/winsvc.h src/winsvcaux.h src/winsvc.c src/winsvcaux.c)
+  add_definitions(-DWITH_WINSVC)
+endif()
+
 luajit_add_executable(luvi
+  ${winsvc}
   src/main.c
   src/lua/init.lua
 )
