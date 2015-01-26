@@ -202,12 +202,6 @@ local function SvcDelete()
     return
   end
 
-  -- Delete the Service
-  local schService = winsvc.OpenService(
-    schSCManager,
-    svcname,
-    winsvc.DELETE)
-
   local delsuccess, err = winsvc.DeleteService(schService)
   if not delsuccess then
     SvcReportEvent('DeleteService failed', winsvcaux.GetErrorString(err))
@@ -221,12 +215,93 @@ local function SvcDelete()
 end
 
 
+
+local function SvcStart()
+  -- Get a handle to the SCM database
+  local schSCManager, err = winsvc.OpenSCManager(nil, nil, winsvc.SC_MANAGER_ALL_ACCESS)
+  if schSCManager == nil then
+    SvcReportEvent('OpenSCManager failed', winsvcaux.GetErrorString(err))
+    return
+  end
+
+  -- Open the Service
+  local schService, err = winsvc.OpenService(
+    schSCManager,
+    svcname,
+    winsvc.SERVICE_START)
+
+  if schService == nil then
+    SvcReportEvent('OpenService failed', winsvcaux.GetErrorString(err))
+    winsvc.CloseServiceHandle(schSCManager)
+    return
+  end
+
+  local startsuccess, err = winsvc.StartService(schService, nil)
+  if not startsuccess then
+    SvcReportEvent('StartService failed', winsvcaux.GetErrorString(err))
+  else
+    SvcReportEvent('StartService succeeded')
+  end
+
+  winsvc.CloseServiceHandle(schService)
+  winsvc.CloseServiceHandle(schSCManager)
+
+end
+
+
+
+local function SvcStop()
+  -- Get a handle to the SCM database
+  local schSCManager, err = winsvc.OpenSCManager(nil, nil, winsvc.SC_MANAGER_ALL_ACCESS)
+  if schSCManager == nil then
+    SvcReportEvent('OpenSCManager failed', winsvcaux.GetErrorString(err))
+    return
+  end
+
+  -- Open the Service
+  local schService, err = winsvc.OpenService(
+    schSCManager,
+    svcname,
+    winsvc.SERVICE_STOP)
+
+  if schService == nil then
+    SvcReportEvent('OpenService failed', winsvcaux.GetErrorString(err))
+    winsvc.CloseServiceHandle(schSCManager)
+    return
+  end
+
+  -- Stop the Service
+  local success, status, err = winsvc.ControlService(schService, winsvc.SERVICE_CONTROL_STOP, nil)
+  if not success then
+    SvcReportEvent('ControlService stop failed', winsvcaux.GetErrorString(err))
+  else
+    local i, v, fstatus
+    fstatus = {}
+    for i, v in pairs(status) do
+      table.insert(fstatus, i .. ': ' .. v)
+    end
+    SvcReportEvent('ControlService stop succeeded, status:', table.concat(fstatus, ', '))
+  end
+
+  winsvc.CloseServiceHandle(schService)
+  winsvc.CloseServiceHandle(schSCManager)
+
+end
+
+
+
 -- Main Code
 if args[1] == 'install' then
   SvcInstall()
   return
 elseif args[1] == 'delete' then
   SvcDelete()
+  return
+elseif args[1] == 'start' then
+  SvcStart()
+  return
+elseif args[1] == 'stop' then
+  SvcStop()
   return
 end
 

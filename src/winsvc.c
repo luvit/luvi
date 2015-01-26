@@ -172,28 +172,116 @@ static int lua_EndService(lua_State *L) {
   return 0;
 }
 
-static int lua_SetServiceStatus(lua_State *L) {
-  SERVICE_STATUS status;
-  SERVICE_STATUS_HANDLE SvcCtrlHandler = lua_touserdata(L, 1);
-  if (!lua_istable(L, 2)) {
+static int table_to_ServiceStatus(lua_State *L, SERVICE_STATUS *status) {
+  memset(status, 0, sizeof(SERVICE_STATUS));
+  if (lua_isnil(L, -1)) {
+    return 0;
+  }
+  if (!lua_istable(L, -1)) {
     return luaL_error(L, "table expected");
   }
 
-  status.dwCheckPoint = GetDWFromTable(L, "dwCheckPoint");
-  status.dwControlsAccepted = GetDWFromTable(L, "dwControlsAccepted");
-  status.dwCurrentState = GetDWFromTable(L, "dwCurrentState");
-  status.dwServiceSpecificExitCode = GetDWFromTable(L, "dwServiceSpecificExitCode");
-  status.dwServiceType = GetDWFromTable(L, "dwServiceType");
-  status.dwWaitHint = GetDWFromTable(L, "dwWaitHint");
-  status.dwWin32ExitCode = GetDWFromTable(L, "dwWin32ExitCode");
+  status->dwCheckPoint = GetDWFromTable(L, "dwCheckPoint");
+  status->dwControlsAccepted = GetDWFromTable(L, "dwControlsAccepted");
+  status->dwCurrentState = GetDWFromTable(L, "dwCurrentState");
+  status->dwServiceSpecificExitCode = GetDWFromTable(L, "dwServiceSpecificExitCode");
+  status->dwServiceType = GetDWFromTable(L, "dwServiceType");
+  status->dwWaitHint = GetDWFromTable(L, "dwWaitHint");
+  status->dwWin32ExitCode = GetDWFromTable(L, "dwWin32ExitCode");
 
-  BOOL ret = SetServiceStatus(SvcCtrlHandler, (LPSERVICE_STATUS)&status);
-  if (ret) {
-    lua_pushboolean(L, ret);
+  return 0;
+}
+
+static void ServiceStatus_to_table(lua_State *L, SERVICE_STATUS *status) {
+  lua_newtable(L);
+  lua_pushstring(L, "dwCheckPoint");
+  lua_pushinteger(L, status->dwCheckPoint);
+  lua_settable(L, -3);
+  lua_pushstring(L, "dwControlsAccepted");
+  lua_pushinteger(L, status->dwControlsAccepted);
+  lua_settable(L, -3);
+  lua_pushstring(L, "dwCurrentState");
+  lua_pushinteger(L, status->dwCurrentState);
+  lua_settable(L, -3);
+  lua_pushstring(L, "dwServiceSpecificExitCode");
+  lua_pushinteger(L, status->dwServiceSpecificExitCode);
+  lua_settable(L, -3);
+  lua_pushstring(L, "dwServiceType");
+  lua_pushinteger(L, status->dwServiceType);
+  lua_settable(L, -3);
+  lua_pushstring(L, "dwWaitHint");
+  lua_pushinteger(L, status->dwWaitHint);
+  lua_settable(L, -3);
+  lua_pushstring(L, "dwWin32ExitCode");
+  lua_pushinteger(L, status->dwWin32ExitCode);
+  lua_settable(L, -3);
+}
+
+static int lua_SetServiceStatus(lua_State *L) {
+  SERVICE_STATUS status;
+  SERVICE_STATUS_HANDLE SvcStatusHandler = lua_touserdata(L, 1);
+  int ret = table_to_ServiceStatus(L, &status);
+  if (ret != 0) {
+    return ret;
+  }
+
+  BOOL set = SetServiceStatus(SvcStatusHandler, (LPSERVICE_STATUS)&status);
+  lua_pushboolean(L, set);
+  if (set) {
     lua_pushnil(L);
   }
   else {
+    lua_pushinteger(L, GetLastError());
+  }
+  return 3;
+}
+
+static int lua_ControlService(lua_State *L) {
+  SERVICE_STATUS status;
+  SC_HANDLE SvcCtrlHandler = lua_touserdata(L, 1);
+  DWORD dwControl = luaL_checkint(L, 2);
+
+  BOOL set = ControlService(SvcCtrlHandler, dwControl, (LPSERVICE_STATUS)&status);
+  lua_pushboolean(L, set);
+  ServiceStatus_to_table(L, &status);
+  if (set) {
     lua_pushnil(L);
+  }
+  else {
+    lua_pushinteger(L, GetLastError());
+  }
+  return 3;
+}
+
+static int lua_StartService(lua_State *L) {
+  SC_HANDLE SvcCtrlHandler = lua_touserdata(L, 1);
+  size_t numargs = 0;
+  LPCSTR *args = NULL;
+  if (!(lua_isnil(L, 2) || lua_istable(L, 2))) {
+    return luaL_error(L, "table (array) or nil expected");
+  }
+
+  if (lua_istable(L, 2)) {
+    lua_pushnil(L);
+    numargs = lua_rawlen(L, 2);
+    if (numargs) {
+      args = LocalAlloc(LPTR, sizeof(LPCSTR) * numargs);
+    }
+    size_t i = 0;
+    while (lua_next(L, 2)) {
+      /* uses 'key' (at index -2) and 'value' (at index -1) */
+      args[i] = luaL_checkstring(L, -1);
+      i++;
+    }
+    lua_pop(L, 2);
+  }
+
+  BOOL set = StartService(SvcCtrlHandler, numargs, args);
+  lua_pushboolean(L, set);
+  if (set) {
+    lua_pushnil(L);
+  }
+  else {
     lua_pushinteger(L, GetLastError());
   }
   return 2;
@@ -423,6 +511,8 @@ static const luaL_Reg winsvclib[] = {
     { "CreateService", lua_CreateService },
     { "OpenService", lua_OpenService },
     { "DeleteService", lua_DeleteService },
+    { "StartService", lua_StartService },
+    { "ControlService", lua_ControlService },
     { NULL, NULL }
 };
 
