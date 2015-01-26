@@ -39,9 +39,9 @@ static int lua_GetModuleFileName(lua_State *L)
 static int lua_GetErrorString(lua_State *L)
 {
   DWORD err = luaL_checkint(L, 1);
-  LPTSTR lpMsgBuf;
+  LPTSTR lpMsgBuf = NULL;
 
-  FormatMessage(
+  DWORD len = FormatMessage(
     FORMAT_MESSAGE_ALLOCATE_BUFFER |
     FORMAT_MESSAGE_FROM_SYSTEM |
     FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -51,9 +51,20 @@ static int lua_GetErrorString(lua_State *L)
     (LPTSTR)&lpMsgBuf,
     0, NULL);
 
-  lua_pushstring(L, lpMsgBuf);
-  LocalFree(lpMsgBuf);
-  return 1;
+  if (len) {
+      if (len > 2) {
+          // strip \r\n
+          lpMsgBuf[len - 2] = '\0';
+      }
+      lua_pushstring(L, lpMsgBuf);
+      lua_pushnil(L);
+      LocalFree(lpMsgBuf);
+  }
+  else {
+      lua_pushstring(L, "");
+      lua_pushinteger(L, GetLastError());
+  }
+  return 2;
 }
 
 static const luaL_Reg winsvcauxlib[] = {
