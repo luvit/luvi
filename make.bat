@@ -59,10 +59,12 @@ ECHO "Building all versions"
 git submodule update --init --recursive
 CALL make.bat clean
 cmake -H. -Bbuild -G"Visual Studio 12 2013 Win64"
+CALL make.bat build
 CALL make.bat test
 COPY build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe
 CALL make.bat clean
 cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild -G"Visual Studio 12 2013 Win64"
+CALL make.bat build
 CALL make.bat test
 COPY build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
 CD luvi-binaries
