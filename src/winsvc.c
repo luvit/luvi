@@ -54,12 +54,21 @@ typedef struct _svc_baton {
 /* linked list of batons */
 svc_baton* gBatons = NULL;
 
-static DWORD GetDWFromTable(lua_State *L, const char* name) {
-  DWORD result;
+static int GetIntFromTable(lua_State *L, const char* name) {
+  int result;
   lua_pushstring(L, name);
   lua_gettable(L, -2);  /* get table[key] */
-  result = (int)lua_tonumber(L, -1);
+  result = (int)lua_tointeger(L, -1);
   lua_pop(L, 1);  /* remove number */
+  return result;
+}
+
+static const char* GetStringFromTable(lua_State *L, const char* name) {
+  const char* result;
+  lua_pushstring(L, name);
+  lua_gettable(L, -2);  /* get table[key] */
+  result = lua_tostring(L, -1);
+  lua_pop(L, 1);  /* remove string */
   return result;
 }
 
@@ -181,13 +190,13 @@ static int table_to_ServiceStatus(lua_State *L, SERVICE_STATUS *status) {
     return luaL_error(L, "table expected");
   }
 
-  status->dwCheckPoint = GetDWFromTable(L, "dwCheckPoint");
-  status->dwControlsAccepted = GetDWFromTable(L, "dwControlsAccepted");
-  status->dwCurrentState = GetDWFromTable(L, "dwCurrentState");
-  status->dwServiceSpecificExitCode = GetDWFromTable(L, "dwServiceSpecificExitCode");
-  status->dwServiceType = GetDWFromTable(L, "dwServiceType");
-  status->dwWaitHint = GetDWFromTable(L, "dwWaitHint");
-  status->dwWin32ExitCode = GetDWFromTable(L, "dwWin32ExitCode");
+  status->dwCheckPoint = GetIntFromTable(L, "dwCheckPoint");
+  status->dwControlsAccepted = GetIntFromTable(L, "dwControlsAccepted");
+  status->dwCurrentState = GetIntFromTable(L, "dwCurrentState");
+  status->dwServiceSpecificExitCode = GetIntFromTable(L, "dwServiceSpecificExitCode");
+  status->dwServiceType = GetIntFromTable(L, "dwServiceType");
+  status->dwWaitHint = GetIntFromTable(L, "dwWaitHint");
+  status->dwWin32ExitCode = GetIntFromTable(L, "dwWin32ExitCode");
 
   return 0;
 }
@@ -276,7 +285,7 @@ static int lua_StartService(lua_State *L) {
     lua_pop(L, 2);
   }
 
-  BOOL set = StartService(SvcCtrlHandler, numargs, args);
+  BOOL set = StartService(SvcCtrlHandler, (DWORD)numargs, args);
   lua_pushboolean(L, set);
   if (set) {
     lua_pushnil(L);
@@ -501,6 +510,64 @@ static int lua_DeleteService(lua_State *L) {
   return 2;
 }
 
+static int lua_ChangeServiceConfig2(lua_State *L) {
+  SC_HANDLE h = lua_touserdata(L, 1);
+  DWORD dwInfoLevel = luaL_checkint(L, 2);
+  union {
+    SERVICE_DELAYED_AUTO_START_INFO autostart;
+    SERVICE_DESCRIPTION description;
+    struct {
+      SERVICE_FAILURE_ACTIONS failure_actions;
+      SC_ACTION actions_array[3];
+    };
+  } info, *infop = &info;
+  memset(infop, 0, sizeof(info));
+  luaL_checktype(L, 3, LUA_TTABLE);
+
+  switch (dwInfoLevel)
+  {
+  case SERVICE_CONFIG_DELAYED_AUTO_START_INFO:
+    info.autostart.fDelayedAutostart = GetIntFromTable(L, "fDelayedAutostart");
+    break;
+  case SERVICE_CONFIG_DESCRIPTION:
+    info.description.lpDescription = GetStringFromTable(L, "lpDescription");
+    break;
+  case SERVICE_CONFIG_FAILURE_ACTIONS:
+    info.failure_actions.dwResetPeriod = GetIntFromTable(L, "dwResetPeriod");
+    info.failure_actions.lpRebootMsg = GetStringFromTable(L, "lpRebootMsg");
+    lua_pushstring(L, "lpsaActions");
+    lua_gettable(L, -2);
+    if (lua_type(L, -1) == LUA_TTABLE) {
+      lua_pushnil(L);
+      int i = 0;
+      while (i < 3 && lua_next(L, -2)) {
+        /* uses 'key' (at index -2) and 'value' (at index -1) */
+        luaL_checktype(L, -1, LUA_TTABLE);
+        info.actions_array[i].Delay = GetIntFromTable(L, "Delay");
+        info.actions_array[i].Type = GetIntFromTable(L, "Type");
+        lua_pop(L, 1);
+        ++i;
+      }
+      info.failure_actions.cActions = i;
+      lua_pop(L, 1);
+      info.failure_actions.lpsaActions = info.actions_array;
+    }
+    break;
+  default:
+    infop = NULL;
+    break;
+  }
+  BOOL ret = ChangeServiceConfig2(h, dwInfoLevel, infop);
+  lua_pushboolean(L, ret);
+  if (ret) {
+    lua_pushnil(L);
+  }
+  else {
+    lua_pushinteger(L, GetLastError());
+  }
+  return 2;
+}
+
 static const luaL_Reg winsvclib[] = {
     { "GetStatusHandleFromContext", lua_GetStatusHandleFromContext },
     { "EndService", lua_EndService },
@@ -513,6 +580,7 @@ static const luaL_Reg winsvclib[] = {
     { "DeleteService", lua_DeleteService },
     { "StartService", lua_StartService },
     { "ControlService", lua_ControlService },
+    { "ChangeServiceConfig2", lua_ChangeServiceConfig2 },
     { NULL, NULL }
 };
 
@@ -735,6 +803,14 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
   SETINT(SERVICE_LAUNCH_PROTECTED_WINDOWS);
   SETINT(SERVICE_LAUNCH_PROTECTED_WINDOWS_LIGHT);
   SETINT(SERVICE_LAUNCH_PROTECTED_ANTIMALWARE_LIGHT);
+
+  SETINT(SERVICE_TRIGGER_ACTION_SERVICE_START);
+  SETINT(SERVICE_TRIGGER_ACTION_SERVICE_STOP);
+
+  SETINT(SC_ACTION_NONE);
+  SETINT(SC_ACTION_RESTART);
+  SETINT(SC_ACTION_REBOOT);
+  SETINT(SC_ACTION_RUN_COMMAND);
 
   return 1;
 }
