@@ -2,6 +2,40 @@
 
 High-level changes between release versions.
 
+## v0.6.0
+
+ - luajit: Update to v2.0.3 [Tim Caswell]
+ - libuv: Update to v1.2.1 [Tim Caswell]
+ - openssl: Update to 1.0.1l [Ryan Phillips]
+ - luv: Expose `lua_State` and `uv_loop` for luv extensions. [Rob Emanuele]
+ - luv: fix spawn invalid command. [Ryan Phillips]
+ - windows: Support for Windows Services [Rob Emanuele]
+
+Windows Service support features:
+
+ * Complete Windows services can be written in Luvi, example:
+   https://github.com/luvit/luvi/blob/master/samples/winsvc.app/main.lua.
+
+ * The service API closely mimics the Windows API to provide easy understanding
+   of writing a service in Luvi.
+
+ * Services can be written in their own process or a shared process.
+
+ * Each service runs its own main function.
+
+ * Each service has its own callback for handling service control.
+
+ * Service control functions are provided for Creating, Deleting, Starting, and
+   other control operations.
+
+ * Extended Service configuration is provided by ChangeServiceConfig2 (service
+   triggers are currently unsupported).
+
+Internally the Windows service threads feed callbacks and control operations to
+Luv.  Each service thread internally calls RegisterServiceCtrlHandlerEx as that
+much be done within the context of the calling service's thread and the control
+operations passed to that handler are passed to the user defined Lua handler.
+
 ## v0.5.7
 
  - lua: Fix handle leak for invalid commands [Ryan Phillips]
