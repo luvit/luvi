@@ -174,6 +174,14 @@ local function SvcInstall()
     return
   end
 
+  -- Describe the service
+  winsvc.ChangeServiceConfig2(schService, winsvc.SERVICE_CONFIG_DESCRIPTION, {lpDescription = "This is a test service written in Luvi/Lua"})
+  -- Set the service to restart on failure in 15 seconds
+  winsvc.ChangeServiceConfig2(schService, winsvc.SERVICE_CONFIG_FAILURE_ACTIONS,
+    {dwResetPeriod = 0, lpsaActions = {
+      {Delay = 15000, Type = winsvc.SC_ACTION_RESTART}
+    }})
+
   SvcReportEvent('Service installed successfully')
 
   winsvc.CloseServiceHandle(schService)
