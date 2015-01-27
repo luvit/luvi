@@ -3,7 +3,9 @@ BIN_ROOT=luvi-binaries/$(shell uname -s)_$(shell uname -m)
 NPROCS:=1
 OS:=$(shell uname -s)
 
-CMAKE_FLAGS+= -H. -Bbuild
+_PWD:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+
+CMAKE_FLAGS+= -H. -Bbuild -D"CMAKE_C_FLAGS=-I$(_PWD)/src --include glibc-compat-symbols.h -U_FORTIFY_SOURCE -pthread"
 ifdef GENERATOR
 	CMAKE_FLAGS+= -G"${GENERATOR}"
 endif
@@ -21,7 +23,7 @@ luvi: build
 	cmake --build build -- ${EXTRA_OPTIONS}
 
 # The default flavor is tiny
-build: tiny
+build: static
 
 # Configure the build with minimal dependencies
 tiny: luv/CMakeLists.txt
