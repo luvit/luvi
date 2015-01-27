@@ -6,7 +6,7 @@
 	url = https://github.com/luvit/openssl.git
 [submodule "deps/luv"]
 	path = deps/luv
-	url = https://github.com/luvit/luv.git
+	url = https://github.com/brimworks/luv.git
 [submodule "deps/zlib"]
 	path = deps/zlib
 	url = https://github.com/luvit/zlib.git
