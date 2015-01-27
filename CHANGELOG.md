@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v0.6.1
+
+ - openssl: Fix cmake build [Ryan Phillips]
+
 ## v0.6.0
 
  - luajit: Update to v2.0.3 [Tim Caswell]
