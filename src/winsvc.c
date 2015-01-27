@@ -516,10 +516,13 @@ static int lua_ChangeServiceConfig2(lua_State *L) {
   union {
     SERVICE_DELAYED_AUTO_START_INFO autostart;
     SERVICE_DESCRIPTION description;
-    struct {
-      SERVICE_FAILURE_ACTIONS failure_actions;
-      SC_ACTION actions_array[3];
-    };
+    SERVICE_FAILURE_ACTIONS failure_actions;
+    SERVICE_FAILURE_ACTIONS_FLAG failure_actions_flag;
+    SERVICE_PREFERRED_NODE_INFO preferred_node;
+    SERVICE_PRESHUTDOWN_INFO preshutdown_info;
+    SERVICE_REQUIRED_PRIVILEGES_INFO privileges_info;
+    SERVICE_SID_INFO sid_info;
+    SERVICE_LAUNCH_PROTECTED_INFO protected_info;
   } info, *infop = &info;
   memset(infop, 0, sizeof(info));
   luaL_checktype(L, 3, LUA_TTABLE);
@@ -538,26 +541,57 @@ static int lua_ChangeServiceConfig2(lua_State *L) {
     lua_pushstring(L, "lpsaActions");
     lua_gettable(L, -2);
     if (lua_type(L, -1) == LUA_TTABLE) {
-      lua_pushnil(L);
-      int i = 0;
-      while (i < 3 && lua_next(L, -2)) {
-        /* uses 'key' (at index -2) and 'value' (at index -1) */
+      info.failure_actions.cActions = lua_objlen(L, -1);
+      if (info.failure_actions.cActions) {
+        info.failure_actions.lpsaActions = LocalAlloc(LPTR, sizeof(SC_ACTION) * info.failure_actions.cActions);
+      }
+      DWORD i = 0;
+      while (i < info.failure_actions.cActions) {
+        lua_rawgeti(L, -1, i+1);
         luaL_checktype(L, -1, LUA_TTABLE);
-        info.actions_array[i].Delay = GetIntFromTable(L, "Delay");
-        info.actions_array[i].Type = GetIntFromTable(L, "Type");
+        info.failure_actions.lpsaActions[i].Delay = GetIntFromTable(L, "Delay");
+        info.failure_actions.lpsaActions[i].Type = GetIntFromTable(L, "Type");
         lua_pop(L, 1);
         ++i;
       }
-      info.failure_actions.cActions = i;
       lua_pop(L, 1);
-      info.failure_actions.lpsaActions = info.actions_array;
     }
+    break;
+  case SERVICE_CONFIG_FAILURE_ACTIONS_FLAG:
+    info.failure_actions_flag.fFailureActionsOnNonCrashFailures = GetIntFromTable(L, "fFailureActionsOnNonCrashFailures");
+    break;
+  case SERVICE_CONFIG_PREFERRED_NODE:
+    info.preferred_node.usPreferredNode = GetIntFromTable(L, "usPreferredNode");
+    info.preferred_node.fDelete = GetIntFromTable(L, "fDelete");
+    break;
+  case SERVICE_CONFIG_PRESHUTDOWN_INFO:
+    info.preshutdown_info.dwPreshutdownTimeout = GetIntFromTable(L, "dwPreshutdownTimeout");
+    break;
+  case SERVICE_CONFIG_REQUIRED_PRIVILEGES_INFO:
+    info.privileges_info.pmszRequiredPrivileges = GetStringFromTable(L, "pmszRequiredPrivileges");
+    break;
+  case SERVICE_CONFIG_SERVICE_SID_INFO:
+    info.sid_info.dwServiceSidType = GetIntFromTable(L, "dwServiceSidType");
+    break;
+  /* case SERVICE_CONFIG_TRIGGER_INFO unsupported by ANSI version of ChangeServiceConfig2 */
+  case SERVICE_CONFIG_LAUNCH_PROTECTED:
+    info.protected_info.dwLaunchProtected = GetIntFromTable(L, "dwLaunchProtected");
     break;
   default:
     infop = NULL;
     break;
   }
+
   BOOL ret = ChangeServiceConfig2(h, dwInfoLevel, infop);
+
+  switch (dwInfoLevel)
+  {
+  case SERVICE_CONFIG_FAILURE_ACTIONS:
+    LocalFree(info.failure_actions.lpsaActions);
+    break;
+  default:
+    break;
+  }
   lua_pushboolean(L, ret);
   if (ret) {
     lua_pushnil(L);
