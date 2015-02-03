@@ -13,8 +13,8 @@ option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
 option(WithZLIB "Include ZLIB" OFF)
 option(WithSharedZLIB "Shared or Static ZLIB" ON)
 
-include(deps/luv/luajit.cmake)
-include(deps/luv/uv.cmake)
+include(deps/luv/deps/luajit.cmake)
+include(deps/luv/deps/uv.cmake)
 
 if (WithOpenSSL)
   include(deps/openssl.cmake)

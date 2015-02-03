@@ -24,19 +24,19 @@ luvi: build
 build: tiny
 
 # Configure the build with minimal dependencies
-tiny: luv/CMakeLists.txt
+tiny: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS)
 
 # Configure the build with everything, use shared libs when possible
-large: luv/CMakeLists.txt
+large: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithZLIB=ON
 
 # Configure the build with everything, but statically link the deps
-static: luv/CMakeLists.txt
+static: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF
 
 # In case the user forgot to pull in submodules, grab them.
-luv/CMakeLists.txt:
+deps/luv/CMakeLists.txt:
 	git submodule update --init --recursive
 
 clean:
