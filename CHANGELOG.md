@@ -2,6 +2,12 @@
 
 High-level changes between release versions.
 
+## v0.6.2
+
+ - libuv: Update to v1.3.0
+ - luv: Add sync versions of dns functions, add uv.pipe_getpeername [Tim Caswell]
+ - lua-openssl: Fix infinite loop [Ryan Phillips]
+
 ## v0.6.1
 
  - openssl: Fix cmake build [Ryan Phillips]
