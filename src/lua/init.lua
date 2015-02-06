@@ -420,9 +420,7 @@ return function(args)
     if not target or #target == 0 then return commonBundle(bundle) end
     return buildBundle(target, bundle)
   end
-  local prefix = [[$(LUVI) $(LUVI_VERSION)]]
-  prefix = string.gsub(prefix, "%$%(LUVI%)", args[0])
-  prefix = string.gsub(prefix, "%$%(LUVI_VERSION%)", luvi.version)
+  local prefix = string.format("%s %s", args[0], luvi.version)
   local options = generateOptionsString()
   local usage = [[
 
