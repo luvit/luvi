@@ -18,10 +18,12 @@ include(deps/luv/deps/uv.cmake)
 
 if (WithOpenSSL)
   include(deps/openssl.cmake)
+  add_definitions( -DWITH_OPENSSL )
 endif (WithOpenSSL)
 
 if (WithZLIB)
   include(deps/zlib.cmake)
+  add_definitions( -DWITH_ZLIB )
 endif (WithZLIB)
 
 add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )

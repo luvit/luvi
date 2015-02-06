@@ -95,8 +95,8 @@ local function pathJoin(...)
   -- Evaluate special segments in reverse order.
   local skip = 0
   local reversed = {}
-  for i = #parts, 1, -1 do
-    local part = parts[i]
+  for idx = #parts, 1, -1 do
+    local part = parts[idx]
     if part == '.' then
       -- Ignore
     elseif part == '..' then
@@ -110,9 +110,9 @@ local function pathJoin(...)
 
   -- Reverse the list again to get the correct order
   parts = reversed
-  for i = 1, #parts / 2 do
-    local j = #parts - i + 1
-    parts[i], parts[j] = parts[j], parts[i]
+  for idx = 1, #parts / 2 do
+    local j = #parts - idx + 1
+    parts[idx], parts[j] = parts[j], parts[idx]
   end
 
   local path = joinParts(prefix, parts)
@@ -234,7 +234,8 @@ return function(args)
             mtime = 0
           }
         end
-        local index, err = zip:locate_file(path)
+        local err 
+        local index = zip:locate_file(path)
         if not index then
           index, err = zip:locate_file(path .. "/")
           if not index then return nil, err end
@@ -407,7 +408,13 @@ return function(args)
     if not target or #target == 0 then return commonBundle(bundle) end
     return buildBundle(target, bundle)
   end
-  local usage = [[Luvi Usage Instructions:
+  local prefix = [[$(LUVI) $(LUVI_VERSION) ($(LUVI_OPTIONS))]]
+  prefix = string.gsub(prefix, "%$%(LUVI%)", args[0])
+  prefix = string.gsub(prefix, "%$%(LUVI_VERSION%)", luvi.version)
+  prefix = string.gsub(prefix, "%$%(LUVI_OPTIONS%)", table.concat(luvi.options, ","))
+  local usage = [[
+
+Usage:
 
     Bare Luvi uses environment variables to configure its runtime parameters.
 
@@ -438,9 +445,9 @@ return function(args)
       LUVI_APP=myapp: ./luvit
 
       # Build your app
-      LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit
-  ]]
-  usage = "\n" .. string.gsub(usage, "%$%(LUVI%)", args[0])
+      LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit]]
+  usage = string.gsub(usage, "%$%(LUVI%)", args[0])
+  print(prefix)
   print(usage)
   return -1
 
