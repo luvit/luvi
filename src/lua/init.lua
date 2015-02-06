@@ -95,8 +95,8 @@ local function pathJoin(...)
   -- Evaluate special segments in reverse order.
   local skip = 0
   local reversed = {}
-  for i = #parts, 1, -1 do
-    local part = parts[i]
+  for idx = #parts, 1, -1 do
+    local part = parts[idx]
     if part == '.' then
       -- Ignore
     elseif part == '..' then
@@ -110,9 +110,9 @@ local function pathJoin(...)
 
   -- Reverse the list again to get the correct order
   parts = reversed
-  for i = 1, #parts / 2 do
-    local j = #parts - i + 1
-    parts[i], parts[j] = parts[j], parts[i]
+  for idx = 1, #parts / 2 do
+    local j = #parts - idx + 1
+    parts[idx], parts[j] = parts[j], parts[idx]
   end
 
   local path = joinParts(prefix, parts)
@@ -234,7 +234,8 @@ return function(args)
             mtime = 0
           }
         end
-        local index, err = zip:locate_file(path)
+        local err 
+        local index = zip:locate_file(path)
         if not index then
           index, err = zip:locate_file(path .. "/")
           if not index then return nil, err end
@@ -350,6 +351,18 @@ return function(args)
     return loadstring(main, "bundle:main.lua")(unpack(args))
   end
 
+  local function generateOptionsString()
+    local s = {}
+    for k, v in pairs(luvi.options) do
+      if type(v) == 'boolean' then
+        table.insert(s, k)
+      else
+        table.insert(s, string.format("%s: %s", k, v))
+      end
+    end
+    return table.concat(s, "\n")
+  end
+
   local function buildBundle(target, bundle)
     local miniz = require('miniz')
     target = pathJoin(uv.cwd(), target)
@@ -407,7 +420,11 @@ return function(args)
     if not target or #target == 0 then return commonBundle(bundle) end
     return buildBundle(target, bundle)
   end
-  local usage = [[Luvi Usage Instructions:
+  local prefix = string.format("%s %s", args[0], luvi.version)
+  local options = generateOptionsString()
+  local usage = [[
+
+Usage:
 
     Bare Luvi uses environment variables to configure its runtime parameters.
 
@@ -438,9 +455,11 @@ return function(args)
       LUVI_APP=myapp: ./luvit
 
       # Build your app
-      LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit
-  ]]
-  usage = "\n" .. string.gsub(usage, "%$%(LUVI%)", args[0])
+      LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit]]
+  usage = string.gsub(usage, "%$%(LUVI%)", args[0])
+  print(prefix)
+  print()
+  print(options)
   print(usage)
   return -1
 

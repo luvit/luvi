@@ -18,10 +18,27 @@
 #include "./luvi.h"
 
 LUALIB_API int luaopen_luvi(lua_State *L) {
+  char buffer[1024];
   lua_newtable(L);
 #ifdef LUVI_VERSION
   lua_pushstring(L, ""LUVI_VERSION"");
   lua_setfield(L, -2, "version");
 #endif
+  lua_newtable(L);
+#ifdef WITH_OPENSSL
+  snprintf(buffer, sizeof(buffer), "%s, lua-openssl %s",
+    SSLeay_version(SSLEAY_VERSION), LOPENSSL_VERSION_STR);
+  lua_pushstring(L, buffer);
+  lua_setfield(L, -2, "ssl");
+#endif
+#ifdef WITH_ZLIB
+  lua_pushstring(L, zlibVersion());
+  lua_setfield(L, -2, "zlib");
+#endif
+#ifdef WITH_WINSVC
+  lua_pushboolean(L, 1);
+  lua_setfield(L, -2, "winsvc");
+#endif
+  lua_setfield(L, -2, "options");
   return 1;
 }

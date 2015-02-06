@@ -15,21 +15,11 @@
  *
  */
 
-#include "./luvi.h"
+#include "luvi.h"
 #include "../deps/luv/src/luv.c"
 #include "lenv.c"
 #include "luvi.c"
 #include "lminiz.c"
-#ifdef WITH_OPENSSL
-#include "openssl.h"
-#endif
-#ifdef WITH_ZLIB
-LUALIB_API int luaopen_zlib(lua_State * const L);
-#endif
-#ifdef WITH_WINSVC
-#include "winsvc.h"
-#include "winsvcaux.h"
-#endif
 
 int main(int argc, char* argv[] ) {
 
