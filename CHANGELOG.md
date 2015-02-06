@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v0.6.3
+
+ - lua-openssl: for gc x509_store crash [Ryan Phillips]
+ - luvi: add version and compile options [Ryan Phillips]
+
 ## v0.6.2
 
  - libuv: Update to v1.3.0
