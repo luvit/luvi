@@ -351,6 +351,18 @@ return function(args)
     return loadstring(main, "bundle:main.lua")(unpack(args))
   end
 
+  local function generateOptionsString()
+    local s = {}
+    for k, v in pairs(luvi.options) do
+      if type(v) == 'boolean' then
+        table.insert(s, k)
+      else
+        table.insert(s, string.format("%s: %s", k, v))
+      end
+    end
+    return table.concat(s, "\n")
+  end
+
   local function buildBundle(target, bundle)
     local miniz = require('miniz')
     target = pathJoin(uv.cwd(), target)
@@ -408,14 +420,10 @@ return function(args)
     if not target or #target == 0 then return commonBundle(bundle) end
     return buildBundle(target, bundle)
   end
-  local options = {}
-  for option, _ in pairs(luvi.options) do
-    table.insert(options, option)
-  end
-  local prefix = [[$(LUVI) $(LUVI_VERSION) ($(LUVI_OPTIONS))]]
+  local prefix = [[$(LUVI) $(LUVI_VERSION)]]
   prefix = string.gsub(prefix, "%$%(LUVI%)", args[0])
   prefix = string.gsub(prefix, "%$%(LUVI_VERSION%)", luvi.version)
-  prefix = string.gsub(prefix, "%$%(LUVI_OPTIONS%)", table.concat(options, ","))
+  local options = generateOptionsString()
   local usage = [[
 
 Usage:
@@ -452,6 +460,8 @@ Usage:
       LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit]]
   usage = string.gsub(usage, "%$%(LUVI%)", args[0])
   print(prefix)
+  print()
+  print(options)
   print(usage)
   return -1
 
