@@ -19,7 +19,6 @@
 
 LUALIB_API int luaopen_luvi(lua_State *L) {
   char buffer[1024];
-  int i = 1;
   lua_newtable(L);
 #ifdef LUVI_VERSION
   lua_pushstring(L, ""LUVI_VERSION"");
