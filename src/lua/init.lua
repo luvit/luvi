@@ -408,10 +408,14 @@ return function(args)
     if not target or #target == 0 then return commonBundle(bundle) end
     return buildBundle(target, bundle)
   end
+  local options = {}
+  for option, _ in pairs(luvi.options) do
+    table.insert(options, option)
+  end
   local prefix = [[$(LUVI) $(LUVI_VERSION) ($(LUVI_OPTIONS))]]
   prefix = string.gsub(prefix, "%$%(LUVI%)", args[0])
   prefix = string.gsub(prefix, "%$%(LUVI_VERSION%)", luvi.version)
-  prefix = string.gsub(prefix, "%$%(LUVI_OPTIONS%)", table.concat(luvi.options, ","))
+  prefix = string.gsub(prefix, "%$%(LUVI_OPTIONS%)", table.concat(options, ","))
   local usage = [[
 
 Usage:

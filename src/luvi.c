@@ -26,19 +26,16 @@ LUALIB_API int luaopen_luvi(lua_State *L) {
 #endif
   lua_newtable(L);
 #ifdef WITH_OPENSSL
-  lua_pushnumber(L, i++);
-  lua_pushstring(L, "ssl");
-  lua_settable(L, -3);
+  lua_pushboolean(L, 1);
+  lua_setfield(L, -2, "ssl");
 #endif
 #ifdef WITH_ZLIB
-  lua_pushnumber(L, i++);
-  lua_pushstring(L, "zlib");
-  lua_settable(L, -3);
+  lua_pushboolean(L, 1);
+  lua_setfield(L, -2, "zlib");
 #endif
 #ifdef WITH_WINSVC
-  lua_pushnumber(L, i++);
-  lua_pushstring(L, "winsvc");
-  lua_settable(L, -3);
+  lua_pushboolean(L, 1);
+  lua_setfield(L, -2, "winsvc");
 #endif
   lua_setfield(L, -2, "options");
   return 1;
