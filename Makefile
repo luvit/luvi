@@ -14,7 +14,9 @@ else ifeq ($(OS),Darwin)
 	NPROCS:=$(shell sysctl hw.ncpu | awk '{print $$2}')
 endif
 
-EXTRA_OPTIONS:=-j${NPROCS}
+ifndef GENERATOR
+  EXTRA_OPTIONS:=-j${NPROCS}
+endif
 
 # This does the actual build and configures as default flavor is there is no build folder.
 luvi: build
