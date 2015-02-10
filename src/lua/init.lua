@@ -234,7 +234,7 @@ return function(args)
             mtime = 0
           }
         end
-        local err 
+        local err
         local index = zip:locate_file(path)
         if not index then
           index, err = zip:locate_file(path .. "/")
@@ -292,7 +292,7 @@ return function(args)
       -- Split the string by : leaving empty strings on ends
       local parts = {}
       local n = 1
-      for part in string.gmatch(app, '([^:]*)') do
+      for part in string.gmatch(app, '([^;]*)') do
         if not parts[n] then
           local path
           if part == "" then
@@ -428,7 +428,7 @@ Usage:
 
     Bare Luvi uses environment variables to configure its runtime parameters.
 
-    LUVI_APP is a colon separated list of paths to folders and/or zip files to
+    LUVI_APP is a semicolon separated list of paths to folders and/or zip files to
              be used as the bundle virtual file system.  Items are searched in
              the paths from left to right.
 
@@ -443,7 +443,7 @@ Usage:
       LUVI_APP=luvit/app $(LUVI)
 
       # Run an app that layers on top of luvit
-      LUVI_APP=myapp:luvit/app $(LUVI)
+      "LUVI_APP=myapp;luvit/app" $(LUVI)
 
       # Build the luvit binary
       LUVI_APP=luvit/app LUVI_TARGET=./luvit $(LUVI)
@@ -452,10 +452,10 @@ Usage:
       ./luvit
 
       # Run an app that layers on top of luvit (note trailing colon)
-      LUVI_APP=myapp: ./luvit
+      "LUVI_APP=myapp;" ./luvit
 
       # Build your app
-      LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit]]
+      "LUVI_APP=myapp;" LUVI_TARGET=mybinary ./luvit]]
   usage = string.gsub(usage, "%$%(LUVI%)", args[0])
   print(prefix)
   print()

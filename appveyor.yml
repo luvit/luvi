@@ -10,10 +10,11 @@ matrix:
 
 build_script:
  - git submodule update --init --recursive
- - make.bat %BUILD_TYPE%
+ - Make.bat %BUILD_TYPE%
+ - Make.bat
 
 test_script:
- - make.bat test
+ - Make.bat test
 
 artifacts:
  - path: luvi.exe
