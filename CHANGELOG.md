@@ -2,6 +2,14 @@
 
 High-level changes between release versions.
 
+## v0.6.4
+
+ - lua-openssl: Update to fix more crashers [Ryan Phillips]
+ - libuv: Update to v1.4.0 [Tim Caswell]
+ - libuv: Fix dirent types on Windows [Tim Caswell]
+ - luvi: Change LUVI_APP to use `;` instead of `:` for separators,
+         this fixes Windows paths starting with `C:/`. [Tim Caswell]
+
 ## v0.6.3
 
  - lua-openssl: for gc x509_store crash [Ryan Phillips]
