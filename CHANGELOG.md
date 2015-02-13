@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v0.6.5
+
+ - luv: Add getpid, getuid, getgid, setuid, setgid [Ryan Phillips]
+
 ## v0.6.4
 
  - lua-openssl: Update to fix more crashers [Ryan Phillips]
