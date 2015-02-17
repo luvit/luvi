@@ -2,6 +2,12 @@
 
 High-level changes between release versions.
 
+## v0.6.6
+
+ - luvi: Allow custom main by reading package.lua [Tim Caswell]
+ - lua-openssl: Update for more fixes [Ryan Phillips]
+ - cmake: Add support for freebsd [Ryan Phillips]
+
 ## v0.6.5
 
  - luv: Add getpid, getuid, getgid, setuid, setgid [Ryan Phillips]
