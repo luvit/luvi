@@ -344,8 +344,19 @@ return function(args)
       end
     end
 
-    local base = string.match(args[0], "[^/]*$")
-    local main = base and bundle.readfile("main/" .. base .. ".lua") or bundle.readfile("main.lua")
+    local meta = bundle.readfile("package.lua")
+    local main
+    if meta then
+      meta = loadstring(meta)()
+      if meta.main then
+        main = bundle.readfile(meta.main)
+      end
+    end
+    if not main then
+      local base = string.match(args[0], "[^/]*$")
+      main = base and bundle.readfile("main/" .. base .. ".lua") or bundle.readfile("main.lua")
+    end
+
     if not main then error("Missing main.lua in " .. bundle.base) end
     _G.args = args
     return loadstring(main, "bundle:main.lua")(unpack(args))
