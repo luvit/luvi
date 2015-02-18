@@ -58,37 +58,27 @@ uninstall:
 	rm -f /usr/local/bin/luvi
 
 reset:
-	git submodule update --init --recursive
-	git clean -f -d
+	git submodule update --init --recursive && \
+	git clean -i -d && \
+	git checkout .
 
 publish-src: reset
-	tar -czvf luvi-src.tar.gz --exclude 'luvi-src.tar.gz' --exclude '.*' --exclude build .
-	github-release upload \
-    --user luvit --repo luvi \
-    --tag ${LUVI_TAG} \
-    --name luvi-src \
-    --file luvi-src.tar.gz
+	tar -czvf luvi-src.tar.gz \
+	  --exclude 'luvi-src.tar.gz' --exclude '.*' --exclude build . && \
+	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
+	  --file luvi-src.tar.gz --name luvi-src
 
 publish-tiny: reset
 	$(MAKE) tiny test && \
-	github-release upload \
-    --user luvit --repo luvi \
-    --tag ${LUVI_TAG} \
-    --name luvi-tiny-${LUVI_ARCH} \
-    --file build/luvi &&
+	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
+	  --file build/luvi --name luvi-tiny-${LUVI_ARCH}
 
 publish-large: reset
 	$(MAKE) large test && \
-	github-release upload \
-    --user luvit --repo luvi \
-    --tag ${LUVI_TAG} \
-    --name luvi-large-${LUVI_ARCH} \
-    --file build/luvi &&
+	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
+	  --file build/luvi --name luvi-large-${LUVI_ARCH}
 
 publish-static: reset
 	$(MAKE) static test && \
-	github-release upload \
-    --user luvit --repo luvi \
-    --tag ${LUVI_TAG} \
-    --name luvi-static-${LUVI_ARCH} \
-    --file build/luvi &&
+	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
+	  --file build/luvi --name luvi-static-${LUVI_ARCH}
