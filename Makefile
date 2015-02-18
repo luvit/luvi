@@ -1,4 +1,5 @@
-BIN_ROOT=luvi-binaries/$(shell uname -s)_$(shell uname -m)
+LUVI_TAG=$(shell git describe)
+LUVI_ARCH=$(shell uname -s)_$(shell uname -m)
 
 NPROCS:=1
 OS:=$(shell uname -s)
@@ -42,7 +43,7 @@ deps/luv/CMakeLists.txt:
 	git submodule update --init --recursive
 
 clean:
-	rm -rf build
+	rm -rf build luvi.tar.gz
 
 test: luvi
 	rm -f test.bin
@@ -56,21 +57,38 @@ install: luvi
 uninstall:
 	rm -f /usr/local/bin/luvi
 
-publish-linux:
+reset:
 	git submodule update --init --recursive
-	mkdir -p $(BIN_ROOT)
-	$(MAKE) clean tiny test && cp build/luvi $(BIN_ROOT)/luvi-tiny
-	$(MAKE) clean static test && cp build/luvi $(BIN_ROOT)/luvi-static
-	$(MAKE) clean large test && cp build/luvi $(BIN_ROOT)/luvi
+	git clean -f -d
 
-publish-raspberry:
-	git submodule update --init --recursive
-	mkdir -p $(BIN_ROOT)
-	$(MAKE) clean tiny test && cp build/luvi $(BIN_ROOT)/luvi-tiny
-	$(MAKE) clean large test && cp build/luvi $(BIN_ROOT)/luvi
+publish-src: reset
+	tar -czvf luvi-src.tar.gz --exclude 'luvi-src.tar.gz' --exclude '.*' --exclude build .
+	github-release upload \
+    --user luvit --repo luvi \
+    --tag ${LUVI_TAG} \
+    --name luvi-src \
+    --file luvi-src.tar.gz
 
-publish-darwin:
-	git submodule update --init --recursive
-	mkdir -p $(BIN_ROOT)
-	$(MAKE) clean tiny test && cp build/luvi $(BIN_ROOT)/luvi-tiny
-	$(MAKE) clean static test && cp build/luvi $(BIN_ROOT)/luvi
+publish-tiny: reset
+	$(MAKE) tiny test && \
+	github-release upload \
+    --user luvit --repo luvi \
+    --tag ${LUVI_TAG} \
+    --name luvi-tiny-${LUVI_ARCH} \
+    --file build/luvi &&
+
+publish-large: reset
+	$(MAKE) large test && \
+	github-release upload \
+    --user luvit --repo luvi \
+    --tag ${LUVI_TAG} \
+    --name luvi-large-${LUVI_ARCH} \
+    --file build/luvi &&
+
+publish-static: reset
+	$(MAKE) static test && \
+	github-release upload \
+    --user luvit --repo luvi \
+    --tag ${LUVI_TAG} \
+    --name luvi-static-${LUVI_ARCH} \
+    --file build/luvi &&

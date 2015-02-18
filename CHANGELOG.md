@@ -2,6 +2,13 @@
 
 High-level changes between release versions.
 
+## v0.7.0
+
+ - lua-openssl: Update to latest [Tim Caswell]
+ - luvi: Use LUV_MAIN instead of package.lua for custom main
+ - luvi: Add `publish-tarball` `publish-tiny` `publish-static`, etc targets
+         which publish to github releases for tags.
+
 ## v0.6.6
 
  - luvi: Allow custom main by reading package.lua [Tim Caswell]
