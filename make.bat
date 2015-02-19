@@ -1,16 +1,17 @@
 @ECHO off
 
+for /f %%i in ('git describe') do set LUVI_TAG=%%i
 IF NOT "x%1" == "x" GOTO :%1
 
 GOTO :build
 
-:large
-ECHO "Building large"
+:static
+ECHO "Building static"
 cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild
 GOTO :end
 
-:large64
-ECHO "Building large64"
+:static64
+ECHO "Building static64"
 cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild  -G"Visual Studio 12 2013 Win64"
 GOTO :end
 
@@ -74,16 +75,26 @@ git submodule update --init --recursive
 CALL make.bat clean
 CALL make.bat tiny64
 CALL make.bat test
-COPY build\Release\luvi.exe luvi-binaries\Windows\luvi-tiny.exe
-CALL make.bat clean
-CALL make.bat large64
+GOTO :end
+
+:reset
+git submodule update --init --recursive
+git clean -f -d
+git checkout .
+GOTO :end
+
+:publish-tiny
+CALL make.bat reset
+CALL make.bat tiny64
 CALL make.bat test
-COPY build\Release\luvi.exe luvi-binaries\Windows\luvi.exe
-CD luvi-binaries
-git pull
-git add Windows
-git commit
-git push
-CD ..
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-tiny-Windows-amd64.exe
+GOTO :end
+
+:publish-static
+CALL make.bat reset
+CALL make.bat static64
+CALL make.bat test
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-static-Windows-amd64.exe
+GOTO :end
 
 :end
