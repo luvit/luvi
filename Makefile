@@ -59,14 +59,14 @@ uninstall:
 
 reset:
 	git submodule update --init --recursive && \
-	git clean -i -d && \
+	git clean -f -d && \
 	git checkout .
 
 publish-src: reset
 	tar -czvf luvi-src.tar.gz \
-	  --exclude 'luvi-src.tar.gz' --exclude '.*' --exclude build . && \
+	  --exclude 'luvi-src.tar.gz' --exclude '.git*' --exclude build . && \
 	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
-	  --file luvi-src.tar.gz --name luvi-src
+	  --file luvi-src.tar.gz --name luvi-src.tar.gz
 
 publish-tiny: reset
 	$(MAKE) tiny test && \
