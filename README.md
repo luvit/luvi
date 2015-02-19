@@ -239,11 +239,11 @@ Luvi Usage Instructions:
       # Run the new luvit binary
       ./luvit
 
-      # Run an app that layers on top of luvit (note trailing colon)
-      LUVI_APP=myapp: ./luvit
+      # Run an app that layers on top of luvit (note trailing semicolon)
+      LUVI_APP=myapp; ./luvit
 
       # Build your app
-      LUVI_APP=myapp: LUVI_TARGET=mybinary ./luvit
+      LUVI_APP=myapp; LUVI_TARGET=mybinary ./luvit
 ```
 
 You can run the sample repl app by doing:

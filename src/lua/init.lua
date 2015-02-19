@@ -456,7 +456,7 @@ Usage:
       # Run the new luvit binary
       ./luvit
 
-      # Run an app that layers on top of luvit (note trailing colon)
+      # Run an app that layers on top of luvit (note trailing semicolon)
       "LUVI_APP=myapp;" ./luvit
 
       # Build your app
