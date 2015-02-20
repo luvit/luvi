@@ -289,7 +289,7 @@ return function(args)
   local function makeBundle(app)
     local miniz = require('miniz')
     if app and (#app > 0) then
-      -- Split the string by : leaving empty strings on ends
+      -- Split the string by ; leaving empty strings on ends
       local parts = {}
       local n = 1
       for part in string.gmatch(app, '([^;]*)') do
@@ -326,8 +326,29 @@ return function(args)
     if zip then return zipBundle(path, zip) end
   end
 
+  local function chrootBundle(bundle, prefix)
+    local bundleStat = bundle.stat
+    function bundle.stat(path)
+      return bundleStat(prefix .. path)
+    end
+    local bundleReaddir = bundle.readdir
+    function bundle.readdir(path)
+      return bundleReaddir(prefix .. path)
+    end
+    local bundleReadfile = bundle.readfile
+    function bundle.readfile(path)
+      return bundleReadfile(prefix .. path)
+    end
+  end
+
   local function commonBundle(bundle)
     luvi.bundle = bundle
+
+    -- Support zips with a single folder inserted at toplevel
+    local entries = bundle.readdir("")
+    if #entries == 1 and bundle.stat(entries[1]).type == "directory" then
+      chrootBundle(bundle, entries[1] .. '/')
+    end
 
     luvi.path = {
       join = pathJoin,
