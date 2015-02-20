@@ -70,6 +70,7 @@ CALL make.bat reset
 CALL make.bat tiny
 CALL make.bat test
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-tiny-Windows-amd64.exe
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi.lib --name luvi-tiny-Windows-amd64.lib
 GOTO :end
 
 :publish-static
@@ -77,6 +78,7 @@ CALL make.bat reset
 CALL make.bat static
 CALL make.bat test
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-static-Windows-amd64.exe
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi.lib --name luvi-static-Windows-amd64.lib
 GOTO :end
 
 :end
