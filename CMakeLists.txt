@@ -30,7 +30,7 @@ add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 
 if(MSVC)
   set(winsvc src/winsvc.h src/winsvcaux.h src/winsvc.c src/winsvcaux.c)
-  add_definitions(-DWITH_WINSVC)
+  add_definitions(-DWITH_WINSVC -DLUA_BUILD_AS_DLL -DLUA_LIB)
 endif()
 
 luajit_add_executable(luvi
