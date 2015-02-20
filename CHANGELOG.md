@@ -2,6 +2,12 @@
 
 High-level changes between release versions.
 
+## v0.7.1
+
+ - luvi: Add ability to run from zips with folder at root [Tim Caswell]
+ - luvi: Export makeBundle as an API [Tim Caswell]
+ - windows: Tweak build to allow for shared libraries at runtime. [Ryan Phillips]
+
 ## v0.7.0
 
  - lua-openssl: Update to latest [Tim Caswell]
