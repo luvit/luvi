@@ -222,8 +222,23 @@ return function(args)
     }
   end
 
+  local function chrootBundle(bundle, prefix)
+    local bundleStat = bundle.stat
+    function bundle.stat(path)
+      return bundleStat(prefix .. path)
+    end
+    local bundleReaddir = bundle.readdir
+    function bundle.readdir(path)
+      return bundleReaddir(prefix .. path)
+    end
+    local bundleReadfile = bundle.readfile
+    function bundle.readfile(path)
+      return bundleReadfile(prefix .. path)
+    end
+  end
+
   local function zipBundle(base, zip)
-    return {
+    local bundle = {
       base = base,
       stat = function (path)
         path = pathJoin("./" .. path)
@@ -284,6 +299,14 @@ return function(args)
         return zip:extract(index)
       end
     }
+
+    -- Support zips with a single folder inserted at toplevel
+    local entries = bundle.readdir("")
+    if #entries == 1 and bundle.stat(entries[1]).type == "directory" then
+      chrootBundle(bundle, entries[1] .. '/')
+    end
+
+    return bundle
   end
 
   local function makeBundle(app)
@@ -326,29 +349,9 @@ return function(args)
     if zip then return zipBundle(path, zip) end
   end
 
-  local function chrootBundle(bundle, prefix)
-    local bundleStat = bundle.stat
-    function bundle.stat(path)
-      return bundleStat(prefix .. path)
-    end
-    local bundleReaddir = bundle.readdir
-    function bundle.readdir(path)
-      return bundleReaddir(prefix .. path)
-    end
-    local bundleReadfile = bundle.readfile
-    function bundle.readfile(path)
-      return bundleReadfile(prefix .. path)
-    end
-  end
-
   local function commonBundle(bundle)
     luvi.bundle = bundle
-
-    -- Support zips with a single folder inserted at toplevel
-    local entries = bundle.readdir("")
-    if #entries == 1 and bundle.stat(entries[1]).type == "directory" then
-      chrootBundle(bundle, entries[1] .. '/')
-    end
+    luvi.makeBundle = makeBundle
 
     luvi.path = {
       join = pathJoin,
