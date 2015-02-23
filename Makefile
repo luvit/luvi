@@ -23,8 +23,8 @@ endif
 luvi: build
 	cmake --build build -- ${EXTRA_OPTIONS}
 
-# The default flavor is tiny
-build: tiny
+# The default flavor is static
+build: static
 
 # Configure the build with minimal dependencies
 tiny: deps/luv/CMakeLists.txt
