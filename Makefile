@@ -20,23 +20,22 @@ ifndef GENERATOR
 endif
 
 # This does the actual build and configures as default flavor is there is no build folder.
-luvi: build
-	cmake --build build -- ${EXTRA_OPTIONS}
-
-# The default flavor is static
-build: static
+luvi: static
 
 # Configure the build with minimal dependencies
 tiny: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS)
+	cmake --build build -- ${EXTRA_OPTIONS}
 
 # Configure the build with everything, use shared libs when possible
 large: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithZLIB=ON
+	cmake --build build -- ${EXTRA_OPTIONS}
 
 # Configure the build with everything, but statically link the deps
 static: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF
+	cmake --build build -- ${EXTRA_OPTIONS}
 
 # In case the user forgot to pull in submodules, grab them.
 deps/luv/CMakeLists.txt:
