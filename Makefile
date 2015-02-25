@@ -1,6 +1,13 @@
 LUVI_TAG=$(shell git describe)
 LUVI_ARCH=$(shell uname -s)_$(shell uname -m)
 
+LUVI_MAJOR=$(shell git describe --tags --long | sed "s/v\([0-9]*\).*/\1/")
+LUVI_MINOR=$(shell git describe --tags --long | sed "s/v[0-9]*\.\([0-9]*\).*/\1/")
+LUVI_REVISION=$(shell git describe --tags --long | sed "s/v[0-9]*\.[0-9]*\.\([0-9]*\).*/\1/")
+LUVI_COMMITS_SINCE=$(shell git describe --tags --long | sed "s/v[0-9]*\.[0-9]*\.[0-9]*-\([0-9]*\).*/\1/")
+LUVI_PACKAGE_VERSION=$(LUVI_MAJOR).$(LUVI_MINOR).$(LUVI_REVISION)-$(LUVI_COMMITS_SINCE)
+
+FPM_OPTIONS:=-v $(LUVI_PACKAGE_VERSION) -s dir  -n luvi -C root
 NPROCS:=1
 OS:=$(shell uname -s)
 
@@ -81,3 +88,12 @@ publish-static: reset
 	$(MAKE) static test && \
 	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
 	  --file build/luvi --name luvi-static-${LUVI_ARCH}
+
+package:
+	mkdir -p root/usr/bin && cp build/luvi root/usr/bin
+
+package-deb: package
+	fpm $(FPM_OPTIONS) -t deb .
+
+package-rpm: package
+	fpm $(FPM_OPTIONS) -t rpm .
