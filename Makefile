@@ -9,6 +9,23 @@ ifdef GENERATOR
 	CMAKE_FLAGS+= -G"${GENERATOR}"
 endif
 
+CPACK_FLAGS=-DWithPackageSH=ON -DWITH_PACKAGE_TGZ=ON -DWITH_PACKAGE_TBZ2=ON
+ifdef CPACK_DEB
+	CPACK_FLAGS=-DWithPackageDEB=ON
+endif
+
+ifdef CPACK_RPM
+	CPACK_FLAGS=-DWithPackageRPM=ON
+endif
+
+ifdef CPACK_NSIS
+	CPACK_FLAGS=-DWithPackageNSIS=ON
+endif
+
+ifdef CPACK_BUNDLE
+	CPACK_FLAGS=-DWithPackageBUNDLE=ON
+endif
+
 ifeq ($(OS),Linux)
 	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
 else ifeq ($(OS),Darwin)
@@ -24,18 +41,21 @@ luvi: static
 
 # Configure the build with minimal dependencies
 tiny: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS)
+	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS)
 	cmake --build build -- ${EXTRA_OPTIONS}
 
 # Configure the build with everything, use shared libs when possible
 large: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithZLIB=ON
+	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithZLIB=ON
 	cmake --build build -- ${EXTRA_OPTIONS}
 
 # Configure the build with everything, but statically link the deps
 static: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF
+	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF
 	cmake --build build -- ${EXTRA_OPTIONS}
+
+package: deps/luv/CMakeLists.txt
+	cmake --build build -- package
 
 # In case the user forgot to pull in submodules, grab them.
 deps/luv/CMakeLists.txt:
