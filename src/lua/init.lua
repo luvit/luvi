@@ -374,7 +374,43 @@ return function(args)
 
     if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
     _G.args = args
-    return loadstring(main, "bundle:main.lua")(unpack(args))
+
+    -- Auto-register the require system if present
+    local mainRequire
+    local stat = bundle.stat("deps/require.lua")
+    if stat and stat.type == "file" then
+      print("Auto-registering luvit require system")
+      bundle.register('require', "deps/require.lua")
+      mainRequire = require('require')("bundle:main.lua")
+    end
+
+    -- Auto-setup global p and libuv version of print
+    if mainRequire and bundle.stat("deps/pretty-print") or bundle.stat("deps/pretty-print.lua") then
+      _G.p = mainRequire('pretty-print').prettyPrint
+    end
+
+    -- Wrap main in a coroutine and auto start-stop the uv loop.
+    local returnCode
+    coroutine.wrap(function ()
+      local success, result = xpcall(function ()
+        local fn = assert(loadstring(main, "bundle:main.lua"))
+        if mainRequire then
+          setfenv(fn, setmetatable({
+            require = mainRequire
+          }, {
+            __index=_G
+          }))
+        end
+        return fn(unpack(args))
+      end, debug.traceback)
+      if not success then
+        error(result)
+      end
+      uv.stop()
+    end)()
+    uv.run();
+    return returnCode
+
   end
 
   local function generateOptionsString()
