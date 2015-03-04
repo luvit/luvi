@@ -379,7 +379,6 @@ return function(args)
     local mainRequire
     local stat = bundle.stat("deps/require.lua")
     if stat and stat.type == "file" then
-      print("Auto-registering luvit require system")
       bundle.register('require', "deps/require.lua")
       mainRequire = require('require')("bundle:main.lua")
     end
