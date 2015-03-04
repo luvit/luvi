@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v0.8.1
+
+ - luv: Update to libuv v1.4.2-4-gfd3cf20 [Daniel Barney]
+ - cmake: Fix zlib and openssl cmake files for Solaris [Daniel Barney]
+
 ## v0.8.0
 
  - luvi: Add conventions to make bootstrapping for apps easier. [Tim Caswell]
