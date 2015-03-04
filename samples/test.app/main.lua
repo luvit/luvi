@@ -156,7 +156,7 @@ print("Testing for lua 5.2 extensions")
 local thread, ismain = coroutine.running()
 p(thread, ismain)
 assert(thread)
-assert(ismain)
+assert(ismain == false)
 
 
 print("Testing miniz")
@@ -184,7 +184,7 @@ writer:add("main.lua", 'print(require("luvi").version)', 9)
 p(writer:finalize())
 
 
-local zlib 
+local zlib
 if not pcall(function() zlib = require("zlib") end) then
   print("zlib unavailable")
 else

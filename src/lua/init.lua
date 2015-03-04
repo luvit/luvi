@@ -392,20 +392,15 @@ return function(args)
     -- Wrap main in a coroutine and auto start-stop the uv loop.
     local returnCode
     coroutine.wrap(function ()
-      local success, result = xpcall(function ()
-        local fn = assert(loadstring(main, "bundle:main.lua"))
-        if mainRequire then
-          setfenv(fn, setmetatable({
-            require = mainRequire
-          }, {
-            __index=_G
-          }))
-        end
-        return fn(unpack(args))
-      end, debug.traceback)
-      if not success then
-        error(result)
+      local fn = assert(loadstring(main, "bundle:main.lua"))
+      if mainRequire then
+        setfenv(fn, setmetatable({
+          require = mainRequire
+        }, {
+          __index=_G
+        }))
       end
+      returnCode = fn(unpack(args))
       uv.stop()
     end)()
     uv.run();
