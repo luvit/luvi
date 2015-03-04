@@ -2,6 +2,17 @@
 
 High-level changes between release versions.
 
+## v0.8.0
+
+ - luvi: Add conventions to make bootstrapping for apps easier. [Tim Caswell]
+   - If deps/require.lua exists, auto-register it as luvit require system.
+   - If deps/pretty-print module exists, use it to set _G.p and _G.print.
+   - Run main.lua in a coroutine off the main lua "thread".
+   - Auto-start uv loop after starting main.lua.
+   - Auto-stop uv loop after main.lua finishes.
+ - luvi: export libuv externs for binary addons to use. [Ryan Phillips]
+ - luvi: Add basic packaging code using cpack. [Ryan Phillips]
+
 ## v0.7.1
 
  - luvi: Add ability to run from zips with folder at root [Tim Caswell]
