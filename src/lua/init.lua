@@ -412,7 +412,6 @@ return function(args)
         }))
       end
       returnCode = fn(unpack(args))
-      uv.stop()
     end)()
     uv.run();
     return returnCode
