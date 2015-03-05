@@ -368,9 +368,21 @@ return function(args)
       end
     end
 
-    local base = string.match(args[0], "[^/]*$")
-    local mainPath = env.get("LUVI_MAIN") or "main.lua"
-    local main = base and bundle.readfile("main/" .. base .. ".lua") or bundle.readfile(mainPath)
+    local mainPath, main
+    mainPath = env.get("LUVI_MAIN")
+    if mainPath then
+      main = bundle.readFile(mainPath)
+    else
+      local base = string.match(args[0], "[^/]*$")
+      if base then
+        mainPath = "main/" .. base .. ".lua"
+        main = bundle.readfile(mainPath)
+      end
+      if not main then
+        mainPath = "main.lua"
+        main = bundle.readfile(mainPath)
+      end
+    end
 
     if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
     _G.args = args
@@ -380,7 +392,7 @@ return function(args)
     local stat = bundle.stat("deps/require.lua")
     if stat and stat.type == "file" then
       bundle.register('require', "deps/require.lua")
-      mainRequire = require('require')("bundle:main.lua")
+      mainRequire = require('require')("bundle:" .. mainPath)
     end
 
     -- Auto-setup global p and libuv version of print
