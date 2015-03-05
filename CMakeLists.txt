@@ -40,6 +40,10 @@ if(MSVC)
   add_definitions( -DWITH_WINSVC -DLUA_BUILD_AS_DLL -DLUA_LIB -DBUILDING_UV_SHARED )
 endif()
 
+if(UNIX)
+  add_definitions(-Wall)
+endif()
+
 luajit_add_executable(luvi
   ${winsvc}
   src/main.c

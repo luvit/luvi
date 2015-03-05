@@ -18,7 +18,9 @@
 #include "./luvi.h"
 
 LUALIB_API int luaopen_luvi(lua_State *L) {
+#ifdef WITH_OPENSSL
   char buffer[1024];
+#endif
   lua_newtable(L);
 #ifdef LUVI_VERSION
   lua_pushstring(L, ""LUVI_VERSION"");
