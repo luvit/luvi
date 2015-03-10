@@ -195,7 +195,7 @@ based on CMake and is pretty simple.
 First clone this repo recursively.
 
 ```shell
-git clone --recursive git@github.com:luvit/luvi.git
+git clone --recursive https://github.com/luvit/luvi.git
 ```
 
 Then run the makefile inside it. (Note this assumes you have cmake in your path.)
