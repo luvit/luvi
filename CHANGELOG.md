@@ -2,6 +2,16 @@
 
 High-level changes between release versions.
 
+## v1.0.0
+
+ - luvi: Add bundle.action API for using objects from the zip bundle. [Tim Caswell]
+ - luvi: Remove auto uv.stop after main. [Tim Caswell]
+ - luvi: Use proper mainpath for auto-require. [Tim Caswell]
+ - luvi: fix packaging, add -Wall and fix warning [Ryan Phillips]
+ - luv: expose O_EXLOCK constant on platforms that have it. [Tim Caswell]
+ - lua-openssl: Update upstream.
+
+
 ## v0.8.1
 
  - luv: Update to libuv v1.4.2-4-gfd3cf20 [Daniel Barney]
