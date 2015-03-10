@@ -156,7 +156,7 @@ print("Testing for lua 5.2 extensions")
 local thread, ismain = coroutine.running()
 p(thread, ismain)
 assert(thread)
-assert(ismain == false)
+assert(ismain)
 
 
 print("Testing miniz")

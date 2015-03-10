@@ -424,21 +424,15 @@ return function(args)
       _G.p = mainRequire('pretty-print').prettyPrint
     end
 
-    -- Wrap main in a coroutine and auto start-stop the uv loop.
-    local returnCode
-    coroutine.wrap(function ()
-      local fn = assert(loadstring(main, "bundle:main.lua"))
-      if mainRequire then
-        setfenv(fn, setmetatable({
-          require = mainRequire
-        }, {
-          __index=_G
-        }))
-      end
-      returnCode = fn(unpack(args))
-    end)()
-    uv.run();
-    return returnCode
+    local fn = assert(loadstring(main, "bundle:main.lua"))
+    if mainRequire then
+      setfenv(fn, setmetatable({
+        require = mainRequire
+      }, {
+        __index=_G
+      }))
+    end
+    return fn(unpack(args))
 
   end
 
