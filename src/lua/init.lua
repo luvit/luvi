@@ -395,7 +395,7 @@ return function(args)
     local mainPath, main
     mainPath = env.get("LUVI_MAIN")
     if mainPath then
-      main = bundle.readFile(mainPath)
+      main = bundle.readfile(mainPath)
     else
       local base = string.match(args[0], "[^/]*$")
       if base then
