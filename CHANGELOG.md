@@ -2,6 +2,15 @@
 
 High-level changes between release versions.
 
+## v1.0.1
+
+ - lua-openssl: Update to latest [Ryan Phillips]
+ - openssl: Update to 1.0.2a [Ryan Phillips]
+ - luv: Fix spawn memory leak [Ryan Phillips]
+ - libuv: Reap zombies on spawn [Ryan Phillips]
+ - luvi: Use static runtime on windows [Rob Emanuele]
+ - luvi: Fix custom LUVI_MAIN [Ryan Liptak]
+
 ## v1.0.0
 
  - luvi: Add bundle.action API for using objects from the zip bundle. [Tim Caswell]
