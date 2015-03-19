@@ -9,6 +9,7 @@ High-level changes between release versions.
  - luv: Fix spawn memory leak [Ryan Phillips]
  - libuv: Reap zombies on spawn [Ryan Phillips]
  - luvi: Use static runtime on windows [Rob Emanuele]
+ - luvi: Add luvi_renamed.lib for windows DLL loading [Rob Emanuele]
  - luvi: Fix custom LUVI_MAIN [Ryan Liptak]
 
 ## v1.0.0
