@@ -13,3 +13,6 @@
 [submodule "deps/lua-zlib"]
 	path = deps/lua-zlib
 	url = https://github.com/brimworks/lua-zlib.git
+[submodule "deps/lbuffer"]
+	path = deps/lbuffer
+	url = https://github.com/starwing/lbuffer.git

@@ -16,7 +16,6 @@ add_library(lua_openssl
   ${LUA_OPENSSL_DIR}/src/callback.c                     
   ${LUA_OPENSSL_DIR}/src/cipher.c                     
   ${LUA_OPENSSL_DIR}/src/cms.c                        
-  ${LUA_OPENSSL_DIR}/src/compat.c                     
   ${LUA_OPENSSL_DIR}/src/crl.c                        
   ${LUA_OPENSSL_DIR}/src/csr.c                        
   ${LUA_OPENSSL_DIR}/src/dh.c                         
