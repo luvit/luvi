@@ -58,6 +58,10 @@ int main(int argc, char* argv[] ) {
   // Store luvi module definition at preload.luvi
   lua_pushcfunction(L, luaopen_luvi);
   lua_setfield(L, -2, "luvi");
+ 
+  // Store the lbuffer module definition at preload.lbuffer
+  lua_pushcfunction(L, luaopen_buffer);
+  lua_setfield(L, -2, "lbuffer");
 
 #ifdef WITH_OPENSSL
   // Store luvi module definition at preload.openssl
@@ -66,13 +70,13 @@ int main(int argc, char* argv[] ) {
 #endif
 
 #ifdef WITH_ZLIB
-  // Store luvi module definition at preload.openssl
+  // Store luvi module definition at preload.zlib
   lua_pushcfunction(L, luaopen_zlib);
   lua_setfield(L, -2, "zlib");
 #endif
 
 #ifdef WITH_WINSVC
-  // Store luvi module definition at preload.openssl
+  // Store luvi module definition at preload.winsvc
   lua_pushcfunction(L, luaopen_winsvc);
   lua_setfield(L, -2, "winsvc");
   lua_pushcfunction(L, luaopen_winsvcaux);

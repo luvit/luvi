@@ -37,6 +37,7 @@ option(WithPackageBUNDLE "Build OSX bundle." OFF)
 
 include(deps/luv/deps/luajit.cmake)
 include(deps/luv/deps/uv.cmake)
+include(deps/lbuffer.cmake)
 
 if (WithOpenSSL)
   include(deps/openssl.cmake)
