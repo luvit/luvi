@@ -20,7 +20,7 @@
 #include "lenv.c"
 #include "luvi.c"
 #include "lminiz.c"
-
+#include "../deps/strlib.c"
 int main(int argc, char* argv[] ) {
 
   lua_State* L;
@@ -39,6 +39,9 @@ int main(int argc, char* argv[] ) {
 
   // Add in the lua standard libraries
   luaL_openlibs(L);
+
+  // Add string lua 5.3 compat apis, pack,unpack,packsize
+  make_compat53_string(L);
 
   // Get package.preload so we can store builtins in it.
   lua_getglobal(L, "package");
