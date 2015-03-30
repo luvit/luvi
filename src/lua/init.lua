@@ -28,7 +28,7 @@ local tmpBase = os == "Windows" and (env.get("TMP") or uv.cwd()) or
 if os == "Windows" then
   -- Windows aware path utils
   function getPrefix(path)
-    return path:match("^%u:\\") or
+    return path:match("^%a:\\") or
            path:match("^/") or
            path:match("^\\+")
   end
