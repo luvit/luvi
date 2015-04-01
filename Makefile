@@ -1,7 +1,6 @@
 LUVI_TAG=$(shell git describe)
 LUVI_ARCH=$(shell uname -s)_$(shell uname -m)
 
-NPROCS:=1
 OS:=$(shell uname -s)
 
 CMAKE_FLAGS+= -H. -Bbuild
@@ -30,13 +29,15 @@ ifdef CPACK_BUNDLE
 	CPACK_FLAGS=-DWithPackageBUNDLE=ON
 endif
 
+ifndef NPROCS
 ifeq ($(OS),Linux)
 	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
 else ifeq ($(OS),Darwin)
 	NPROCS:=$(shell sysctl hw.ncpu | awk '{print $$2}')
 endif
+endif
 
-ifndef GENERATOR
+ifdef NPROCS
   EXTRA_OPTIONS:=-j${NPROCS}
 endif
 
