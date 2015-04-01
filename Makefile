@@ -9,6 +9,10 @@ ifdef GENERATOR
 	CMAKE_FLAGS+= -G"${GENERATOR}"
 endif
 
+ifdef WITHOUT_AMALG
+	CMAKE_FLAGS+= -DWITH_AMALG=OFF
+endif
+
 CPACK_FLAGS=-DWithPackageSH=ON -DWithPackageTGZ=ON -DWithPackageTBZ2=ON
 ifdef CPACK_DEB
 	CPACK_FLAGS=-DWithPackageDEB=ON
