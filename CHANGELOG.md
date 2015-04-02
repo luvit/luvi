@@ -9,6 +9,7 @@ High-level changes between release versions.
  - luv: Fix bug in fs_event_start callback. [George Zhao]
  - luvi: Match lower-case drive letters on windows [Tim Caswell]
  - luvi: No longer include zlib bindings in default build [Tim Caswell]
+ - luvi: Drop "large" build and rename "static" to "regular" [Tim Caswell]
 
 ## v1.0.1
 

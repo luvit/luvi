@@ -46,18 +46,14 @@ luvi: build
 	cmake --build build -- ${EXTRA_OPTIONS}
 
 build:
-	@echo "Please run tiny', 'large', or 'static' make target first to configure"
+	@echo "Please run tiny' or 'regular' make target first to configure"
 
 # Configure the build with minimal dependencies
 tiny: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS)
 
-# Configure the build with everything, use shared libs when possible
-large: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON
-
-# Configure the build with everything, but statically link the deps
-static: deps/luv/CMakeLists.txt
+# Configure the build with openssl statically included
+regular: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF
 
 package: deps/luv/CMakeLists.txt
@@ -93,17 +89,16 @@ publish-src: reset
 	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
 	  --file luvi-src.tar.gz --name luvi-src.tar.gz
 
+publish:
+	$(MAKE) clean publish-tiny
+	$(MAKE) clean publish-regular
+
 publish-tiny: reset
 	$(MAKE) tiny test && \
 	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
 	  --file build/luvi --name luvi-tiny-${LUVI_ARCH}
 
-publish-large: reset
-	$(MAKE) large test && \
+publish-regular: reset
+	$(MAKE) regular test && \
 	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
-	  --file build/luvi --name luvi-large-${LUVI_ARCH}
-
-publish-static: reset
-	$(MAKE) static test && \
-	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
-	  --file build/luvi --name luvi-static-${LUVI_ARCH}
+	  --file build/luvi --name luvi-regular-${LUVI_ARCH}
