@@ -7,7 +7,7 @@ GOTO :build
 
 :static
 ECHO "Building static64"
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithZLIB=ON -DWithSharedZLIB=OFF -H. -Bbuild  -G"Visual Studio 12 Win64"
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild  -G"Visual Studio 12 Win64"
 GOTO :end
 
 :tiny
