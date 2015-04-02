@@ -2,6 +2,14 @@
 
 High-level changes between release versions.
 
+## v1.1.0
+
+ - luv: Hard exit on uncaught exceptions in event callbacks [Tim Caswell]
+ - luv: Remove fprintf for errors. [Ryan Phillips]
+ - luv: Fix bug in fs_event_start callback. [George Zhao]
+ - luvi: Match lower-case drive letters on windows [Tim Caswell]
+ - luvi: No longer include zlib bindings in default build [Tim Caswell]
+
 ## v1.0.1
 
  - lua-openssl: Update to latest [Ryan Phillips]
