@@ -83,7 +83,7 @@ github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Rel
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi_renamed.lib --name luvi_renamed-regular-Windows-amd64.lib
 GOTO :end
 
-:publish-regular
+:publish
 CALL make.bat clean
 CALL make.bat publish-tiny
 CALL make.bat clean
