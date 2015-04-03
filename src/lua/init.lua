@@ -424,7 +424,7 @@ return function(args)
       _G.p = mainRequire('pretty-print').prettyPrint
     end
 
-    local fn = assert(loadstring(main, "bundle:main.lua"))
+    local fn = assert(loadstring(main, "bundle:" .. mainPath))
     if mainRequire then
       setfenv(fn, setmetatable({
         require = mainRequire
