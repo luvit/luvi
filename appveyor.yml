@@ -3,7 +3,7 @@ configuration: Release
 environment:
   matrix:
     - BUILD_TYPE: tiny
-    - BUILD_TYPE: static
+    - BUILD_TYPE: regular
 
 matrix:
   fast_finish: true

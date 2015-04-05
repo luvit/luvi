@@ -2,8 +2,7 @@ language: c
 
 env:
   - BUILD_TYPE=tiny
-  - BUILD_TYPE=large
-  - BUILD_TYPE=static
+  - BUILD_TYPE=regular
 
 os:
   - linux
