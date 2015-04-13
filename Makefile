@@ -68,9 +68,10 @@ clean:
 
 test: luvi
 	rm -f test.bin
-	LUVI_APP=samples/test.app build/luvi 1 2 3 4
-	LUVI_APP=samples/test.app LUVI_TARGET=test.bin build/luvi
-	LUVI_app= ./test.bin 1 2 3 4
+	build/luvi samples/test.app -- 1 2 3 4
+	cd samples/test.app && ../../build/luvi -- 1 2 3 4 && cd -
+	build/luvi samples/test.app test.bin
+	./test.bin 1 2 3 4
 	rm -f test.bin
 install: luvi
 	install -p build/luvi /usr/local/bin
