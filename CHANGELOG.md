@@ -2,6 +2,17 @@
 
 High-level changes between release versions.
 
+## v2.0.0
+
+ - luvi: Major change in interface to use command-line args instead of
+     environment variables. [Tim Caswell]
+ - libuv: Update to latest in v1.x branch. [Tim Caswell]
+ - luajit: Switch to v2.1 branch. [Tim Caswell]
+ - luv: Add threading support [George Zhao]
+ - lua-openssl: Update to latest upstream. [Tim Caswell]
+ - openssl: Fix build for arm devices [Ryan Phillips]
+ - luvi: Add string lua 5.3 compat apis, pack,unpack,packsize [George Zhao]
+
 ## v1.1.0
 
  - luv: Hard exit on uncaught exceptions in event callbacks [Tim Caswell]
