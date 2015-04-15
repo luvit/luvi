@@ -181,13 +181,11 @@ writer:add("data.json", '{"name":"Tim","age":32}\n', 9)
 writer:add("a/big/file.dat", string.rep("12345\n", 10000), 9)
 writer:add("main.lua", 'print(require("luvi").version)', 9)
 
-p(writer:finalize())
+p("zip bytes", #writer:finalize())
 
 
 local zlib
-if not pcall(function() zlib = require("zlib") end) then
-  print("zlib unavailable")
-else
+if pcall(function() zlib = require("zlib") end) then
   print("Testing zlib")
   p("zlib version", zlib.version())
   local tozblob = bundle.readfile("sonnet-133.txt")

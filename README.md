@@ -20,9 +20,9 @@ git init myapp
 # Write the app
 vim myapp/main.lua
 # Run the app
-LUVI_APP=myapp luvi
+luvi myapp
 # Build the binary when done
-LUVI_APP=myapp LUVI_TARGET=mybinary luvi
+luvi myapp -o mybinary
 # Run the new self-contained binary
 ./mybinary
 # Deploy / Publish / Profit!
@@ -185,7 +185,7 @@ The following platforms are supported:
  - Windows (amd64)
  - FreeBSD 10.1 (amd64)
  - Raspberry PI Raspbian (armv6)
- - BeagleBone Black Debian (armv7)
+ - Raspberry PI 2 Raspbian (armv7)
  - Ubuntu 14.04 (x86_64)
  - OSX Yosemite (x86_64)
 
@@ -220,86 +220,45 @@ $ ls -lh build/luvi
 Run it to see usage information:
 
 ```sh
-$ ./build/luvi
+$ luvi -h
 
-Luvi Usage Instructions:
+Usage: luvi bundle+ [options] [-- extra args]
 
-    Bare Luvi uses environment variables to configure its runtime parameters.
+  bundle            Path to directory or zip file containing bundle source.
+                    `bundle` can be specified multiple times to layer bundles
+                    on top of eachother.
+  --version         Show luvi version and compiled in options.
+  --output target   Build a luvi app by zipping the bundle and inserting luvi.
+  --help            Show this help file.
+  --                All args after this go to the luvi app itself.
 
-    LUVI_APP is a colon separated list of paths to folders and/or zip files to
-             be used as the bundle virtual file system.  Items are searched in
-             the paths from left to right.
+Examples:
 
-    LUVI_TARGET is set when you wish to build a new binary instead of running
-                directly out of the raw folders.  Set this in addition to
-                LUVI_APP and luvi will build a new binary with the vfs embedded
-                inside as a single zip file at the end of the executable.
+  # Run an app from disk, but pass in arguments
+  luvi path/to/app -- app args
 
-    Examples:
+  # Run from a app zip
+  luvi path/to/app.zip
 
-      # Run luvit directly from the filesystem (like a git checkout)
-      LUVI_APP=luvit/app ./build/luvi
+  # Run an app that layers on top of luvit
+  luvi path/to/app path/to/luvit
 
-      # Run an app that layers on top of luvit
-      LUVI_APP=myapp:luvit/app ./build/luvi
-
-      # Build the luvit binary
-      LUVI_APP=luvit/app LUVI_TARGET=./luvit ./build/luvi
-
-      # Run the new luvit binary
-      ./luvit
-
-      # Run an app that layers on top of luvit (note trailing semicolon)
-      LUVI_APP=myapp; ./luvit
-
-      # Build your app
-      LUVI_APP=myapp; LUVI_TARGET=mybinary ./luvit
+  # Bundle an app with luvi to create standalone
+  luvi path/to/app -o target
+  ./target some args
 ```
 
 You can run the sample repl app by doing:
 
 ```sh
-LUVI_APP=samples/repl.app build/luvi
+build/luvi samples/repl.app
 ```
 
 Ot the test suite with:
 
 ```sh
-LUVI_APP=samples/test.app build/luvi
+build/luvi samples/test.app
 ```
-
-## Multiple Mains
-
-Luvi also has a feature where you can reuse the same binary bundle for
-multiple commands.  This is done by reading the value of `argv[0]` and looking
-for a main in `"main/" .. basename(args[0]) .. ".lua"`. before looking in
-`main.lua`.
-
-To use this you will typically create multiple mains in your bundle, one for
-each command you want to support.  Then when installing your app/utility,
-create a symlink to the main binary in the user's `$PATH` but named after each
-command.
-
-Here is an example that has two entry points, `add` and `subtract`
-
-```sh
-mkdir main
-vi main/add.lua
-vi main/subtract.lua
-```
-
-Then create symlinks somewhere points to luvi (or an old version of your
-binary)
-
-```sh
-ln -s luvi add
-ln -s luvi subtract
-```
-
-Then when you run theses symlinks, luvi will use the custom mains.
-
-All the previous rules about LUVI_APP and bundled zips in the binary still
-apply here.
 
 ## CMake Flags
 
@@ -337,4 +296,4 @@ cmake \
 ```
 
 
-[Prebuilt binaries]: https://github.com/luvit/luvi-binaries
+[Prebuilt binaries]: https://github.com/luvit/luvi/releases
