@@ -164,11 +164,11 @@ local function folderBundle(base)
     fd, err = uv.fs_open(path, "r", 0644)
     if not fd then return nil, err end
     stat, err = uv.fs_fstat(fd)
-    if not stat then return nil, err end
-    data, err = uv.fs_read(fd, stat.size, 0)
-    if not data then return nil, err end
+    if stat then
+      data, err = uv.fs_read(fd, stat.size, 0)
+    end
     uv.fs_close(fd)
-    return data
+    return data, err
   end
 
   return bundle
