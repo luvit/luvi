@@ -23,7 +23,7 @@ GOTO :end
 
 :test
 IF NOT EXIST luvi.exe CALL Make.bat
-luvi.exe samples\test.app 1 2 3 4
+luvi.exe samples\test.app -- 1 2 3 4
 luvi.exe samples\test.app -o test.exe
 test.exe 1 2 3 4
 DEL /Q test.exe
