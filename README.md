@@ -22,7 +22,7 @@ vim myapp/main.lua
 # Run the app
 luvi myapp
 # Build the binary when done
-luvi myapp mybinary
+luvi myapp -o mybinary
 # Run the new self-contained binary
 ./mybinary
 # Deploy / Publish / Profit!
@@ -185,7 +185,7 @@ The following platforms are supported:
  - Windows (amd64)
  - FreeBSD 10.1 (amd64)
  - Raspberry PI Raspbian (armv6)
- - BeagleBone Black Debian (armv7)
+ - Raspberry PI 2 Raspbian (armv7)
  - Ubuntu 14.04 (x86_64)
  - OSX Yosemite (x86_64)
 
@@ -220,36 +220,32 @@ $ ls -lh build/luvi
 Run it to see usage information:
 
 ```sh
-$ luvi
+$ luvi -h
 
-Usage: luvi bundles... [-- extra args]
+Usage: luvi bundle+ [options] [-- extra args]
 
-    If target is omitted, the current working directory will be assumed.
-    Target is the path to a folder or zip file containing your app.
+  bundle            Path to directory or zip file containing bundle source.
+                    `bundle` can be specified multiple times to layer bundles
+                    on top of eachother.
+  --version         Show luvi version and compiled in options.
+  --output target   Build a luvi app by zipping the bundle and inserting luvi.
+  --help            Show this help file.
+  --                All args after this go to the luvi app itself.
 
-    Everything after a "--" argument will be passed through to the actual app.
+Examples:
 
-    You can pass in more than one target paths to folders and/or zip files to
-    be used as the bundle virtual file system.  These will be layered on top
-    of eachother. Items are searched in the paths from left to right.
+  # Run an app from disk, but pass in arguments
+  luvi path/to/app -- app args
 
-    Examples:
+  # Run from a app zip
+  luvi path/to/app.zip
 
-      # Run luvit directly from the filesystem (like a git checkout)
-      luvi luvit/app
+  # Run an app that layers on top of luvit
+  luvi path/to/app path/to/luvit
 
-      # Run the app in cwd, but pass some args
-      luvi -- my args
-
-      # Run an app that layers on top of luvit
-      luvi myapp luvit/app
-
-      # Run an app from disk, but pass in arguments
-      luvi myapp -- some args
-
-      # Zip an app and append to luvi as standalone executible
-      luvi myapp target
-      ./target some args
+  # Bundle an app with luvi to create standalone
+  luvi path/to/app -o target
+  ./target some args
 ```
 
 You can run the sample repl app by doing:

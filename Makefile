@@ -69,8 +69,7 @@ clean:
 test: luvi
 	rm -f test.bin
 	build/luvi samples/test.app -- 1 2 3 4
-	cd samples/test.app && ../../build/luvi -- 1 2 3 4 && cd -
-	build/luvi samples/test.app test.bin
+	build/luvi samples/test.app -o test.bin
 	./test.bin 1 2 3 4
 	rm -f test.bin
 install: luvi

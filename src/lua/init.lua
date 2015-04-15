@@ -375,43 +375,26 @@ local function combinedBundle(bundles)
   return bundle
 end
 
-local function makeBundle(app)
-  if app and (#app > 0) then
-    -- Split the string by ; leaving empty strings on ends
-    local parts = {}
-    local n = 1
-    for part in string.gmatch(app, '([^;]*)') do
-      if not parts[n] then
-        local path
-        if part == "" then
-          path = uv.exepath()
-        else
-          path = pathJoin(uv.cwd(), part)
-        end
-        local bundle
-        local zip = miniz.new_reader(path)
-        if zip then
-          bundle = zipBundle(path, zip)
-        else
-          local stat = uv.fs_stat(path)
-          if not stat or stat.type ~= "directory" then
-            print("ERROR: " .. path .. " is not a zip file or a folder")
-            return
-          end
-          bundle = folderBundle(path)
-        end
-        parts[n] = bundle
+local function makeBundle(parts)
+  for n = 1, #parts do
+    local path = pathJoin(uv.cwd(), parts[n])
+    local bundle
+    local zip = miniz.new_reader(path)
+    if zip then
+      bundle = zipBundle(path, zip)
+    else
+      local stat = uv.fs_stat(path)
+      if not stat or stat.type ~= "directory" then
+        error("ERROR: " .. path .. " is not a zip file or a folder")
       end
-      if part == "" then n = n + 1 end
+      bundle = folderBundle(path)
     end
-    if #parts == 1 then
-      return parts[1]
-    end
-    return combinedBundle(parts)
+    parts[n] = bundle
   end
-  local path = uv.exepath()
-  local zip = miniz.new_reader(path)
-  if zip then return zipBundle(path, zip) end
+  if #parts == 1 then
+    return parts[1]
+  end
+  return combinedBundle(parts)
 end
 
 local function commonBundle(bundle, args)
@@ -495,6 +478,51 @@ local function generateOptionsString()
   return table.concat(s, "\n")
 end
 
+local commands = {
+  ["-o"] = "output",
+  ["--output"] = "output",
+  ["-v"] = "version",
+  ["--version"] = "version",
+  ["-h"] = "help",
+  ["--help"] = "help",
+}
+
+local function version(args)
+  print(string.format("%s %s", args[0], luvi.version))
+  print(generateOptionsString())
+end
+
+local function help(args)
+
+  local usage = [[
+Usage: $(LUVI) bundle+ [options] [-- extra args]
+
+  bundle            Path to directory or zip file containing bundle source.
+                    `bundle` can be specified multiple times to layer bundles
+                    on top of eachother.
+  --version         Show luvi version and compiled in options.
+  --output target   Build a luvi app by zipping the bundle and inserting luvi.
+  --help            Show this help file.
+  --                All args after this go to the luvi app itself.
+
+Examples:
+
+  # Run an app from disk, but pass in arguments
+  $(LUVI) path/to/app -- app args
+
+  # Run from a app zip
+  $(LUVI) path/to/app.zip
+
+  # Run an app that layers on top of luvit
+  $(LUVI) path/to/app path/to/luvit
+
+  # Bundle an app with luvi to create standalone
+  $(LUVI) path/to/app -o target
+  ./target some args
+]]
+  print((string.gsub(usage, "%$%(LUVI%)", args[0])))
+end
+
 return function(args)
 
   -- First check for a bundled zip file appended to the executible
@@ -504,77 +532,68 @@ return function(args)
     return commonBundle(zipBundle(path, zip), args)
   end
 
-  -- Look for luvi args with app args separated with "--"
-  local luviArgs = { [0] = args[0] }
+  -- Parse the arguments
+  local bundles = { }
+  local options = {}
   local appArgs = { [0] = args[0] }
 
-  local list = luviArgs
-
+  local key
   for i = 1, #args do
     local arg = args[i]
     if arg == "--" then
-      list = appArgs
+      for j = i + 1, #args do
+        appArgs[#appArgs + 1] = args[j]
+      end
+      break
+    elseif key then
+      options[key] = arg
+      key = nil
     else
-      list[#list + 1] = arg
+      local command = commands[arg]
+      if options[command] then
+        error("Duplicate flags: " .. command)
+      end
+      if command == "output" then
+        key = "output"
+      elseif command then
+        options[command] = true
+      else
+        if arg:sub(1, 1) == "-" then
+          error("Unknown flag: " .. arg)
+        end
+        bundles[#bundles + 1] = arg
+      end
     end
   end
 
-  path = table.remove(luviArgs, 1) or uv.cwd()
-  local target = table.remove(luviArgs, 1)
-
-  if #luviArgs > 0 then
-    error("Extra luvi arguments, did you mean app args using '--'?")
+  if key then
+    error("Missing value for option: " .. key)
   end
 
-  local bundle = makeBundle(path)
-  if bundle then
-    if bundle.readfile("main.lua") then
-      if target then return buildBundle(target, bundle) end
-      return commonBundle(bundle, appArgs)
-    else
-      print("No main.lua found in " .. path)
-    end
+  -- Show help and version by default
+  if #bundles == 0 and not options.version and not options.help then
+    options.version = true
+    options.help = true
   end
 
-  local prefix = string.format("%s %s", args[0], luvi.version)
-  local options = generateOptionsString()
-  local usage = [[
+  if options.version then
+    version(args)
+  end
+  if options.help then
+    help(args)
+  end
 
-Usage: $(LUVI) bundles... [-- extra args]
+  -- Don't run app when printing version or help
+  if options.version or options.help then return -1 end
 
-    If target is omitted, the current working directory will be assumed.
-    Target is the path to a folder or zip file containing your app.
+  local bundle = assert(makeBundle(bundles))
 
-    Everything after a "--" argument will be passed through to the actual app.
+  -- Build the app if output is given
+  if options.output then
+    return buildBundle(options.output, bundle)
+  end
 
-    You can pass in more than one target paths to folders and/or zip files to
-    be used as the bundle virtual file system.  These will be layered on top
-    of eachother. Items are searched in the paths from left to right.
-
-    Examples:
-
-      # Run luvit directly from the filesystem (like a git checkout)
-      $(LUVI) luvit/app
-
-      # Run the app in cwd, but pass some args
-      $(LUVI) -- my args
-
-      # Run an app that layers on top of luvit
-      $(LUVI) myapp luvit/app
-
-      # Run an app from disk, but pass in arguments
-      $(LUVI) myapp -- some args
-
-      # Zip an app and append to luvi as standalone executible
-      $(LUVI) myapp target
-      ./target some args
-
-]]
-  usage = string.gsub(usage, "%$%(LUVI%)", args[0])
-  print(prefix)
-  print()
-  print(options)
-  print(usage)
-  return -1
+  -- Run the luvi app with the extra args
+  return commonBundle(bundle, appArgs)
 
 end

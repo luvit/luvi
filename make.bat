@@ -23,34 +23,22 @@ GOTO :end
 
 :test
 IF NOT EXIST luvi.exe CALL Make.bat
-SET LUVI_APP=samples\test.app
-luvi.exe
-SET LUVI_TARGET=test.exe
-luvi.exe
-SET "LUVI_APP="
-SET "LUVI_TARGET="
-test.exe
+luvi.exe samples\test.app 1 2 3 4
+luvi.exe samples\test.app -o test.exe
+test.exe 1 2 3 4
 DEL /Q test.exe
 GOTO :end
 
 :winsvc
 IF NOT EXIST luvi.exe CALL Make.bat
 DEL /Q winsvc.exe
-SET LUVI_APP=samples\winsvc.app
-SET LUVI_TARGET=winsvc.exe
-luvi.exe
-SET "LUVI_APP="
-SET "LUVI_TARGET="
+luvi.exe samples\winsvc.app -o winsvc.exe
 GOTO :end
 
 :repl
 IF NOT EXIST luvi.exe CALL Make.bat
 DEL /Q repl.exe
-SET LUVI_APP=samples\repl.app
-SET LUVI_TARGET=repl.exe
-luvi.exe
-SET "LUVI_APP="
-SET "LUVI_TARGET="
+luvi.exe samples/repl.app -o repl.exe
 GOTO :end
 
 
