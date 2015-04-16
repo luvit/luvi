@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.0.1
+
+ - luajit: Go back to stable 2.0.3 version [Tim Caswell]
+
 ## v2.0.0
 
  - luvi: Major change in interface to use command-line args instead of
