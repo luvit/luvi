@@ -18,7 +18,7 @@ before_script:
   - sudo apt-get install cmake
 
 script:
-  - make ${BUILD_TYPE}
+  - WITHOUT_AMALG=1 make ${BUILD_TYPE}
   - make test
 
 notifications:
