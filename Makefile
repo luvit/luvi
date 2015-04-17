@@ -3,7 +3,7 @@ LUVI_ARCH=$(shell uname -s)_$(shell uname -m)
 
 OS:=$(shell uname -s)
 
-CMAKE_FLAGS+= -H. -Bbuild
+CMAKE_FLAGS+= -H. -Bbuild -DCMAKE_BUILD_TYPE=RelWithDebInfo
 ifdef GENERATOR
 	CMAKE_FLAGS+= -G"${GENERATOR}"
 endif

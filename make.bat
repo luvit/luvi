@@ -17,8 +17,8 @@ GOTO :end
 
 :build
 IF NOT EXIST build CALL Make.bat regular
-cmake --build build --config Release -- /maxcpucount
-COPY build\Release\luvi.exe .
+cmake --build build --config RelWithDebInfo -- /maxcpucount
+COPY build\RelWithDebInfo\luvi.exe .
 GOTO :end
 
 :test
@@ -58,8 +58,8 @@ CALL make.bat reset
 CALL make.bat tiny
 CALL make.bat test
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-tiny-Windows-amd64.exe
-github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi.lib --name luvi-tiny-Windows-amd64.lib
-github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi_renamed.lib --name luvi_renamed-tiny-Windows-amd64.lib
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\RelWithDebInfo\luvi.lib --name luvi-tiny-Windows-amd64.lib
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\RelWithDebInfo\luvi_renamed.lib --name luvi_renamed-tiny-Windows-amd64.lib
 GOTO :end
 
 :publish-regular
@@ -67,8 +67,8 @@ CALL make.bat reset
 CALL make.bat regular
 CALL make.bat test
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-regular-Windows-amd64.exe
-github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi.lib --name luvi-regular-Windows-amd64.lib
-github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi_renamed.lib --name luvi_renamed-regular-Windows-amd64.lib
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\RelWithDebInfo\luvi.lib --name luvi-regular-Windows-amd64.lib
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\RelWithDebInfo\luvi_renamed.lib --name luvi_renamed-regular-Windows-amd64.lib
 GOTO :end
 
 :publish
