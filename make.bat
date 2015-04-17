@@ -17,7 +17,7 @@ GOTO :end
 
 :build
 IF NOT EXIST build CALL Make.bat regular
-cmake --build build --config Release -- /maxcpucount
+cmake --build build --config RelWithDebInfo -- /maxcpucount
 COPY build\Release\luvi.exe .
 GOTO :end
 
