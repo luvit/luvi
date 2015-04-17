@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.0.2
+
+ - luvi: Add back custom main as a command-line flag `-m` [Tim Caswell]
+ - luv: Merge uv.new_thread with uv.create_thread. [Tim Caswell]
+
 ## v2.0.1
 
  - luajit: Go back to stable 2.0.3 version [Tim Caswell]
