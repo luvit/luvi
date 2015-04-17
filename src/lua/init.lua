@@ -397,7 +397,7 @@ local function makeBundle(parts)
   return combinedBundle(parts)
 end
 
-local function commonBundle(bundle, args)
+local function commonBundle(bundle, args, mainPath)
 
   luvi.makeBundle = makeBundle
   luvi.bundle = bundle
@@ -435,7 +435,7 @@ local function commonBundle(bundle, args)
     end
   end
 
-  local mainPath = "main.lua"
+  mainPath = mainPath or "main.lua"
   local main = bundle.readfile(mainPath)
 
   if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
@@ -481,6 +481,8 @@ end
 local commands = {
   ["-o"] = "output",
   ["--output"] = "output",
+  ["-m"] = "main",
+  ["--main"] = "main",
   ["-v"] = "version",
   ["--version"] = "version",
   ["-h"] = "help",
@@ -502,6 +504,7 @@ Usage: $(LUVI) bundle+ [options] [-- extra args]
                     on top of eachother.
   --version         Show luvi version and compiled in options.
   --output target   Build a luvi app by zipping the bundle and inserting luvi.
+  --main path       Specify a custom main bundle path (normally main.lua)
   --help            Show this help file.
   --                All args after this go to the luvi app itself.
 
@@ -519,6 +522,9 @@ Examples:
   # Bundle an app with luvi to create standalone
   $(LUVI) path/to/app -o target
   ./target some args
+
+  # Run unit tests for a luvi app using custom main
+  $(LUVI) path/to/app -m tests/run.lua
 ]]
   print((string.gsub(usage, "%$%(LUVI%)", args[0])))
 end
@@ -553,8 +559,8 @@ return function(args)
       if options[command] then
         error("Duplicate flags: " .. command)
       end
-      if command == "output" then
-        key = "output"
+      if command == "output" or command == "main" then
+        key = command
       elseif command then
         options[command] = true
       else
@@ -594,6 +600,6 @@ return function(args)
   end
 
   -- Run the luvi app with the extra args
-  return commonBundle(bundle, appArgs)
+  return commonBundle(bundle, appArgs, options.main)
 
 end

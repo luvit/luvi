@@ -229,6 +229,7 @@ Usage: luvi bundle+ [options] [-- extra args]
                     on top of eachother.
   --version         Show luvi version and compiled in options.
   --output target   Build a luvi app by zipping the bundle and inserting luvi.
+  --main path       Specify a custom main bundle path (normally main.lua)
   --help            Show this help file.
   --                All args after this go to the luvi app itself.
 
@@ -246,6 +247,9 @@ Examples:
   # Bundle an app with luvi to create standalone
   luvi path/to/app -o target
   ./target some args
+
+  # Run unit tests for a luvi app using custom main
+  luvi path/to/app -m tests/run.lua
 ```
 
 You can run the sample repl app by doing:
