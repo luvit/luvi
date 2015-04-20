@@ -161,9 +161,11 @@ local function folderBundle(base)
   function bundle.readfile(path)
     path = pathJoin(base, "./" .. path)
     local fd, stat, data, err
+    stat, err = uv.fs_stat(path)
+    if not stat then return nil, err end
+    if stat.type ~= "file" then return end
     fd, err = uv.fs_open(path, "r", 0644)
     if not fd then return nil, err end
-    stat, err = uv.fs_fstat(fd)
     if stat then
       data, err = uv.fs_read(fd, stat.size, 0)
     end
