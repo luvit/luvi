@@ -377,9 +377,11 @@ local function combinedBundle(bundles)
   return bundle
 end
 
-local function makeBundle(parts)
-  for n = 1, #parts do
-    local path = pathJoin(uv.cwd(), parts[n])
+local function makeBundle(bundlePaths)
+  local parts = {}
+  for n = 1, #bundlePaths do
+    local path = pathJoin(uv.cwd(), bundlePaths[n])
+    bundlePaths[n] = path
     local bundle
     local zip = miniz.new_reader(path)
     if zip then
@@ -399,10 +401,15 @@ local function makeBundle(parts)
   return combinedBundle(parts)
 end
 
-local function commonBundle(bundle, args, mainPath)
+local function commonBundle(bundle, args, bundlePaths, mainPath)
 
   luvi.makeBundle = makeBundle
   luvi.bundle = bundle
+
+  mainPath = mainPath or "main.lua"
+
+  bundle.paths = bundlePaths
+  bundle.mainPath = mainPath
 
   luvi.path = {
     join = pathJoin,
@@ -437,7 +444,6 @@ local function commonBundle(bundle, args, mainPath)
     end
   end
 
-  mainPath = mainPath or "main.lua"
   local main = bundle.readfile(mainPath)
 
   if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
@@ -537,7 +543,7 @@ return function(args)
   local path = uv.exepath()
   local zip = miniz.new_reader(path)
   if zip then
-    return commonBundle(zipBundle(path, zip), args)
+    return commonBundle(zipBundle(path, zip), args, {path})
   end
 
   -- Parse the arguments
@@ -602,6 +608,6 @@ return function(args)
   end
 
   -- Run the luvi app with the extra args
-  return commonBundle(bundle, appArgs, options.main)
+  return commonBundle(bundle, appArgs, bundles, options.main)
 
 end
