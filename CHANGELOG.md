@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.0.3
+
+ - luvi: Expose `bundle.mainPath` and `bundle.paths` [Tim Caswell]
+ - luvi: Fix `bundle.readfile` for BSD. [Tim Caswell]
+
 ## v2.0.2
 
  - luvi: Add back custom main as a command-line flag `-m` [Tim Caswell]
