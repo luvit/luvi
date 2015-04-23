@@ -28,7 +28,7 @@ local tmpBase = os == "Windows" and (env.get("TMP") or uv.cwd()) or
                                     (env.get("TMPDIR") or '/tmp')
 
 if os == "Windows" then
-  -- Windows aware path utils
+  -- Windows aware path utilities
   function getPrefix(path)
     return path:match("^%a:\\") or
            path:match("^/") or
@@ -51,7 +51,7 @@ if os == "Windows" then
     end
   end
 else
-  -- Simple optimized versions for unix systems
+  -- Simple optimized versions for UNIX systems
   function getPrefix(path)
     return path:match("^/")
   end
@@ -257,7 +257,7 @@ local function zipBundle(base, zip)
     return zip:extract(index)
   end
 
-  -- Support zips with a single folder inserted at toplevel
+  -- Support zips with a single folder inserted at top-level
   local entries = bundle.readdir("")
   if #entries == 1 and bundle.stat(entries[1]).type == "directory" then
     chrootBundle(bundle, entries[1] .. '/')
@@ -317,7 +317,8 @@ local function buildBundle(target, bundle)
   return
 end
 
--- Given a list of bundles, merge them into a single vfs.  Lower indexed items overshawdow later items.
+-- Given a list of bundles, merge them into a single VFS.  Lower indexed items
+-- overshadow later items.
 local function combinedBundle(bundles)
   local bases = {}
   for i = 1, #bundles do
@@ -509,7 +510,7 @@ Usage: $(LUVI) bundle+ [options] [-- extra args]
 
   bundle            Path to directory or zip file containing bundle source.
                     `bundle` can be specified multiple times to layer bundles
-                    on top of eachother.
+                    on top of each other.
   --version         Show luvi version and compiled in options.
   --output target   Build a luvi app by zipping the bundle and inserting luvi.
   --main path       Specify a custom main bundle path (normally main.lua)
@@ -539,7 +540,7 @@ end
 
 return function(args)
 
-  -- First check for a bundled zip file appended to the executible
+  -- First check for a bundled zip file appended to the executable
   local path = uv.exepath()
   local zip = miniz.new_reader(path)
   if zip then
