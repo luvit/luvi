@@ -466,7 +466,12 @@ local function commonBundle(bundle, args, bundlePaths, mainPath)
   local fn = assert(loadstring(main, "bundle:" .. mainPath))
   if mainRequire then
     setfenv(fn, setmetatable({
-      require = mainRequire
+      require = mainRequire,
+      module = {
+        exports = {},
+        dir = "bundle:" .. pathJoin(mainPath, ".."),
+        path = "bundle:" .. mainPath,
+      }
     }, {
       __index=_G
     }))
