@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.9)
 
 project(luvi C)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 if(MSVC)
   # Statically build against C runtime (use the right version for Release/Debug)
   set(CompilerFlags
@@ -23,6 +25,7 @@ exec_program(
     ARGS "describe" "--tags"
     OUTPUT_VARIABLE LUVI_VERSION)
 
+option(WithSharedLibluv "Shared or Static libluv" OFF)
 option(WithOpenSSL "Include OpenSSL" OFF)
 option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
 option(WithZLIB "Include ZLIB" OFF)
@@ -35,8 +38,31 @@ option(WithPackageRPM "Build RPM package." OFF)
 option(WithPackageNSIS "Build NSIS package." OFF)
 option(WithPackageBUNDLE "Build OSX bundle." OFF)
 
-include(deps/luv/deps/luajit.cmake)
-include(deps/luv/deps/uv.cmake)
+if (WithSharedLibluv)
+  # Building against a shared libluv provides that libluajit and libuv exists
+  find_package(Libluv)
+  find_package(LuaJIT)
+  find_package(Libuv)
+  if (LIBLUV_FOUND)
+    include_directories(${LIBLUV_INCLUDE_DIR})
+  endif (LIBLUV_FOUND)
+  if (LUAJIT_FOUND)
+    include_directories(${LUAJIT_INCLUDE_DIR})
+    link_directories(${LUAJIT_LIBRARIES})
+  endif (LUAJIT_FOUND)
+  if (LIBUV_FOUND)
+    include_directories(${LIBUV_INCLUDE_DIR})
+  endif (LIBUV_FOUND)
+  include(LuaJITAddExecutable)
+else (WithSharedLibluv)
+  # Build luv as static library insteas as module
+  set(BUILD_MODULE OFF CACHE STRING "Build luv as static library")
+  include_directories(deps/luv/src)
+  include_directories(deps/luv/deps/libuv/include)
+  include_directories(deps/luv/deps/luajit/src)
+  add_subdirectory(deps/luv)
+endif (WithSharedLibluv)
+
 
 if (WithOpenSSL)
   include(deps/openssl.cmake)
@@ -76,9 +102,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 endif()
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
-  target_link_libraries(luvi uv lua51 rt ${EXTRA_LIBS})
+  target_link_libraries(luvi uv luajit-5.1 luv rt ${EXTRA_LIBS})
 else()
-  target_link_libraries(luvi uv lua51 ${EXTRA_LIBS})
+  target_link_libraries(luvi uv lua51 luv ${EXTRA_LIBS})
 endif()
 
 ###############################################################################

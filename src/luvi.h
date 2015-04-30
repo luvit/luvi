@@ -20,8 +20,8 @@
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
-#include "../deps/luv/deps/libuv/include/uv.h"
-#include "../deps/luv/src/luv.h"
+#include "uv.h"
+#include "luv.h"
 
 #include <string.h>
 #include <stdlib.h>
