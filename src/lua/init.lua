@@ -445,9 +445,6 @@ local function commonBundle(bundle, args, bundlePaths, mainPath)
     end
   end
 
-  local main = bundle.readfile(mainPath)
-
-  if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
   _G.args = args
 
   -- Auto-register the require system if present
@@ -455,7 +452,7 @@ local function commonBundle(bundle, args, bundlePaths, mainPath)
   local stat = bundle.stat("deps/require.lua")
   if stat and stat.type == "file" then
     bundle.register('require', "deps/require.lua")
-    mainRequire = require('require')("bundle:" .. mainPath)
+    mainRequire = require('require')("bundle:main.lua")
   end
 
   -- Auto-setup global p and libuv version of print
@@ -463,20 +460,14 @@ local function commonBundle(bundle, args, bundlePaths, mainPath)
     _G.p = mainRequire('pretty-print').prettyPrint
   end
 
-  local fn = assert(loadstring(main, "bundle:" .. mainPath))
   if mainRequire then
-    setfenv(fn, setmetatable({
-      require = mainRequire,
-      module = {
-        exports = {},
-        dir = "bundle:" .. pathJoin(mainPath, ".."),
-        path = "bundle:" .. mainPath,
-      }
-    }, {
-      __index=_G
-    }))
+    return mainRequire(mainPath)
+  else
+    local main = bundle.readfile(mainPath)
+    if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
+    local fn = assert(loadstring(main, "bundle:" .. mainPath))
+    return fn(unpack(args))
   end
-  return fn(unpack(args))
 
 end
 

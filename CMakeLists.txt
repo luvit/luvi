@@ -102,7 +102,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 endif()
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
-  target_link_libraries(luvi uv luajit-5.1 luv rt ${EXTRA_LIBS})
+  target_link_libraries(luvi uv lua51 luv rt ${EXTRA_LIBS})
 else()
   target_link_libraries(luvi uv lua51 luv ${EXTRA_LIBS})
 endif()
