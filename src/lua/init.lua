@@ -267,7 +267,6 @@ local function zipBundle(base, zip)
 end
 
 local function buildBundle(target, bundle)
-  local miniz = require('miniz')
   target = pathJoin(uv.cwd(), target)
   print("Creating new binary: " .. target)
   local fd = assert(uv.fs_open(target, "w", 511)) -- 0777
@@ -461,7 +460,7 @@ local function commonBundle(bundle, args, bundlePaths, mainPath)
   end
 
   if mainRequire then
-    return mainRequire(mainPath)
+    return mainRequire("./" .. mainPath)
   else
     local main = bundle.readfile(mainPath)
     if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
