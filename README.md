@@ -206,6 +206,7 @@ If you're on windows, there is a `make.bat` file that works mostly like the unix
 ```sh
 cd luvi
 make
+make test
 ```
 
 When that's done you should have a shiny little binary `in build/luvi`.
