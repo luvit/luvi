@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.0.4
+
+ - luvi: When require is bootstrapped, load main in it's environment. [Tim Caswell]
+ - luv: Remove printf in luv_status [Ryan Phillips]
+
 ## v2.0.3
 
  - luvi: Expose `bundle.mainPath` and `bundle.paths` [Tim Caswell]
