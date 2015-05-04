@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.0.5
+
+ - luvi: Bump lua-openssl for signature verification improvements [Ryan Phillips]
+ - luvi: Documentation tweak in README [Lionel Duboeuf]
+
 ## v2.0.4
 
  - luvi: When require is bootstrapped, load main in it's environment. [Tim Caswell]
