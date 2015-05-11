@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.0.6
+
+ - libuv: Update to v1.5.0 [Tim Caswell]
+ - luvi: Go back to release builds [Ryan Phillips]
+
 ## v2.0.5
 
  - luvi: Bump lua-openssl for signature verification improvements [Ryan Phillips]
