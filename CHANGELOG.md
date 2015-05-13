@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.0.7
+
+ - lua-openssl: Support SNI [George Zhao]
+
 ## v2.0.6
 
  - libuv: Update to v1.5.0 [Tim Caswell]
