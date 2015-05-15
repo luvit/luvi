@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.0.8
+
+ - luajit: Update to v2.0.4 release.
+
 ## v2.0.7
 
  - lua-openssl: Support SNI [George Zhao]
