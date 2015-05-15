@@ -2,7 +2,7 @@
 
 High-level changes between release versions.
 
-## v2.0.8
+## v2.0.9
 
  - luajit: Update to v2.0.4 release.
 
