@@ -10,9 +10,19 @@ ECHO "Building regular64"
 cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild  -G"Visual Studio 12 Win64"
 GOTO :end
 
+:regular32
+ECHO "Building regular32"
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild  -G"Visual Studio 12"
+GOTO :end
+
 :tiny
 ECHO "Building tiny64"
 cmake -H. -Bbuild -G"Visual Studio 12 Win64"
+GOTO :end
+
+:tiny32
+ECHO "Building tiny32"
+cmake -H. -Bbuild -G"Visual Studio 12"
 GOTO :end
 
 :build
@@ -62,6 +72,15 @@ github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Rel
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi_renamed.lib --name luvi_renamed-tiny-Windows-amd64.lib
 GOTO :end
 
+:publish-tiny32
+CALL make.bat reset
+CALL make.bat tiny32
+CALL make.bat test
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-tiny-Windows-ia32.exe
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi.lib --name luvi-tiny-Windows-ia32.lib
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi_renamed.lib --name luvi_renamed-tiny-Windows-ia32.lib
+GOTO :end
+
 :publish-regular
 CALL make.bat reset
 CALL make.bat regular
@@ -71,10 +90,23 @@ github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Rel
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi_renamed.lib --name luvi_renamed-regular-Windows-amd64.lib
 GOTO :end
 
+:publish-regular32
+CALL make.bat reset
+CALL make.bat regular32
+CALL make.bat test
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-regular-Windows-ia32.exe
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi.lib --name luvi-regular-Windows-ia32.lib
+github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi_renamed.lib --name luvi_renamed-regular-Windows-ia32.lib
+GOTO :end
+
 :publish
 CALL make.bat clean
 CALL make.bat publish-tiny
 CALL make.bat clean
+CALL make.bat publish-tiny32
+CALL make.bat clean
 CALL make.bat publish-regular
+CALL make.bat clean
+CALL make.bat publish-regular32
 
 :end
