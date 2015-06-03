@@ -2,6 +2,14 @@
 
 High-level changes between release versions.
 
+## v2.1.0
+
+ - libuv: Update to v1.6.0 release. [Tim Caswell]
+ - luv: Add uv.os_homedir() function. [Tim Caswell]
+ - luv: Add uv.new_socket_poll() function. [runner.mei]
+ - luv: Fix(fs_lstat, enable S_IFLNK [Brian Maher]
+ - lua-openssl: Update to latest. [Ryan Phillips] 
+
 ## v2.0.9
 
  - luajit: Update to v2.0.4 release.
