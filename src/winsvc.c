@@ -296,7 +296,7 @@ static int lua_StartService(lua_State *L) {
   return 2;
 }
 
-static void svcdispatcher_end_cb(uv_handle_t* handle) {
+static void svcdispatcher_end_cb(uv_async_t* handle) {
   svc_dispatch_info *info = (svc_dispatch_info*)handle->data;
   lua_State* L = luv_state(handle->loop);
 
@@ -533,11 +533,11 @@ static int lua_ChangeServiceConfig2(lua_State *L) {
     info.autostart.fDelayedAutostart = GetIntFromTable(L, "fDelayedAutostart");
     break;
   case SERVICE_CONFIG_DESCRIPTION:
-    info.description.lpDescription = GetStringFromTable(L, "lpDescription");
+    info.description.lpDescription = (char*)GetStringFromTable(L, "lpDescription");
     break;
   case SERVICE_CONFIG_FAILURE_ACTIONS:
     info.failure_actions.dwResetPeriod = GetIntFromTable(L, "dwResetPeriod");
-    info.failure_actions.lpRebootMsg = GetStringFromTable(L, "lpRebootMsg");
+    info.failure_actions.lpRebootMsg = (char*)GetStringFromTable(L, "lpRebootMsg");
     lua_pushstring(L, "lpsaActions");
     lua_gettable(L, -2);
     if (lua_type(L, -1) == LUA_TTABLE) {
@@ -568,7 +568,7 @@ static int lua_ChangeServiceConfig2(lua_State *L) {
     info.preshutdown_info.dwPreshutdownTimeout = GetIntFromTable(L, "dwPreshutdownTimeout");
     break;
   case SERVICE_CONFIG_REQUIRED_PRIVILEGES_INFO:
-    info.privileges_info.pmszRequiredPrivileges = GetStringFromTable(L, "pmszRequiredPrivileges");
+    info.privileges_info.pmszRequiredPrivileges = (char*)GetStringFromTable(L, "pmszRequiredPrivileges");
     break;
   case SERVICE_CONFIG_SERVICE_SID_INFO:
     info.sid_info.dwServiceSidType = GetIntFromTable(L, "dwServiceSidType");
