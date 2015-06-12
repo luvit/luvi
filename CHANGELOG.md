@@ -2,13 +2,18 @@
 
 High-level changes between release versions.
 
+## v2.1.1
+
+ - openssl: Bump version to 1.0.2b [Ryan Phillips]
+ - lua-openssl: Update to master [Tim Caswell]
+
 ## v2.1.0
 
  - libuv: Update to v1.6.0 release. [Tim Caswell]
  - luv: Add uv.os_homedir() function. [Tim Caswell]
  - luv: Add uv.new_socket_poll() function. [runner.mei]
  - luv: Fix(fs_lstat, enable S_IFLNK [Brian Maher]
- - lua-openssl: Update to latest. [Ryan Phillips] 
+ - lua-openssl: Update to latest. [Ryan Phillips]
 
 ## v2.0.9
 
