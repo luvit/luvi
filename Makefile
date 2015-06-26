@@ -61,6 +61,9 @@ tiny: deps/luv/CMakeLists.txt
 regular: deps/luv/CMakeLists.txt
 	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF
 
+regular-asm: deps/luv/CMakeLists.txt
+	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithOpenSSLASM=ON
+
 package: deps/luv/CMakeLists.txt
 	cmake --build build -- package
 

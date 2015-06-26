@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8.9)
 
-project(luvi C)
+if(WIN32)
+  set(projects C ASM ASM_MASM)
+else()
+  set(projects C ASM)
+endif()
+
+project(luvi ${projects})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -27,6 +33,7 @@ exec_program(
 
 option(WithSharedLibluv "Shared or Static libluv" OFF)
 option(WithOpenSSL "Include OpenSSL" OFF)
+option(WithOpenSSLASM "Enable Assembly Optimizations" OFF)
 option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
 option(WithZLIB "Include ZLIB" OFF)
 option(WithSharedZLIB "Shared or Static ZLIB" ON)
@@ -37,6 +44,7 @@ option(WithPackageDEB "Build DEB package." OFF)
 option(WithPackageRPM "Build RPM package." OFF)
 option(WithPackageNSIS "Build NSIS package." OFF)
 option(WithPackageBUNDLE "Build OSX bundle." OFF)
+
 
 if (WithSharedLibluv)
   # Building against a shared libluv provides that libluajit and libuv exists

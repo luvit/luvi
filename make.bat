@@ -10,9 +10,19 @@ ECHO "Building regular64"
 cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild  -G"Visual Studio 12 Win64"
 GOTO :end
 
+:regular-asm
+ECHO "Building regular64 asm"
+cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild  -G"Visual Studio 12 Win64"
+GOTO :end
+
 :regular32
 ECHO "Building regular32"
 cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild  -G"Visual Studio 12"
+GOTO :end
+
+:regular32-asm
+ECHO "Building regular32 asm"
+cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -H. -Bbuild  -G"Visual Studio 12"
 GOTO :end
 
 :tiny
