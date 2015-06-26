@@ -551,6 +551,10 @@ return function(args)
   for i = 1, #args do
     local arg = args[i]
     if arg == "--" then
+      if #bundles == 0 then
+        i = i + 1
+        bundles[1] = args[i]
+      end
       for j = i + 1, #args do
         appArgs[#appArgs + 1] = args[j]
       end
