@@ -272,6 +272,7 @@ for more control.
 
 ```
 WithOpenSSL (Default: OFF)      - Enable OpenSSL Support
+WithOpenSSLASM (Default: OFF)   - Enable OpenSSL Assembly Optimizations
 WithSharedOpenSSL (Default: ON) - Use System OpenSSL Library
                                   Otherwise use static library
 
