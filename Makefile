@@ -107,6 +107,6 @@ publish-tiny: reset
 	  --file build/luvi --name luvi-tiny-${LUVI_ARCH}
 
 publish-regular: reset
-	$(MAKE) regular test && \
+	$(MAKE) regular-asm test && \
 	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
 	  --file build/luvi --name luvi-regular-${LUVI_ARCH}

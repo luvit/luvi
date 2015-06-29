@@ -93,7 +93,7 @@ GOTO :end
 
 :publish-regular
 CALL make.bat reset
-CALL make.bat regular
+CALL make.bat regular-asm
 CALL make.bat test
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-regular-Windows-amd64.exe
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi.lib --name luvi-regular-Windows-amd64.lib
@@ -102,7 +102,7 @@ GOTO :end
 
 :publish-regular32
 CALL make.bat reset
-CALL make.bat regular32
+CALL make.bat regular32-asm
 CALL make.bat test
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file luvi.exe --name luvi-regular-Windows-ia32.exe
 github-release upload --user luvit --repo luvi --tag %LUVI_TAG% --file build\Release\luvi.lib --name luvi-regular-Windows-ia32.lib
