@@ -2,6 +2,14 @@
 
 High-level changes between release versions.
 
+## v2.1.2
+
+ - openssl: Bump version to 1.0.2c [Ryan Phillips]
+ - openssl: Add asm support for improved performance [Ryan Phillips]
+ - lua-openssl: Update to enable session reuse [Ryan Phillips]
+ - luvi: Allow using luvi in shebang lines [Tim Caswell]
+ - libuv: Update to 1.6.1 [Tim Caswell]
+
 ## v2.1.1
 
  - openssl: Bump version to 1.0.2b [Ryan Phillips]
