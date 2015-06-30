@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.1.3
+
+ - openssl: Fix openssl asm build on windows [Ryan Phillips]
+
 ## v2.1.2
 
  - openssl: Bump version to 1.0.2c [Ryan Phillips]
