@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.1.4
+
+ - lua-openssl/openssl: Really fix session reuse [Ryan Phillips]
+
 ## v2.1.3
 
  - openssl: Fix openssl asm build on windows [Ryan Phillips]
