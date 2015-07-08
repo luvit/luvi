@@ -9,6 +9,7 @@
 
 MACRO(LUAJIT_add_custom_commands luajit_target)
   SET(TARGET_ARCH $ENV{TARGET_ARCH})
+  SET(LUA_PATH $ENV{LUA_PATH})
   SET(target_srcs "")
   FOREACH(file ${ARGN})
     IF(${file} MATCHES ".*\\.lua$")
@@ -25,7 +26,7 @@ MACRO(LUAJIT_add_custom_commands luajit_target)
       add_custom_command(
         OUTPUT ${generated_file}
         MAIN_DEPENDENCY ${source_file}
-        COMMAND luajit
+        COMMAND "LUA_PATH=${LUA_PATH}" luajit
         ARGS -b -a ${TARGET_ARCH}
           ${source_file}
           ${generated_file}
