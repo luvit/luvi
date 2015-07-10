@@ -1,5 +1,7 @@
 LUVI_TAG=$(shell git describe)
 LUVI_ARCH=$(shell uname -s)_$(shell uname -m)
+LUVI_PUBLISH_USER?=luvit
+LUVI_PUBLISH_REPO?=luvi
 
 OS:=$(shell uname -s)
 
@@ -94,7 +96,7 @@ reset:
 publish-src: reset
 	tar -czvf luvi-src.tar.gz \
 	  --exclude 'luvi-src.tar.gz' --exclude '.git*' --exclude build . && \
-	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
+	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
 	  --file luvi-src.tar.gz --name luvi-src.tar.gz
 
 publish:
@@ -103,10 +105,10 @@ publish:
 
 publish-tiny: reset
 	$(MAKE) tiny test && \
-	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
+	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
 	  --file build/luvi --name luvi-tiny-${LUVI_ARCH}
 
 publish-regular: reset
 	$(MAKE) regular-asm test && \
-	github-release upload --user luvit --repo luvi --tag ${LUVI_TAG} \
+	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
 	  --file build/luvi --name luvi-regular-${LUVI_ARCH}
