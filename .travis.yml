@@ -1,5 +1,15 @@
 language: c
 
+
+addons:
+  apt:
+    sources:
+    - kalakris-cmake
+    packages:
+    - cmake
+
+sudo: false
+
 env:
   - BUILD_TYPE=tiny
   - BUILD_TYPE=regular
@@ -12,11 +22,6 @@ os:
 before_install:
   - git submodule update --init --recursive
   - git submodule update --recursive
-
-before_script:
-  - sudo add-apt-repository --yes ppa:kalakris/cmake
-  - sudo apt-get update -qq
-  - sudo apt-get install cmake
 
 script:
   - WITHOUT_AMALG=1 make ${BUILD_TYPE}
