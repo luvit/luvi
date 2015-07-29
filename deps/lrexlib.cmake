@@ -14,10 +14,6 @@ add_library(lrexlib
   ${LREXLIB_DIR}/src/pcre/lpcre_f.c
 )
 
-if (WithSharedPCRE2)
-  target_link_libraries(lrexlib pcre2)
-else (WithSharedPCRE2)
-  target_link_libraries(lrexlib pcre2posix)
-endif (WithSharedPCRE2)
+target_link_libraries(lrexlib ${PCRE2_LIBRARY})
 
 set(EXTRA_LIBS ${EXTRA_LIBS} lrexlib)

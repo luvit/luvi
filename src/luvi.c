@@ -18,7 +18,7 @@
 #include "./luvi.h"
 
 LUALIB_API int luaopen_luvi(lua_State *L) {
-#ifdef WITH_OPENSSL
+#if defined(WITH_OPENSSL) || defined(WITH_PCRE2)
   char buffer[1024];
 #endif
   lua_newtable(L);
