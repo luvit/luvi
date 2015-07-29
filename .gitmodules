@@ -15,7 +15,7 @@
 	url = https://github.com/brimworks/lua-zlib.git
 [submodule "deps/lrexlib"]
 	path = deps/lrexlib
-	url = git@github.com:rrthomas/lrexlib.git
+	url = https://github.com/rrthomas/lrexlib.git
 [submodule "deps/pcre2"]
 	path = deps/pcre2
-	url = git@github.com:luvit/pcre2.git
+	url = https://github.com/luvit/pcre2.git
