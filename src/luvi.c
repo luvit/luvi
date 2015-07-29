@@ -18,7 +18,7 @@
 #include "./luvi.h"
 
 LUALIB_API int luaopen_luvi(lua_State *L) {
-#if defined(WITH_OPENSSL) || defined(WITH_PCRE2)
+#if defined(WITH_OPENSSL) || defined(WITH_PCRE)
   char buffer[1024];
 #endif
   lua_newtable(L);
@@ -33,10 +33,9 @@ LUALIB_API int luaopen_luvi(lua_State *L) {
   lua_pushstring(L, buffer);
   lua_setfield(L, -2, "ssl");
 #endif
-#ifdef WITH_PCRE2
-  pcre2_config(PCRE2_CONFIG_VERSION, buffer);
-  lua_pushstring(L, buffer);
-  lua_setfield(L, -2, "pcre2");
+#ifdef WITH_PCRE
+  lua_pushstring(L, pcre_version());
+  lua_setfield(L, -2, "pcre");
 #endif
 #ifdef WITH_ZLIB
   lua_pushstring(L, zlibVersion());

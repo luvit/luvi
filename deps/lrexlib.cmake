@@ -14,6 +14,6 @@ add_library(lrexlib
   ${LREXLIB_DIR}/src/pcre/lpcre_f.c
 )
 
-target_link_libraries(lrexlib ${PCRE2_LIBRARY})
+target_link_libraries(lrexlib ${PCRE_LIBRARY})
 
 set(EXTRA_LIBS ${EXTRA_LIBS} lrexlib)

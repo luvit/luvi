@@ -36,8 +36,8 @@
 #ifdef WITH_OPENSSL
 #include "openssl.h"
 #endif
-#ifdef WITH_PCRE2
-#include "pcre2.h"
+#ifdef WITH_PCRE
+#include "pcre.h"
 #endif
 #ifdef WITH_ZLIB
 #include "zlib.h"
