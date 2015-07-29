@@ -63,7 +63,7 @@ int main(int argc, char* argv[] ) {
 
   #ifdef WITH_PCRE
   lua_pushcfunction(L, luaopen_rex_pcre);
-  lua_setfield(L, -2, "pcre");
+  lua_setfield(L, -2, "rex");
   #endif
 
   // Store luvi module definition at preload.luvi
