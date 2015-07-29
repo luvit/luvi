@@ -35,7 +35,7 @@ LUALIB_API int luaopen_luvi(lua_State *L) {
 #endif
 #ifdef WITH_PCRE
   lua_pushstring(L, pcre_version());
-  lua_setfield(L, -2, "pcre");
+  lua_setfield(L, -2, "rex");
 #endif
 #ifdef WITH_ZLIB
   lua_pushstring(L, zlibVersion());
