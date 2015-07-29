@@ -19,6 +19,7 @@ else (WithSharedPCRE)
   add_subdirectory(deps/pcre)
   message("Enabling Static PCRE")
   list(APPEND EXTRA_LIBS pcre)
+  add_definitions(-DPCRE_STATIC)
 endif (WithSharedPCRE)
 
 add_definitions(-DWITH_PCRE)
