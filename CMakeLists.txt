@@ -35,6 +35,8 @@ option(WithSharedLibluv "Shared or Static libluv" OFF)
 option(WithOpenSSL "Include OpenSSL" OFF)
 option(WithOpenSSLASM "Enable Assembly Optimizations" OFF)
 option(WithSharedOpenSSL "Shared or Static OpenSSL" ON)
+option(WithPCRE2 "Include PCRE2" OFF)
+option(WithSharedPCRE2 "Shared or Static PCRE2" OFF)
 option(WithZLIB "Include ZLIB" OFF)
 option(WithSharedZLIB "Shared or Static ZLIB" ON)
 option(WithPackageSH "Build shell-installable package." OFF)
@@ -74,12 +76,14 @@ endif (WithSharedLibluv)
 
 if (WithOpenSSL)
   include(deps/openssl.cmake)
-  add_definitions( -DWITH_OPENSSL )
 endif (WithOpenSSL)
+
+if (WithPCRE2)
+  include (deps/pcre2.cmake)
+endif (WithPCRE2)
 
 if (WithZLIB)
   include(deps/zlib.cmake)
-  add_definitions( -DWITH_ZLIB )
 endif (WithZLIB)
 
 add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
@@ -96,7 +100,7 @@ if(UNIX)
 endif()
 
 luajit_add_executable(luvi
-  ${winsvc}
+  ${extra_sources}
   src/main.c
   src/lua/init.lua
 )

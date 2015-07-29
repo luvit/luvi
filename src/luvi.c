@@ -33,6 +33,11 @@ LUALIB_API int luaopen_luvi(lua_State *L) {
   lua_pushstring(L, buffer);
   lua_setfield(L, -2, "ssl");
 #endif
+#ifdef WITH_PCRE2
+  pcre2_config(PCRE2_CONFIG_VERSION, buffer);
+  lua_pushstring(L, buffer);
+  lua_setfield(L, -2, "pcre2");
+#endif
 #ifdef WITH_ZLIB
   lua_pushstring(L, zlibVersion());
   lua_setfield(L, -2, "zlib");

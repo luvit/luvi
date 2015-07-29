@@ -57,7 +57,7 @@ build:
 
 # Configure the build with minimal dependencies
 tiny: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS)
+	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithPCRE2=ON
 
 # Configure the build with openssl statically included
 regular: deps/luv/CMakeLists.txt
