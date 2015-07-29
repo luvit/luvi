@@ -1,9 +1,8 @@
-SET(PCRE_CODE_UNIT_WIDTH 0 CACHE INTEGER)
 
 FIND_PATH(PCRE_INCLUDE_DIR NAMES pcre.h)
 
 # Look for the library.
-FIND_LIBRARY(PCRE_LIBRARY NAMES pcre-posix)
+FIND_LIBRARY(PCRE_LIBRARY NAMES pcre)
 
 # Handle the QUIETLY and REQUIRED arguments and set PCRE_FOUND to TRUE if all listed variables are TRUE.
 INCLUDE(FindPackageHandleStandardArgs)
