@@ -100,7 +100,7 @@ if(UNIX)
 endif()
 
 luajit_add_executable(luvi
-  ${extra_sources}
+  ${winsvc}
   src/main.c
   src/lua/init.lua
 )
