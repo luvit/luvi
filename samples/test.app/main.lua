@@ -202,4 +202,15 @@ if pcall(function() zlib = require("zlib") end) then
   assert(inflated == tozblob, "inflated data doesn't match original")
 end
 
+local rex
+if pcall(function() rex = require('rex') end) then
+  local string = "The red frog sits on the blue box in the green well."
+  local colors = {}
+  for color in rex.gmatch(string, "(red|blue|green)") do
+    colors[#colors + 1] = color
+  end
+  p(colors)
+  assert(#colors == 3)
+end
+
 print("All tests pass!\n")
