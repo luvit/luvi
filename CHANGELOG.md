@@ -2,9 +2,14 @@
 
 High-level changes between release versions.
 
+## v2.1.6
+
+ - luv: Fix GC bug where uv.spawn would sometimes segfault [Ryan Phillips]
+ - luvi: Add libuv version to version table [Ryan Phillips]
+
 ## v2.1.5
 
- - luv: Add strack traces for uncaught errors. [Tim Caswell]
+ - luv: Add stack traces for uncaught errors. [Tim Caswell]
  - openssl: Update to v1.0.2d. [Ryan Phillips]
 
 ## v2.1.4
