@@ -3,6 +3,11 @@
 set LUVI_PUBLISH_USER=luvit
 set LUVI_PUBLISH_REPO=luvi
 
+set GENERATOR=Visual Studio 12
+reg query HKEY_CLASSES_ROOT\VisualStudio.DTE.14.0 >nul 2>nul
+IF %errorlevel%==0 set GENERATOR=Visual Studio 14
+set GENERATOR64=%GENERATOR% Win64
+
 for /f %%i in ('git describe') do set LUVI_TAG=%%i
 IF NOT "x%1" == "x" GOTO :%1
 
@@ -10,32 +15,32 @@ GOTO :build
 
 :regular
 ECHO "Building regular64"
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithSharedPCRE=OFF -H. -Bbuild  -G"Visual Studio 12 Win64"
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithSharedPCRE=OFF -H. -Bbuild  -G"%GENERATOR64%"
 GOTO :end
 
 :regular-asm
 ECHO "Building regular64 asm"
-cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithSharedPCRE=OFF -H. -Bbuild  -G"Visual Studio 12 Win64"
+cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithSharedPCRE=OFF -H. -Bbuild  -G"%GENERATOR64%"
 GOTO :end
 
 :regular32
 ECHO "Building regular32"
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithSharedPCRE=OFF -H. -Bbuild  -G"Visual Studio 12"
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithSharedPCRE=OFF -H. -Bbuild  -G"%GENERATOR%"
 GOTO :end
 
 :regular32-asm
 ECHO "Building regular32 asm"
-cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithSharedPCRE=OFF -H. -Bbuild  -G"Visual Studio 12"
+cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithSharedPCRE=OFF -H. -Bbuild  -G"%GENERATOR%"
 GOTO :end
 
 :tiny
 ECHO "Building tiny64"
-cmake -H. -Bbuild -G"Visual Studio 12 Win64"
+cmake -H. -Bbuild -G"%GENERATOR64%"
 GOTO :end
 
 :tiny32
 ECHO "Building tiny32"
-cmake -H. -Bbuild -G"Visual Studio 12"
+cmake -H. -Bbuild -G"%GENERATOR%"
 GOTO :end
 
 :build
