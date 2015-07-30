@@ -183,9 +183,10 @@ writer:add("main.lua", 'print(require("luvi").version)', 9)
 
 p("zip bytes", #writer:finalize())
 
+local options = require('luvi').options
 
-local zlib
-if pcall(function() zlib = require("zlib") end) then
+if options.zlib then
+  local zlib = require("zlib")
   print("Testing zlib")
   p("zlib version", zlib.version())
   local tozblob = bundle.readfile("sonnet-133.txt")
@@ -200,6 +201,17 @@ if pcall(function() zlib = require("zlib") end) then
   assert(inf_bytes_in == def_bytes_out, "inflate byte in count != deflate byte out count")
   assert(def_bytes_in == inf_bytes_out, "inflate byte out count != deflate byte in count")
   assert(inflated == tozblob, "inflated data doesn't match original")
+end
+
+if options.rex then
+  local rex = require('rex')
+  local string = "The red frog sits on the blue box in the green well."
+  local colors = {}
+  for color in rex.gmatch(string, "(red|blue|green)") do
+    colors[#colors + 1] = color
+  end
+  p(colors)
+  assert(#colors == 3)
 end
 
 print("All tests pass!\n")

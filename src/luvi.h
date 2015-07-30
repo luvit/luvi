@@ -36,6 +36,9 @@
 #ifdef WITH_OPENSSL
 #include "openssl.h"
 #endif
+#ifdef WITH_PCRE
+#include "pcre.h"
+#endif
 #ifdef WITH_ZLIB
 #include "zlib.h"
 LUALIB_API int luaopen_zlib(lua_State * const L);

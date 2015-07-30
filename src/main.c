@@ -20,6 +20,9 @@
 #include "lenv.c"
 #include "luvi.c"
 #include "lminiz.c"
+#ifdef WITH_PCRE
+int luaopen_rex_pcre(lua_State* L);
+#endif
 #include "../deps/strlib.c"
 int main(int argc, char* argv[] ) {
 
@@ -57,6 +60,11 @@ int main(int argc, char* argv[] ) {
 
   lua_pushcfunction(L, luaopen_miniz);
   lua_setfield(L, -2, "miniz");
+
+  #ifdef WITH_PCRE
+  lua_pushcfunction(L, luaopen_rex_pcre);
+  lua_setfield(L, -2, "rex");
+  #endif
 
   // Store luvi module definition at preload.luvi
   lua_pushcfunction(L, luaopen_luvi);
