@@ -2,6 +2,12 @@
 
 High-level changes between release versions.
 
+## v2.1.7
+
+ - luvi: Add rex module (PCRE via lrexlib) to regular build [Tim Caswell]
+ - luv: Fix to build with Visual Studio 14 (2015) / Windows 10 [Tim Caswell]
+ - lua-openssl: Update to pull in many bugfixes [Tim Caswell]
+
 ## v2.1.6
 
  - luv: Fix GC bug where uv.spawn would sometimes segfault [Ryan Phillips]
