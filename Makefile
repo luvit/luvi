@@ -97,7 +97,7 @@ publish-src: reset
 	tar -czvf luvi-src.tar.gz \
 	  --exclude 'luvi-src.tar.gz' --exclude '.git*' --exclude build . && \
 	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
-	  --file luvi-src.tar.gz --name luvi-src.tar.gz
+	  --file luvi-src.tar.gz --name luvi-src-${LUVI_TAG}.tar.gz
 
 publish:
 	$(MAKE) clean publish-tiny
