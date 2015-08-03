@@ -912,13 +912,30 @@ mz_ulong mz_adler32(mz_ulong adler, const unsigned char *ptr, size_t buf_len)
   return (s2 << 16) + s1;
 }
 
-// Karl Malbrain's compact CRC-32. See "A compact CCITT crc16 and crc32 C implementation that balances processor cache usage against speed": http://www.geocities.com/malbrain/
+// Replaced miniz's crc32 with one that it compatible with other zip tools.
+// Tim Caswell <tim@creationix.com> July 2015
+static mz_uint32 poly_table[256];
 mz_ulong mz_crc32(mz_ulong crc, const mz_uint8 *ptr, size_t buf_len)
 {
-  static const mz_uint32 s_crc32[16] = { 0, 0x1db71064, 0x3b6e20c8, 0x26d930ac, 0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
-    0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c };
-  if (!ptr) return MZ_CRC32_INIT;
-  crc = ~crc; while (buf_len--) { mz_uint8 b = *ptr++; crc = (crc >> 4) ^ s_crc32[(crc & 0xF) ^ (b & 0xF)]; crc = (crc >> 4) ^ s_crc32[(crc & 0xF) ^ (b >> 4)]; } return ~crc;
+  // Generate the poly table on first use.
+  // This should match what mhash calls `crc32_table_b`
+  if (!poly_table[1]) {
+    mz_uint32 i, j;
+    for (i = 0; i < 256; i++) {
+      mz_uint32 entry = i;
+      for (j = 0; j < 8; j++) {
+        if (entry & 1) entry = (entry >> 1) ^ 0xedb88320;
+        else entry >>= 1;
+      }
+      poly_table[i] = entry;
+    }
+  }
+
+  crc = ~crc;
+  while (buf_len--) {
+    crc = ((crc >> 8) & 0xffffff) ^ poly_table[(*ptr++ ^ crc) & 0xff];
+  }
+  return ~crc;
 }
 
 #ifndef MINIZ_NO_ZLIB_APIS
