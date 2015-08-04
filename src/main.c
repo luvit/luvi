@@ -61,10 +61,15 @@ int main(int argc, char* argv[] ) {
   lua_pushcfunction(L, luaopen_miniz);
   lua_setfield(L, -2, "miniz");
 
-  #ifdef WITH_PCRE
+#ifdef WITH_LPEG
+  lua_pushcfunction(L, luaopen_lpeg);
+  lua_setfield(L, -2, "lpeg");
+#endif
+
+#ifdef WITH_PCRE
   lua_pushcfunction(L, luaopen_rex_pcre);
   lua_setfield(L, -2, "rex");
-  #endif
+#endif
 
   // Store luvi module definition at preload.luvi
   lua_pushcfunction(L, luaopen_luvi);
