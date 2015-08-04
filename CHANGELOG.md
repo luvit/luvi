@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.1.8
+
+ - miniz: Fix CRC32 to be compatible with other zip tools. [Tim Caswell]
+ - luvi: Change published zip to include name for homebrew. [Tim Caswell]
+
 ## v2.1.7
 
  - luvi: Add rex module (PCRE via lrexlib) to regular build [Tim Caswell]
