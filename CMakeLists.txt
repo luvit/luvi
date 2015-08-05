@@ -25,11 +25,17 @@ if(MSVC)
   endforeach()
 endif()
 
-exec_program(
-    "git"
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ARGS "describe" "--tags"
-    OUTPUT_VARIABLE LUVI_VERSION)
+if (EXISTS "VERSION")
+  file (STRINGS "VERSION" LUVI_VERSION)
+  message("-- Found luvi version: ${LUVI_VERSION}")
+else()
+  exec_program(
+      "git"
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      ARGS "describe" "--tags"
+      OUTPUT_VARIABLE LUVI_VERSION)
+  message("-- Found luvi git version: ${LUVI_VERSION}")
+endif()
 
 option(WithSharedLibluv "Shared or Static libluv" OFF)
 option(WithOpenSSL "Include OpenSSL" OFF)

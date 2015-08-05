@@ -74,7 +74,7 @@ deps/luv/CMakeLists.txt:
 	git submodule update --init --recursive
 
 clean:
-	rm -rf build luvi.tar.gz
+	rm -rf build luvi-src.tar.gz
 
 test: luvi
 	rm -f test.bin
@@ -93,9 +93,13 @@ reset:
 	git clean -f -d && \
 	git checkout .
 
-publish-src: reset
+luvi-src.tar.gz:
+	echo ${LUVI_TAG} > VERSION && \
 	tar -czvf luvi-src.tar.gz \
 	  --exclude 'luvi-src.tar.gz' --exclude '.git*' --exclude build . && \
+	rm VERSION
+
+publish-src: reset luvi-src.tar.gz
 	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
 	  --file luvi-src.tar.gz --name luvi-src-${LUVI_TAG}.tar.gz
 
