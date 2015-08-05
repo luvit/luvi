@@ -8,6 +8,11 @@ endif()
 
 project(luvi ${projects})
 
+set(LUVI_VERSION_MAJOR 2)
+set(LUVI_VERSION_MINOR 0)
+set(LUVI_VERSION_PATCH 9)
+set(LUVI_VERSION ${LUVI_VERSION_MAJOR}.${LUVI_VERSION_MINOR}.${LUVI_VERSION_PATCH})
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 if(MSVC)
@@ -24,12 +29,6 @@ if(MSVC)
     string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
   endforeach()
 endif()
-
-exec_program(
-    "git"
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ARGS "describe" "--tags"
-    OUTPUT_VARIABLE LUVI_VERSION)
 
 option(WithSharedLibluv "Shared or Static libluv" OFF)
 option(WithOpenSSL "Include OpenSSL" OFF)
