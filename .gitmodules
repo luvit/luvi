@@ -19,3 +19,6 @@
 [submodule "deps/pcre"]
 	path = deps/pcre
 	url = https://github.com/luvit/pcre.git
+[submodule "deps/lpeg"]
+	path = deps/lpeg
+	url = https://github.com/luvit/lpeg.git
