@@ -2,6 +2,8 @@ LUVI_TAG=$(shell git describe)
 LUVI_ARCH=$(shell uname -s)_$(shell uname -m)
 LUVI_PUBLISH_USER?=luvit
 LUVI_PUBLISH_REPO?=luvi
+LUVI_PREFIX?=/usr/local
+LUVI_BINDIR?=$(LUVI_PREFIX)/bin
 
 OS:=$(shell uname -s)
 
@@ -82,8 +84,9 @@ test: luvi
 	build/luvi samples/test.app -o test.bin
 	./test.bin 1 2 3 4
 	rm -f test.bin
+
 install: luvi
-	install -p build/luvi /usr/local/bin
+	install -p build/luvi $(LUVI_BINDIR)/
 
 uninstall:
 	rm -f /usr/local/bin/luvi
