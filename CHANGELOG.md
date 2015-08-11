@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.2.0
+
+ - Added lpeg to regular build [George Zhao]
+ - libuv: update to v1.7.0 [Tim Caswell]
+
 ## v2.1.8
 
  - miniz: Fix CRC32 to be compatible with other zip tools. [Tim Caswell]
