@@ -24,21 +24,11 @@
 int luaopen_rex_pcre(lua_State* L);
 #endif
 #include "../deps/strlib.c"
-int main(int argc, char* argv[] ) {
 
-  lua_State* L;
-  int index;
-  int res;
-
-  // Hooks in libuv that need to be done in main.
-  argv = uv_setup_args(argc, argv);
-
-  // Create the lua state.
-  L = luaL_newstate();
-  if (L == NULL) {
-    fprintf(stderr, "luaL_newstate has failed\n");
-    return 1;
-  }
+static lua_State* vm_acquire(){
+  lua_State*L = luaL_newstate();
+  if (L == NULL)
+    return L;
 
   // Add in the lua standard libraries
   luaL_openlibs(L);
@@ -86,6 +76,30 @@ int main(int argc, char* argv[] ) {
   lua_pushcfunction(L, luaopen_zlib);
   lua_setfield(L, -2, "zlib");
 #endif
+  return L;
+}
+
+static void vm_release(lua_State*L) {
+  lua_close(L);
+}
+
+int main(int argc, char* argv[] ) {
+
+  lua_State* L;
+  int index;
+  int res;
+
+  // Hooks in libuv that need to be done in main.
+  argv = uv_setup_args(argc, argv);
+
+  // Create the lua state.
+  L = vm_acquire(); 
+  if (L == NULL) {
+    fprintf(stderr, "luaL_newstate has failed\n");
+    return 1;
+  }
+
+  luv_set_thread_cb(vm_acquire, vm_release);
 
 #ifdef WITH_WINSVC
   // Store luvi module definition at preload.openssl
@@ -119,6 +133,6 @@ int main(int argc, char* argv[] ) {
   if (lua_type(L, -1) == LUA_TNUMBER) {
     res = lua_tointeger(L, -1);
   }
-  lua_close(L);
+  vm_release(L);
   return res;
 }
