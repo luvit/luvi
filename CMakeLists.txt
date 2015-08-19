@@ -114,6 +114,8 @@ luajit_add_executable(luvi
   ${winsvc}
   src/main.c
   src/lua/init.lua
+  src/lua/luvipath.lua
+  src/lua/luvibundle.lua
 )
 
 if(APPLE)
