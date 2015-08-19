@@ -17,15 +17,16 @@ limitations under the License.
 --]]
 
 local os = require('ffi').os
-local env = require('env')
 local uv = require('uv')
 local luvi = require('luvi')
 local miniz = require('miniz')
 
 local getPrefix, splitPath, joinParts
 
-local tmpBase = os == "Windows" and (env.get("TMP") or uv.cwd()) or
-                                    (env.get("TMPDIR") or '/tmp')
+local getenv = require('os').getenv
+
+local tmpBase = os == "Windows" and (getenv("TMP") or uv.cwd()) or
+                                    (getenv("TMPDIR") or '/tmp')
 
 if os == "Windows" then
   -- Windows aware path utilities
