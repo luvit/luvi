@@ -16,10 +16,16 @@ limitations under the License.
 
 --]]
 
-local os = require('ffi').os
 local uv = require('uv')
 local luvi = require('luvi')
 local miniz = require('miniz')
+
+
+if _G.jit then
+  luvi.isWindows = _G.jit.os == "Windows"
+else
+  luvi.isWindows = not not package.path:match("\\")
+end
 
 local getPrefix, splitPath, joinParts
 
@@ -28,7 +34,7 @@ local getenv = require('os').getenv
 local tmpBase = os == "Windows" and (getenv("TMP") or uv.cwd()) or
                                     (getenv("TMPDIR") or '/tmp')
 
-if os == "Windows" then
+if luvi.isWindows then
   -- Windows aware path utilities
   function getPrefix(path)
     return path:match("^%a:\\") or
@@ -105,14 +111,15 @@ local function pathJoin(...)
   local reversed = {}
   for idx = #parts, 1, -1 do
     local part = parts[idx]
-    if part == '.' then
-      -- Ignore
-    elseif part == '..' then
-      skip = skip + 1
-    elseif skip > 0 then
-      skip = skip - 1
-    else
-      reversed[#reversed + 1] = part
+    if part ~= '.' then
+      -- ignore '.' segments
+      if part == '..' then
+        skip = skip + 1
+      elseif skip > 0 then
+        skip = skip - 1
+      else
+        reversed[#reversed + 1] = part
+      end
     end
   end
 
