@@ -101,7 +101,7 @@ return function(args)
   local path = uv.exepath()
   local zip = miniz.new_reader(path)
   if zip then
-    return commonBundle(zipBundle(path, zip), args, {path})
+    return commonBundle({path}, nil, args)
   end
 
   -- Parse the arguments
@@ -162,14 +162,12 @@ return function(args)
   -- Don't run app when printing version or help
   if options.version or options.help then return -1 end
 
-  local bundle = assert(makeBundle(bundles))
-
   -- Build the app if output is given
   if options.output then
-    return buildBundle(options.output, bundle)
+    return buildBundle(options.output, makeBundle(bundles))
   end
 
   -- Run the luvi app with the extra args
-  return commonBundle(bundle, appArgs, bundles, options.main)
+  return commonBundle(bundles, options.main, appArgs)
 
 end

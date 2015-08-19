@@ -283,12 +283,12 @@ local function makeBundle(bundlePaths)
   return combinedBundle(parts)
 end
 
-local function commonBundle(bundle, args, bundlePaths, mainPath)
-
-  luvi.makeBundle = makeBundle
-  luvi.bundle = bundle
+local function commonBundle(bundlePaths, mainPath, args)
 
   mainPath = mainPath or "main.lua"
+
+  local bundle = assert(makeBundle(bundlePaths))
+  luvi.bundle = bundle
 
   bundle.paths = bundlePaths
   bundle.mainPath = mainPath
@@ -334,15 +334,20 @@ local function commonBundle(bundle, args, bundlePaths, mainPath)
     _G.p = mainRequire('pretty-print').prettyPrint
   end
 
-  if mainRequire then
-    return mainRequire("./" .. mainPath)
-  else
-    local main = bundle.readfile(mainPath)
-    if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
-    local fn = assert(loadstring(main, "bundle:" .. mainPath))
-    return fn(unpack(args))
+  if args then
+    if mainRequire then
+      return mainRequire("./" .. mainPath)
+    else
+      local main = bundle.readfile(mainPath)
+      if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
+      local fn = assert(loadstring(main, "bundle:" .. mainPath))
+      return fn(unpack(args))
+    end
   end
 end
+
+-- Legacy export for makeBundle
+luvi.makeBundle = makeBundle
 
 return {
   folderBundle = folderBundle,
