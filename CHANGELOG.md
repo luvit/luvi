@@ -2,6 +2,17 @@
 
 High-level changes between release versions.
 
+## v2.3.0
+
+ - Factor out path and bundle libraries to "luvipath" and "luvibundle" [Tim Caswell]
+ - luv: Add a "mac" field to the luv_interface_addresses() [Brian Maher]
+ - luv: Fix bug when set thread acquire/release vm callback [George Zhao]
+ - luv: Update libuv to v1.7.1 [Tim Caswell]
+ - luv: Improve error message in tcp.c and udp.c [Ryan Phillips]
+ - Use luv_set_thread_cb for better thread support [George Zhao]
+ - Use os.getenv for portable read-only access to environment variables [Tim Caswell]
+ - Don't depend in luajit ffi to detect windows [Tim Caswell]
+
 ## v2.2.0
 
  - Added lpeg to regular build [George Zhao]
