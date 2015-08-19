@@ -334,15 +334,16 @@ local function commonBundle(bundlePaths, mainPath, args)
     _G.p = mainRequire('pretty-print').prettyPrint
   end
 
-  if args then
-    if mainRequire then
-      return mainRequire("./" .. mainPath)
-    else
-      local main = bundle.readfile(mainPath)
-      if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
-      local fn = assert(loadstring(main, "bundle:" .. mainPath))
-      return fn(unpack(args))
-    end
+  if not args then
+    return bundle, mainRequire
+  end
+  if mainRequire then
+    return mainRequire("./" .. mainPath)
+  else
+    local main = bundle.readfile(mainPath)
+    if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
+    local fn = assert(loadstring(main, "bundle:" .. mainPath))
+    return fn(unpack(args))
   end
 end
 
