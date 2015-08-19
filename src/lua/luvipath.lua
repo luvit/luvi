@@ -1,4 +1,5 @@
-local isWindows = require('luvi').isWindows
+local luvi = require('luvi')
+local isWindows = luvi.isWindows
 local getPrefix, splitPath, joinParts
 
 if isWindows then
@@ -99,6 +100,14 @@ local function pathJoin(...)
   local path = joinParts(prefix, parts)
   return path
 end
+
+-- Legacy path exports
+luvi.path = {
+  join = pathJoin,
+  getPrefix = getPrefix,
+  splitPath = splitPath,
+  joinparts = joinParts,
+}
 
 return {
   getPrefix = getPrefix,

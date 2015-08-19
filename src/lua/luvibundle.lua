@@ -7,9 +7,6 @@ local tmpBase = luvi.isWindows and (getenv("TMP") or uv.cwd()) or
 
 local luviPath = require('luvipath')
 local pathJoin = luviPath.pathJoin
-local getPrefix = luviPath.getPrefix
-local splitPath = luviPath.splitPath
-local joinParts = luviPath.joinParts
 
 -- Bundle from folder on disk
 local function folderBundle(base)
@@ -295,13 +292,6 @@ local function commonBundle(bundle, args, bundlePaths, mainPath)
 
   bundle.paths = bundlePaths
   bundle.mainPath = mainPath
-
-  luvi.path = {
-    join = pathJoin,
-    getPrefix = getPrefix,
-    splitPath = splitPath,
-    joinparts = joinParts,
-  }
 
   function bundle.action(path, action, ...)
     -- If it's a real path, run it directly.
