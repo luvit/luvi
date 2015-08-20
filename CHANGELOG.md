@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.3.1
+
+ - luvi: Fix isWindows check to work in threads too. [Tim Caswell]
+
 ## v2.3.0
 
  - Factor out path and bundle libraries to "luvipath" and "luvibundle" [Tim Caswell]
