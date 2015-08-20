@@ -20,17 +20,17 @@ local uv = require('uv')
 local luvi = require('luvi')
 local miniz = require('miniz')
 
-local luviBundle = require('luvibundle')
-local commonBundle = luviBundle.commonBundle
-local zipBundle = luviBundle.zipBundle
-local makeBundle = luviBundle.makeBundle
-local buildBundle = luviBundle.buildBundle
-
 if _G.jit then
   luvi.isWindows = _G.jit.os == "Windows"
 else
   luvi.isWindows = not not package.path:match("\\")
 end
+
+local luviBundle = require('luvibundle')
+local commonBundle = luviBundle.commonBundle
+local zipBundle = luviBundle.zipBundle
+local makeBundle = luviBundle.makeBundle
+local buildBundle = luviBundle.buildBundle
 
 local function generateOptionsString()
   local s = {}
@@ -168,6 +168,7 @@ return function(args)
   end
 
   -- Run the luvi app with the extra args
+
   return commonBundle(bundles, options.main, appArgs)
 
 end
