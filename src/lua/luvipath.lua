@@ -1,6 +1,12 @@
 local luvi = require('luvi')
-local isWindows = luvi.isWindows
 local getPrefix, splitPath, joinParts
+
+local isWindows
+if _G.jit then
+  isWindows = _G.jit.os == "Windows"
+else
+  isWindows = not not package.path:match("\\")
+end
 
 if isWindows then
   -- Windows aware path utilities
@@ -110,6 +116,7 @@ luvi.path = {
 }
 
 return {
+  isWindows = isWindows,
   getPrefix = getPrefix,
   splitPath = splitPath,
   joinParts = joinParts,

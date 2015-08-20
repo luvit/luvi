@@ -1,12 +1,12 @@
 local uv = require('uv')
 local miniz = require('miniz')
 local luvi = require('luvi')
-local getenv = require('os').getenv
-local tmpBase = luvi.isWindows and (getenv("TMP") or uv.cwd()) or
-                                   (getenv("TMPDIR") or '/tmp')
-
 local luviPath = require('luvipath')
 local pathJoin = luviPath.pathJoin
+local getenv = require('os').getenv
+
+local tmpBase = luviPath.isWindows and (getenv("TMP") or uv.cwd()) or
+                                       (getenv("TMPDIR") or '/tmp')
 
 -- Bundle from folder on disk
 local function folderBundle(base)

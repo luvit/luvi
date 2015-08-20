@@ -22,15 +22,8 @@ local miniz = require('miniz')
 
 local luviBundle = require('luvibundle')
 local commonBundle = luviBundle.commonBundle
-local zipBundle = luviBundle.zipBundle
 local makeBundle = luviBundle.makeBundle
 local buildBundle = luviBundle.buildBundle
-
-if _G.jit then
-  luvi.isWindows = _G.jit.os == "Windows"
-else
-  luvi.isWindows = not not package.path:match("\\")
-end
 
 local function generateOptionsString()
   local s = {}
