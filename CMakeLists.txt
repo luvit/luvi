@@ -54,6 +54,7 @@ option(WithPackageRPM "Build RPM package." OFF)
 option(WithPackageNSIS "Build NSIS package." OFF)
 option(WithPackageBUNDLE "Build OSX bundle." OFF)
 
+find_package(Threads)
 
 if (WithSharedLibluv)
   # Building against a shared libluv provides that libluajit and libuv exists
@@ -127,9 +128,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 endif()
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
-  target_link_libraries(luvi uv luajit-5.1 luv rt ${EXTRA_LIBS})
+  target_link_libraries(luvi uv luajit-5.1 luv rt ${EXTRA_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 else()
-  target_link_libraries(luvi uv luajit-5.1 luv ${EXTRA_LIBS})
+  target_link_libraries(luvi uv luajit-5.1 luv ${EXTRA_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 ###############################################################################
