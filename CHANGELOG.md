@@ -2,6 +2,12 @@
 
 High-level changes between release versions.
 
+## v2.3.2
+
+ - libuv: Update libuv to v1.7.2 [Tim Caswell]
+ - luv: Performance tweaks and memory leak fixes for threads [George Zhao]
+ - luvi: Add proper thread linking for luajit [Ryan Phillips]
+
 ## v2.3.1
 
  - luvi: Fix isWindows check to work in threads too. [Tim Caswell]
