@@ -2,9 +2,13 @@
 
 High-level changes between release versions.
 
+## v2.3.4
+
+ - libuv: Update to v1.7.4 [Tim Caswell]
+
 ## v2.3.3
 
- - libuv: Update to v1.7.2 [Tim Caswell]
+ - libuv: Update to v1.7.3 [Tim Caswell]
  - luv: Many fixes and improvements to thread bindings [George Zhao]
 
 ## v2.3.2
