@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.3.5
+
+ - libuv: Update to v1.7.5 [Tim Caswell]
+ - luv: Export `luv_loop()` and `luv_state()` [Tim Caswell]
+
 ## v2.3.4
 
  - libuv: Update to v1.7.4 [Tim Caswell]
