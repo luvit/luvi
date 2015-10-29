@@ -28,7 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define snprintf c99_snprintf
 #define vsnprintf c99_vsnprintf
 
-inline int c99_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap)
+static int c99_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap)
 {
     int count = -1;
 
@@ -40,7 +40,7 @@ inline int c99_vsnprintf(char *outBuf, size_t size, const char *format, va_list 
     return count;
 }
 
-inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
+static int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
 {
     int count;
     va_list ap;
