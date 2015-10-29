@@ -20,6 +20,7 @@
 #include "lenv.c"
 #include "luvi.c"
 #include "lminiz.c"
+#include "snapshot.c"
 #ifdef WITH_PCRE
 int luaopen_rex_pcre(lua_State* L);
 #endif
@@ -50,6 +51,9 @@ static lua_State* vm_acquire(){
 
   lua_pushcfunction(L, luaopen_miniz);
   lua_setfield(L, -2, "miniz");
+
+  lua_pushcfunction(L, luaopen_snapshot);
+  lua_setfield(L, -2, "snapshot");
 
 #ifdef WITH_LPEG
   lua_pushcfunction(L, luaopen_lpeg);
@@ -93,7 +97,7 @@ int main(int argc, char* argv[] ) {
   argv = uv_setup_args(argc, argv);
 
   // Create the lua state.
-  L = vm_acquire(); 
+  L = vm_acquire();
   if (L == NULL) {
     fprintf(stderr, "luaL_newstate has failed\n");
     return 1;
