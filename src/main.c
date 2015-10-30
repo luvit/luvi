@@ -26,6 +26,10 @@ int luaopen_rex_pcre(lua_State* L);
 #endif
 #include "../deps/strlib.c"
 
+#if WITH_CUSTOM
+int luvi_custom(lua_State* L);
+#endif
+
 static lua_State* vm_acquire(){
   lua_State*L = luaL_newstate();
   if (L == NULL)
@@ -70,15 +74,19 @@ static lua_State* vm_acquire(){
   lua_setfield(L, -2, "luvi");
 
 #ifdef WITH_OPENSSL
-  // Store luvi module definition at preload.openssl
+  // Store openssl module definition at preload.openssl
   lua_pushcfunction(L, luaopen_openssl);
   lua_setfield(L, -2, "openssl");
 #endif
 
 #ifdef WITH_ZLIB
-  // Store luvi module definition at preload.openssl
+  // Store zlib module definition at preload.zlib
   lua_pushcfunction(L, luaopen_zlib);
   lua_setfield(L, -2, "zlib");
+#endif
+
+#ifdef WITH_CUSTOM
+  luvi_custom(L);
 #endif
   return L;
 }
