@@ -9,6 +9,9 @@
 
 MACRO(LUAJIT_add_custom_commands luajit_target)
   SET(TARGET_ARCH $ENV{TARGET_ARCH})
+  IF(TARGET_ARCH)
+    SET(LJ_BYTECODE_OPTS ${LJ_BYTECODE_OPTS} -a ${TARGET_ARCH})
+  ENDIF(TARGET_ARCH)
   SET(LUA_PATH $ENV{LUA_PATH})
   SET(target_srcs "")
   FOREACH(file ${ARGN})
@@ -27,7 +30,7 @@ MACRO(LUAJIT_add_custom_commands luajit_target)
         OUTPUT ${generated_file}
         MAIN_DEPENDENCY ${source_file}
         COMMAND "LUA_PATH=${LUA_PATH}" luajit
-        ARGS -b -a ${TARGET_ARCH}
+        ARGS -b ${LJ_BYTECODE_OPTS}
           ${source_file}
           ${generated_file}
         COMMENT "Building Luajitted ${source_file}: ${generated_file}"
