@@ -2,6 +2,13 @@
 
 High-level changes between release versions.
 
+## v2.4.0
+
+ - luvi: Added new "snapshot" module to help debug memory leaks. [Tim Caswell]
+ - luv: Add bindings for `uv_get_free_memory`. [Tim Caswell]
+ - luv: Export libuv symbols when linking without shared libuv. [mythay]
+ - luv: Fix linking lua lib name without standard name in windows. [mythay]
+
 ## v2.3.5
 
  - libuv: Update to v1.7.5 [Tim Caswell]
