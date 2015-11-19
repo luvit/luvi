@@ -301,5 +301,34 @@ cmake \
   ..
 ```
 
+## Holy Build
+
+Executables across Linux distributions are not largely portable for various
+differences. We can leverage the
+[holy-build-box](https://github.com/phusion/holy-build-box) to create a
+portable executable for i686 and x86_64 environments.
+
+Note: If you are attempting this on OSX, please install GNU tar from homebrew:
+
+```
+brew install gnu-tar
+```
+
+To get started:
+
+1. Create a docker machine:
+
+```
+docker-machine create --driver vmwarefusion --vmwarefusion-cpu-count 3 holy-build-box
+eval $(docker-machine env holy-build-box)
+```
+
+2. Start the build
+
+```
+make linux-build
+```
+
+3. Results should be the current working directory.
 
 [Prebuilt binaries]: https://github.com/luvit/luvi/releases
