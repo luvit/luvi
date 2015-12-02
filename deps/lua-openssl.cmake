@@ -45,6 +45,7 @@ add_library(lua_openssl
   ${LUA_OPENSSL_DIR}/src/xattrs.c                     
   ${LUA_OPENSSL_DIR}/src/xexts.c                      
   ${LUA_OPENSSL_DIR}/src/xname.c                      
+  ${LUA_OPENSSL_DIR}/src/xalgor.c                      
   ${LUA_OPENSSL_DIR}/src/xstore.c                     
 )
 
