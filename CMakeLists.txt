@@ -10,6 +10,21 @@ project(luvi ${projects})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH FALSE CACHE INTERNAL "")
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE CACHE INTERNAL "")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" CACHE INTERNAL "")
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE CACHE INTERNAL "")
+# the RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF("${isSystemDir}" STREQUAL "-1")
+
 if(MSVC)
   # Statically build against C runtime (use the right version for Release/Debug)
   set(CompilerFlags
@@ -66,12 +81,12 @@ if (WithSharedLibluv)
   endif (LIBLUV_FOUND)
   if (LUAJIT_FOUND)
     include_directories(${LUAJIT_INCLUDE_DIR})
-    link_directories(${LUAJIT_LIBRARIES})
   endif (LUAJIT_FOUND)
   if (LIBUV_FOUND)
     include_directories(${LIBUV_INCLUDE_DIR})
   endif (LIBUV_FOUND)
   include(LuaJITAddExecutable)
+  set(LUVI_LIBRARIES ${LIBLUV_LIBRARIES} ${LUAJIT_LIBRARIES} ${LIBUV_LIBRARIES})
 else (WithSharedLibluv)
   # Build luv as static library insteas as module
   set(BUILD_MODULE OFF CACHE STRING "Build luv as static library")
@@ -79,6 +94,7 @@ else (WithSharedLibluv)
   include_directories(deps/luv/deps/libuv/include)
   include_directories(deps/luv/deps/luajit/src)
   add_subdirectory(deps/luv)
+  set(LUVI_LIBRARIES luv luajit-5.1 uv)
 endif (WithSharedLibluv)
 
 
@@ -128,10 +144,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 endif()
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
-  target_link_libraries(luvi uv luajit-5.1 luv rt ${EXTRA_LIBS} ${CMAKE_THREAD_LIBS_INIT})
-else()
-  target_link_libraries(luvi uv luajit-5.1 luv ${EXTRA_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+  set(EXTRA_LIBS ${EXTRA_LIBS} rt)
 endif()
+
+target_link_libraries(luvi ${LUVI_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 
 ###############################################################################
 ## Installation Targets
