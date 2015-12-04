@@ -9,6 +9,7 @@ High-level changes between release versions.
  - luvi: set RPATH within CMake [Jörg Krause]
  - luvi: allow the settings of Luajit bytecode options [Jörg Krause]
  - luvi: bump openssl to 1.0.2e [Ryan Phillips]
+ - luvi: holy build support [Ryan Phillips]
 
 ## v2.4.0
 
