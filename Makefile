@@ -76,7 +76,7 @@ deps/luv/CMakeLists.txt:
 	git submodule update --init --recursive
 
 clean:
-	rm -rf build luvi-src.tar.gz
+	rm -rf build luvi-*
 
 test: luvi
 	rm -f test.bin
@@ -98,9 +98,42 @@ reset:
 
 luvi-src.tar.gz:
 	echo ${LUVI_TAG} > VERSION && \
-	tar -czvf luvi-src.tar.gz \
+	tar -czvf ../luvi-src.tar.gz \
 	  --exclude 'luvi-src.tar.gz' --exclude '.git*' --exclude build . && \
+	mv ../luvi-src.tar.gz . && \
 	rm VERSION
+
+linux-build: linux-build-box-regular linux-build-box32-regular linux-build-box-tiny linux-build-box32-tiny
+
+linux-build-box-regular: luvi-src.tar.gz
+	rm -rf build && mkdir -p build
+	cp packaging/holy-build.sh luvi-src.tar.gz build
+	mkdir -p build
+	docker run -t -i --rm \
+		  -v `pwd`/build:/io phusion/holy-build-box-64:latest bash /io/holy-build.sh regular-asm
+	mv build/luvi luvi-regular-Linux_x86_64
+
+linux-build-box32-regular: luvi-src.tar.gz
+	rm -rf build && mkdir -p build
+	cp packaging/holy-build.sh luvi-src.tar.gz build
+	docker run -t -i --rm \
+		  -v `pwd`/build:/io phusion/holy-build-box-32:latest bash /io/holy-build.sh regular-asm
+	mv build/luvi luvi-regular-Linux_i686
+
+linux-build-box-tiny: luvi-src.tar.gz
+	rm -rf build && mkdir -p build
+	cp packaging/holy-build.sh luvi-src.tar.gz build
+	mkdir -p build
+	docker run -t -i --rm \
+		  -v `pwd`/build:/io phusion/holy-build-box-64:latest bash /io/holy-build.sh tiny
+	mv build/luvi luvi-tiny-Linux_x86_64
+
+linux-build-box32-tiny: luvi-src.tar.gz
+	rm -rf build && mkdir -p build
+	cp packaging/holy-build.sh luvi-src.tar.gz build
+	docker run -t -i --rm \
+		  -v `pwd`/build:/io phusion/holy-build-box-32:latest bash /io/holy-build.sh tiny
+	mv build/luvi luvi-tiny-Linux_i686
 
 publish-src: reset luvi-src.tar.gz
 	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
@@ -109,6 +142,17 @@ publish-src: reset luvi-src.tar.gz
 publish:
 	$(MAKE) clean publish-tiny
 	$(MAKE) clean publish-regular
+
+publish-linux: reset
+	$(MAKE) linux-build && \
+	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
+	  --file luvi-regular-Linux_i686 --name luvi-regular-Linux_i686 && \
+	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
+	  --file luvi-regular-Linux_x86_64 --name luvi-regular-Linux_x86_64 && \
+	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
+	  --file luvi-tiny-Linux_x86_64 --name luvi-tiny-Linux-x86_64 && \
+	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
+	  --file luvi-tiny-Linux_i686 --name luvi-tiny-Linux-i686
 
 publish-tiny: reset
 	$(MAKE) tiny test && \
