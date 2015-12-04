@@ -2,6 +2,14 @@
 
 High-level changes between release versions.
 
+## v2.5.0
+
+ - luvi: allow preloading a custom module [George Zhao]
+ - luvi: bump lua-openssl [Jörg Krause]
+ - luvi: set RPATH within CMake [Jörg Krause]
+ - luvi: allow the settings of Luajit bytecode options [Jörg Krause]
+ - luvi: bump openssl to 1.0.2e [Ryan Phillips]
+
 ## v2.4.0
 
  - luvi: Added new "snapshot" module to help debug memory leaks. [Tim Caswell]
