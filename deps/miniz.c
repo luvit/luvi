@@ -4076,12 +4076,6 @@ mz_bool mz_zip_writer_add_mem_ex(mz_zip_archive *pZip, const char *pArchive_name
   if (!mz_zip_writer_validate_archive_name(pArchive_name))
     return MZ_FALSE;
 
-#ifndef MINIZ_NO_TIME
-  {
-    time_t cur_time; time(&cur_time);
-    mz_zip_time_to_dos_time(cur_time, &dos_time, &dos_date);
-  }
-#endif // #ifndef MINIZ_NO_TIME
 
   archive_name_size = strlen(pArchive_name);
   if (archive_name_size > 0xFFFF)
