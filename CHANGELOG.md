@@ -2,6 +2,14 @@
 
 High-level changes between release versions.
 
+
+## v2.5.1
+
+ - luvi: Don't constantly update timestamps when creating zips. [Tim Caswell]
+ - libuv: Update to v1.8.0 [Tim Caswell]
+ - luv: Add uv.fs_realpath [Tim Caswell]
+ - luv: add netmask to network interface data [George Zhao]
+ 
 ## v2.5.0
 
  - luvi: allow preloading a custom module [George Zhao]
