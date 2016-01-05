@@ -330,7 +330,7 @@ local function commonBundle(bundlePaths, mainPath, args)
   end
 
   -- Auto-setup global p and libuv version of print
-  if mainRequire and bundle.stat("deps/pretty-print") or bundle.stat("deps/pretty-print.lua") then
+  if mainRequire and (bundle.stat("deps/pretty-print") or bundle.stat("deps/pretty-print.lua")) then
     _G.p = mainRequire('pretty-print').prettyPrint
   end
 
