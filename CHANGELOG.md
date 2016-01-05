@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.5.2
+
+ - luvi: Fix auto-require logic to not require `luvit/require` [Tim Caswell]
+ - lua: Update test lua to 5.3.2 [Tim Caswell]
 
 ## v2.5.1
 
@@ -9,7 +13,7 @@ High-level changes between release versions.
  - libuv: Update to v1.8.0 [Tim Caswell]
  - luv: Add uv.fs_realpath [Tim Caswell]
  - luv: add netmask to network interface data [George Zhao]
- 
+
 ## v2.5.0
 
  - luvi: allow preloading a custom module [George Zhao]
