@@ -42,7 +42,7 @@ LUALIB_API int luaopen_luvi(lua_State *L) {
   lua_setfield(L, -2, "zlib");
 #endif
 #ifdef WITH_WINSVC
-  lua_pushboolean(L, 1);
+  lua_pushstring(L, WINSVC_VERSION);
   lua_setfield(L, -2, "winsvc");
 #endif
   lua_pushstring(L, uv_version_string());
