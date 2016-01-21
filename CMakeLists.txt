@@ -71,6 +71,8 @@ option(WithPackageBUNDLE "Build OSX bundle." OFF)
 
 find_package(Threads)
 
+include(LuaJITAddExecutable)
+
 if (WithSharedLibluv)
   # Building against a shared libluv provides that libluajit and libuv exists
   find_package(Libluv)
@@ -125,8 +127,6 @@ endif()
 if(UNIX)
   add_definitions(-Wall)
 endif()
-
-include(LuaJITAddExecutable)
 
 luajit_add_executable(luvi
   ${winsvc}
