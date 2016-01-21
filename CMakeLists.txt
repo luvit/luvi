@@ -85,7 +85,6 @@ if (WithSharedLibluv)
   if (LIBUV_FOUND)
     include_directories(${LIBUV_INCLUDE_DIR})
   endif (LIBUV_FOUND)
-  include(LuaJITAddExecutable)
   set(LUVI_LIBRARIES ${LIBLUV_LIBRARIES} ${LUAJIT_LIBRARIES} ${LIBUV_LIBRARIES})
 else (WithSharedLibluv)
   # Build luv as static library insteas as module
@@ -126,6 +125,8 @@ endif()
 if(UNIX)
   add_definitions(-Wall)
 endif()
+
+include(LuaJITAddExecutable)
 
 luajit_add_executable(luvi
   ${winsvc}
