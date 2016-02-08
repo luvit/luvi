@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.6.0
+
+ - luv: bump luv to Luajit 2.1 (fixes 64bit casts on Windows) [Ryan Phillips]
+ - versions: make the winsvc module export a valid semver version [Ryan Phillips]
+
 ## v2.5.2
 
  - luvi: Fix auto-require logic to not require `luvit/require` [Tim Caswell]
