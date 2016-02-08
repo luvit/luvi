@@ -32,11 +32,11 @@ local function folderBundle(base)
 
     local files = {}
     repeat
-      local ent = uv.fs_scandir_next(req)
-      if ent then
-        files[#files + 1] = ent.name
+      local name = uv.fs_scandir_next(req)
+      if name then
+        files[#files + 1] = name
       end
-    until not ent
+    until not name
     return files
   end
 
