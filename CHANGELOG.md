@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.6.1
+
+ - luv: bump luv for a 32bit compile fix [Ryan Phillips]
+
 ## v2.6.0
 
  - luv: bump luv to Luajit 2.1 (fixes 64bit casts on Windows) [Ryan Phillips]
