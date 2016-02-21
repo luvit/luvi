@@ -229,5 +229,39 @@ static const luaL_Reg lenv_f[] = {
 
 LUALIB_API int luaopen_env(lua_State *L) {
   luaL_newlib(L, lenv_f);
+#if defined(_WIN32) && !defined(_XBOX_VER)
+  lua_pushstring(L, "Windows");
+#elif defined(__linux__)
+  lua_pushstring(L, "Linux");
+#elif defined(__MACH__) && defined(__APPLE__)
+  lua_pushstring(L, "OSX");
+#elif (defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || \
+       defined(__NetBSD__) || defined(__OpenBSD__) || \
+       defined(__DragonFly__)) && !defined(__ORBIS__)
+  lua_pushstring(L, "BSD");
+#elif (defined(__sun__) && defined(__svr4__)) || defined(__CYGWIN__)
+  lua_pushstring(L, "POSIX");
+#else
+  lua_pushstring(L, "Other");
+#endif
+  lua_setfield(L, -2, "os");
+
+#if defined(__i386) || defined(__i386__) || defined(_M_IX86)
+  lua_pushstring(L, "x86");
+#elif defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+  lua_pushstring(L, "x64");
+#elif defined(__arm__) || defined(__arm) || defined(__ARM__) || defined(__ARM)
+  lua_pushstring(L, "arm");
+#elif defined(__aarch64__)
+  lua_pushstring(L, "arm64");
+#elif defined(__ppc__) || defined(__ppc) || defined(__PPC__) || defined(__PPC) || defined(__powerpc__) || defined(__powerpc) || defined(__POWERPC__) || defined(__POWERPC) || defined(_M_PPC)
+  lua_pushstring(L, "ppc");
+#elif defined(__mips__) || defined(__mips) || defined(__MIPS__) || defined(__MIPS)
+  lua_pushstring(L, "mips");
+#else
+  lua_pushstring(L, "other");
+#endif
+  lua_setfield(L, -2, "arch");
+
   return 1;
 }

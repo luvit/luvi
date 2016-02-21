@@ -17,6 +17,10 @@
 #ifndef LUVI_H
 #define LUVI_H
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
@@ -51,3 +55,22 @@ LUALIB_API int luaopen_zlib(lua_State * const L);
 int luaopen_lpeg(lua_State* L);
 #endif
 #endif
+
+#if (LUA_VERSION_NUM >= 502)
+# undef luaL_register
+# define luaL_register(L,n,f) \
+               { if ((n) == NULL) luaL_setfuncs(L,f,0); else luaL_newlib(L,f); }
+
+# undef luaL_checkint
+# define luaL_checkint(L,i) ((int)luaL_checkinteger(L,(i)))
+# undef luaL_optint
+# define luaL_optint(L,i,d) ((int)luaL_optinteger(L,(i),(d)))
+
+#define lua_setfenv lua_setuservalue
+
+#define lua_objlen lua_rawlen
+#define lua_getfenv lua_getuservalue
+#define lua_setfenv lua_setuservalue
+
+#endif
+
