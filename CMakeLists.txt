@@ -123,7 +123,8 @@ add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 
 if(MSVC)
   set(winsvc src/winsvc.h src/winsvcaux.h src/winsvc.c src/winsvcaux.c)
-  add_definitions( -DWITH_WINSVC -DLUA_BUILD_AS_DLL -DLUA_LIB -DBUILDING_UV_SHARED )
+  add_definitions( -DWITH_WINSVC -DLUA_BUILD_AS_DLL -DBUILDING_UV_SHARED )
+  add_definitions( -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS )
 
   add_library (luvi_renamed src/luvi_renamed.c)
 endif()

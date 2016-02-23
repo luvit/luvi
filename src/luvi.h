@@ -17,10 +17,6 @@
 #ifndef LUVI_H
 #define LUVI_H
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"

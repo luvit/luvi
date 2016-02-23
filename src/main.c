@@ -15,6 +15,7 @@
  *
  */
 
+#define LUA_LIB
 #include "luvi.h"
 #include "luv.h"
 #include "lenv.c"
@@ -163,7 +164,7 @@ int main(int argc, char* argv[] ) {
   // Use the return value from the script as process exit code.
   res = 0;
   if (lua_type(L, -1) == LUA_TNUMBER) {
-    res = lua_tointeger(L, -1);
+    res = (int)lua_tointeger(L, -1);
   }
   vm_release(L);
   return res;
