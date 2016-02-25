@@ -15,6 +15,7 @@
  *
  */
 
+#define LUA_LIB
 #include "luvi.h"
 #include "luv.h"
 #include "lenv.c"
@@ -25,6 +26,9 @@
 int luaopen_rex_pcre(lua_State* L);
 #endif
 #include "../deps/strlib.c"
+#ifdef WITH_PLAIN_LUA
+#include "../deps/bit.c"
+#endif
 
 #if WITH_CUSTOM
 int luvi_custom(lua_State* L);
@@ -39,7 +43,9 @@ static lua_State* vm_acquire(){
   luaL_openlibs(L);
 
   // Add string lua 5.3 compat apis, pack,unpack,packsize
+#if LUA_VERSION_NUM < 503
   make_compat53_string(L);
+#endif
 
   // Get package.preload so we can store builtins in it.
   lua_getglobal(L, "package");
@@ -83,6 +89,21 @@ static lua_State* vm_acquire(){
   // Store zlib module definition at preload.zlib
   lua_pushcfunction(L, luaopen_zlib);
   lua_setfield(L, -2, "zlib");
+#endif
+
+#ifdef WITH_PLAIN_LUA
+  {
+      LUALIB_API int luaopen_init(lua_State *L);
+      LUALIB_API int luaopen_luvibundle(lua_State *L);
+      LUALIB_API int luaopen_luvipath(lua_State *L);
+      lua_pushcfunction(L, luaopen_init);
+      lua_setfield(L, -2, "init");
+      lua_pushcfunction(L, luaopen_luvibundle);
+      lua_setfield(L, -2, "luvibundle");
+      lua_pushcfunction(L, luaopen_luvipath);
+      lua_setfield(L, -2, "luvipath");
+      luaL_requiref(L, "bit", luaopen_bit, 1);
+  }
 #endif
 
 #ifdef WITH_CUSTOM
@@ -143,7 +164,7 @@ int main(int argc, char* argv[] ) {
   // Use the return value from the script as process exit code.
   res = 0;
   if (lua_type(L, -1) == LUA_TNUMBER) {
-    res = lua_tointeger(L, -1);
+    res = (int)lua_tointeger(L, -1);
   }
   vm_release(L);
   return res;

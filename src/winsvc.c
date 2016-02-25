@@ -14,6 +14,7 @@
 *  limitations under the License.
 *
 */
+#define LUA_LIB
 #include "luvi.h"
 
 #include <windows.h>

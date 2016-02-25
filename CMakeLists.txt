@@ -92,9 +92,14 @@ else (WithSharedLibluv)
   set(BUILD_MODULE OFF CACHE STRING "Build luv as static library")
   include_directories(deps/luv/src)
   include_directories(deps/luv/deps/libuv/include)
-  include_directories(deps/luv/deps/luajit/src)
+  if (WITH_LUA_ENGINE STREQUAL Lua)
+    include_directories(deps/luv/deps/lua/src)
+    set(LUVI_LIBRARIES luv lualib uv)
+  else()
+    include_directories(deps/luv/deps/luajit/src)
+    set(LUVI_LIBRARIES luv luajit-5.1 uv)
+  endif()
   add_subdirectory(deps/luv)
-  set(LUVI_LIBRARIES luv luajit-5.1 uv)
 endif (WithSharedLibluv)
 
 
@@ -118,7 +123,8 @@ add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 
 if(MSVC)
   set(winsvc src/winsvc.h src/winsvcaux.h src/winsvc.c src/winsvcaux.c)
-  add_definitions( -DWITH_WINSVC -DLUA_BUILD_AS_DLL -DLUA_LIB -DBUILDING_UV_SHARED )
+  add_definitions( -DWITH_WINSVC -DLUA_BUILD_AS_DLL -DBUILDING_UV_SHARED )
+  add_definitions( -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS )
 
   add_library (luvi_renamed src/luvi_renamed.c)
 endif()
@@ -127,7 +133,11 @@ if(UNIX)
   add_definitions(-Wall)
 endif()
 
-luajit_add_executable(luvi
+if (WITH_LUA_ENGINE STREQUAL Lua)
+  add_definitions(-DWITH_PLAIN_LUA)
+endif ()
+
+lua_add_executable(luvi
   ${winsvc}
   src/main.c
   src/lua/init.lua

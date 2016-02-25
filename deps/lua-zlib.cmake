@@ -14,6 +14,8 @@ add_library(lua_zlib
   ${LUA_ZLIB_DIR}/zlib.def
 )
 
+set_target_properties(lua_zlib PROPERTIES COMPILE_FLAGS -DLUA_LIB)
+
 target_link_libraries(lua_zlib ${LUA_ZLIB_LIB})
 
 set(EXTRA_LIBS ${EXTRA_LIBS} lua_zlib)

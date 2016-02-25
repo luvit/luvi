@@ -5,9 +5,10 @@ include_directories(
   ${LUA_OPENSSL_DIR}/src
 )
 
-add_definitions(
-  -DCOMPAT52_IS_LUAJIT
-)
+find_package(Threads)
+if (CMAKE_THREAD_LIBS_INIT)
+    add_definitions(-DPTHREADS)
+endif (CMAKE_THREAD_LIBS_INIT)
 
 add_library(lua_openssl
   ${LUA_OPENSSL_DIR}/src/asn1.c                       
@@ -48,6 +49,9 @@ add_library(lua_openssl
   ${LUA_OPENSSL_DIR}/src/xalgor.c                      
   ${LUA_OPENSSL_DIR}/src/xstore.c                     
 )
+
+set_target_properties(lua_openssl PROPERTIES
+    COMPILE_FLAGS "-DLUA_LIB -DCOMPAT52_IS_LUAJIT")
 
 if (WithSharedOpenSSL)
   target_link_libraries(lua_openssl ssl crypto)

@@ -91,7 +91,7 @@ static int lmz_reader_locate_file(lua_State *L) {
 
 static int lmz_reader_stat(lua_State* L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
-  mz_uint file_index = luaL_checkinteger(L, 2) - 1;
+  mz_uint file_index = (mz_uint)luaL_checkinteger(L, 2) - 1;
   mz_zip_archive_file_stat stat;
   if (!mz_zip_reader_file_stat(&(zip->archive), file_index, &stat)) {
     lua_pushnil(L);
@@ -130,7 +130,7 @@ static int lmz_reader_stat(lua_State* L) {
 
 static int lmz_reader_get_filename(lua_State* L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
-  mz_uint file_index = luaL_checkinteger(L, 2) - 1;
+  mz_uint file_index = (mz_uint)luaL_checkinteger(L, 2) - 1;
   char pFilename[PATH_MAX];
   mz_uint filename_buf_size = PATH_MAX;
   if (!mz_zip_reader_get_filename(&(zip->archive), file_index, pFilename, filename_buf_size)) {
@@ -144,14 +144,14 @@ static int lmz_reader_get_filename(lua_State* L) {
 
 static int lmz_reader_is_file_a_directory(lua_State  *L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
-  mz_uint file_index = luaL_checkinteger(L, 2) - 1;
+  mz_uint file_index = (mz_uint)luaL_checkinteger(L, 2) - 1;
   lua_pushboolean(L, mz_zip_reader_is_file_a_directory(&(zip->archive), file_index));
   return 1;
 }
 
 static int lmz_reader_extract(lua_State *L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
-  mz_uint file_index = luaL_checkinteger(L, 2) - 1;
+  mz_uint file_index = (mz_uint)luaL_checkinteger(L, 2) - 1;
   mz_uint flags = luaL_optint(L, 3, 0);
   size_t out_len;
   char* out_buf = mz_zip_reader_extract_to_heap(&(zip->archive), file_index, &out_len, flags);
@@ -185,7 +185,7 @@ static int lmz_writer_init(lua_State *L) {
 static int lmz_writer_add_from_zip_reader(lua_State *L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_writer");
   lmz_file_t* source = luaL_checkudata(L, 2, "miniz_reader");
-  mz_uint file_index = luaL_checkinteger(L, 3) - 1;
+  mz_uint file_index = (mz_uint)luaL_checkinteger(L, 3) - 1;
   if (!mz_zip_writer_add_from_zip_reader(&(zip->archive), &(source->archive), file_index)) {
     return luaL_error(L, "Failure to copy file between zips");
   }
