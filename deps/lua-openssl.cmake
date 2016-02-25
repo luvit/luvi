@@ -5,6 +5,11 @@ include_directories(
   ${LUA_OPENSSL_DIR}/src
 )
 
+find_package(Threads)
+if (CMAKE_THREAD_LIBS_INIT)
+    add_definitions(-DPTHREADS)
+endif (CMAKE_THREAD_LIBS_INIT)
+
 add_library(lua_openssl
   ${LUA_OPENSSL_DIR}/src/asn1.c                       
   ${LUA_OPENSSL_DIR}/src/auxiliar.c                   
