@@ -5,7 +5,7 @@ High-level changes between release versions.
 ## v2.7.0
 
  - openssl: update to 1.0.2.g [Ryan Phillips]
- - lua-openss: update submodule [Tim Caswell]
+ - lua-openssl: update submodule [Tim Caswell]
  - luv: update to 1.9.0-1 [Tim Caswell]
  - libuv: update to v1.9.0 [Tim Caswell]
  - luvi: make compatible with plain Lua 5.2 or 5.3 [Xavier Wang]
