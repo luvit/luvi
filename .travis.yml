@@ -12,7 +12,6 @@ sudo: false
 
 env:
   - BUILD_TYPE=tiny
-  # - BUILD_TYPE=regular
   - BUILD_TYPE=regular-asm
 
 os:

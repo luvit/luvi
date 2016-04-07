@@ -4,7 +4,6 @@ configuration: Release
 environment:
   matrix:
     - BUILD_TYPE: tiny
-    - BUILD_TYPE: regular
     - BUILD_TYPE: regular-asm
     - BUILD_TYPE: regular32-asm
 
