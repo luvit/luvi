@@ -98,7 +98,7 @@ reset:
 
 luvi-src.tar.gz:
 	echo ${LUVI_TAG} > VERSION && \
-	tar -czvf ../luvi-src.tar.gz \
+	COPYFILE_DISABLE=true tar -czvf ../luvi-src.tar.gz \
 	  --exclude 'luvi-src.tar.gz' --exclude '.git*' --exclude build . && \
 	mv ../luvi-src.tar.gz . && \
 	rm VERSION
