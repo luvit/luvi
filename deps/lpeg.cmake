@@ -11,7 +11,7 @@ add_library(LPEGLIB
   ${LPEGLIB_DIR}/lptree.c
   ${LPEGLIB_DIR}/lpvm.c
 )
-add_definitions(-DWITH_LPEG)
+add_definitions(-DLUA_LIB -DWITH_LPEG)
 remove_definitions(-DNDEBUG)
 remove_definitions(-DVERSION)
 
