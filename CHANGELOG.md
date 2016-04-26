@@ -2,9 +2,15 @@
 
 High-level changes between release versions.
 
+## v2.7.1
+
+ - openssl: revert to 1.0.2e [Tim Caswell]
+ - lua-openssl: revert to C_HAPPY-14-g6e96296 [Tim Caswell]
+ - luv: update to 1.9.0-3 to get memory leak fixes [Tim Caswell]
+
 ## v2.7.0
 
- - openssl: update to 1.0.2.g [Ryan Phillips]
+ - openssl: update to 1.0.2g [Ryan Phillips]
  - lua-openssl: update submodule [Tim Caswell]
  - luv: update to 1.9.0-1 [Tim Caswell]
  - libuv: update to v1.9.0 [Tim Caswell]
