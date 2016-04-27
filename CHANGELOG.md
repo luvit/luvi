@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.7.2
+
+ - openssl: update to 1.0.2g with working assembly. [Ryan Phillips]
+
 ## v2.7.1
 
  - openssl: revert to 1.0.2e [Tim Caswell]
