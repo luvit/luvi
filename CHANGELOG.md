@@ -2,6 +2,11 @@
 
 High-level changes between release versions.
 
+## v2.7.4
+
+ - luv: Update luv [Tim Caswell]
+ - luajit: Update to latest in 2.1 branch. [Tim Caswell]
+
 ## v2.7.2
 
  - openssl: update to 1.0.2g with working assembly. [Ryan Phillips]
