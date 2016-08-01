@@ -2,6 +2,10 @@
 
 High-level changes between release versions.
 
+## v2.7.5
+
+ - luv: Don't free luv_handle_t till after parent is GCed [Tim Caswell]
+
 ## v2.7.4
 
  - luv: Update luv [Tim Caswell]
