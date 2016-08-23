@@ -1,6 +1,5 @@
 language: c
 
-
 addons:
   apt:
     sources:
