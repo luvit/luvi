@@ -2,6 +2,15 @@
 
 High-level changes between release versions.
 
+## v2.7.6
+
+ - luv: Update to 1.9.1-1 (Tim Caswell)
+   - Fix upstream lua submodule (Tim Caswell)
+   - Fix crash when handles are nil (Ryan Phillips)
+   - Fix compile for VS2008 (zhangtj)
+ - miniz: Fix expansion warnings (Jörg Krause)
+ - openssl: Bump to 1.0.2h (Ryan Phillips)
+
 ## v2.7.5
 
  - luv: Don't free luv_handle_t till after parent is GCed [Tim Caswell]
