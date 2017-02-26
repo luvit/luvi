@@ -1,0 +1,18 @@
+CC=musl-gcc -static -Os
+
+deps/luv/deps/lua/liblua.a:
+	sed -i deps/luv/deps/lua/makefile -e 's/CC\=/CC\= musl-gcc/'
+	# $(MAKE) -C deps/luv/deps/lua a
+
+deps/luv/deps/libuv/.libs/libuv.a: deps/luv/deps/libuv/Makefile
+	$(MAKE) -C deps/luv/deps/libuv
+
+deps/luv/deps/libuv/Makefile: deps/luv/deps/libuv/configure
+	cd deps/luv/deps/libuv && ./configure && cd -
+
+deps/luv/deps/libuv/configure:
+	./deps/luv/deps/libuv/autogen.sh
+
+distclean:
+	cd deps/luv/deps/libuv && git clean -xdf . && cd -
+	cd deps/luv/deps/lua && git clean -xdf . && cd -
