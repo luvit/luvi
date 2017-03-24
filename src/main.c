@@ -34,6 +34,27 @@ int luaopen_rex_pcre(lua_State* L);
 int luvi_custom(lua_State* L);
 #endif
 
+static int luvi_traceback(lua_State *L) {
+  if (!lua_isstring(L, 1))  /* 'message' not a string? */
+    return 1;  /* keep it intact */
+  lua_pushglobaltable(L);
+  lua_getfield(L, -1, "debug");
+  lua_remove(L, -2);
+  if (!lua_istable(L, -1)) {
+    lua_pop(L, 1);
+    return 1;
+  }
+  lua_getfield(L, -1, "traceback");
+  if (!lua_isfunction(L, -1)) {
+    lua_pop(L, 2);
+    return 1;
+  }
+  lua_pushvalue(L, 1);  /* pass error message */
+  lua_pushinteger(L, 2);  /* skip this function and traceback */
+  lua_call(L, 2, 1);  /* call debug.traceback */
+  return 1;
+}
+
 static lua_State* vm_acquire(){
   lua_State*L = luaL_newstate();
   if (L == NULL)
@@ -121,6 +142,7 @@ int main(int argc, char* argv[] ) {
   lua_State* L;
   int index;
   int res;
+  int errfunc;
 
   // Hooks in libuv that need to be done in main.
   argv = uv_setup_args(argc, argv);
@@ -142,9 +164,14 @@ int main(int argc, char* argv[] ) {
   lua_setfield(L, -2, "winsvcaux");
 #endif
 
+  /* push debug function */
+  lua_pushcfunction(L, luvi_traceback);
+  errfunc = lua_gettop(L);
+
   // Load the init.lua script
   if (luaL_loadstring(L, "return require('init')(...)")) {
     fprintf(stderr, "%s\n", lua_tostring(L, -1));
+    vm_release(L);
     return -1;
   }
 
@@ -156,8 +183,9 @@ int main(int argc, char* argv[] ) {
   }
 
   // Start the main script.
-  if (lua_pcall(L, 1, 1, 0)) {
+  if (lua_pcall(L, 1, 1, errfunc)) {
     fprintf(stderr, "%s\n", lua_tostring(L, -1));
+    vm_release(L);
     return -1;
   }
 
