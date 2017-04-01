@@ -152,12 +152,13 @@ for i = 1, #tests, 2 do
   assert(deepEqual(expected, actual), "ERROR: readdir(" .. path .. ")")
 end
 
-print("Testing for lua 5.2 extensions")
-local thread, ismain = coroutine.running()
-p(thread, ismain)
-assert(thread)
-assert(ismain)
-
+if _VERSION=="Lua 5.2" then
+  print("Testing for lua 5.2 extensions")
+  local thread, ismain = coroutine.running()
+  p(thread, ismain)
+  assert(thread)
+  assert(ismain)
+end
 
 print("Testing miniz")
 local miniz = require('miniz')
