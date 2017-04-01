@@ -30,7 +30,7 @@ int luaopen_rex_pcre(lua_State* L);
 #include "../deps/bit.c"
 #endif
 
-#if WITH_CUSTOM
+#ifdef WITH_CUSTOM
 int luvi_custom(lua_State* L);
 #endif
 
