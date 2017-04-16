@@ -55,7 +55,7 @@ local function setTimeout(timeout, callback)
   local function ontimeout()
     print("ontimeout", self)
     uv.timer_stop(timer)
-    uv.close(timer)
+    uv.close(timer
     callback(self)
   end
   uv.timer_start(timer, timeout, 0, ontimeout)
