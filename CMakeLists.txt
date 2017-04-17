@@ -71,6 +71,8 @@ option(WithPackageBUNDLE "Build OSX bundle." OFF)
 
 find_package(Threads)
 
+include(LuaJITAddExecutable)
+
 if (WithSharedLibluv)
   # Building against a shared libluv provides that libluajit and libuv exists
   find_package(Libluv)
@@ -85,7 +87,6 @@ if (WithSharedLibluv)
   if (LIBUV_FOUND)
     include_directories(${LIBUV_INCLUDE_DIR})
   endif (LIBUV_FOUND)
-  include(LuaJITAddExecutable)
   set(LUVI_LIBRARIES ${LIBLUV_LIBRARIES} ${LUAJIT_LIBRARIES} ${LIBUV_LIBRARIES})
 else (WithSharedLibluv)
   # Build luv as static library insteas as module
