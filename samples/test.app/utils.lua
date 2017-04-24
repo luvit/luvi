@@ -1,5 +1,36 @@
-local uv = require('uv')
-local env = require('env')
+--[[
+
+Copyright 2014-2015 The Luvit Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+--]]
+--[[lit-meta
+  name = "luvit/pretty-print"
+  version = "2.0.0"
+  homepage = "https://github.com/luvit/luvit/blob/master/deps/pretty-print.lua"
+  description = "A lua value pretty printer and colorizer for terminals."
+  tags = {"colors", "tty"}
+  license = "Apache 2"
+  author = { name = "Tim Caswell" }
+]]
+
+local success, uv = pcall(require, 'uv')
+if not success then
+  success, uv = pcall(require, 'luv')
+end
+assert(success, uv)
+local getenv = require('os').getenv
 
 local prettyPrint, dump, strip, color, colorize, loadColors
 local theme = {}
@@ -11,7 +42,6 @@ local stdout, stdin, stderr, width
 local quote, quote2, dquote, dquote2, obracket, cbracket, obrace, cbrace, comma, equals, controls
 
 local themes = {
-
   -- nice color theme using 16 ansi colors
   [16] = {
     property     = "0;37", -- white
@@ -36,7 +66,6 @@ local themes = {
     failure      = "1;33;41", -- bright-yellow on red
     highlight    = "1;36;44", -- bright-cyan on blue
   },
-
   -- nice color theme using ansi 256-mode colors
   [256] = {
     property     = "38;5;253",
@@ -61,7 +90,6 @@ local themes = {
     failure      = "38;5;215;48;5;52",  -- bright red on dark red
     highlight    = "38;5;45;48;5;236",  -- bright teal on dark grey
   },
-
 }
 
 local special = {
@@ -73,6 +101,11 @@ local special = {
   [12] = 'f',
   [13] = 'r'
 }
+
+function strip(str)
+  return string.gsub(str, '\027%[[^m]*m', '')
+end
+
 
 function loadColors(index)
   if index == nil then index = defaultTheme end
@@ -96,8 +129,8 @@ function loadColors(index)
 
   quote    = colorize('quotes', "'", 'string')
   quote2   = colorize('quotes', "'")
-  dquote    = colorize('quotes', '"', 'string')
-  dquote2   = colorize('quotes', '"')
+  dquote   = colorize('quotes', '"', 'string')
+  dquote2  = colorize('quotes', '"')
   obrace   = colorize('braces', '{ ')
   cbrace   = colorize('braces', '}')
   obracket = colorize('property', '[')
@@ -120,6 +153,15 @@ function loadColors(index)
   controls[92] = colorize('escape', '\\\\', 'string')
   controls[34] = colorize('escape', '\\"', 'string')
   controls[39] = colorize('escape', "\\'", 'string')
+  for i = 128, 255 do
+    local c
+    if i < 100 then
+      c = "0" .. tostring(i)
+    else
+      c = tostring(i)
+    end
+    controls[i] = colorize('escape', '\\' .. c, 'string')
+  end
 
 end
 
@@ -137,7 +179,7 @@ local function stringEscape(c)
   return controls[string.byte(c, 1)]
 end
 
-function dump(value)
+function dump(value, recurse, nocolor)
   local seen = {}
   local output = {}
   local offset = 0
@@ -176,7 +218,7 @@ function dump(value)
     output[#output + 1] = text
     offset = offset + length
     if offset > width then
-      dump(stack)
+      return dump(stack)
     end
   end
 
@@ -191,28 +233,29 @@ function dump(value)
     stack[#stack] = nil
   end
 
-  local function process(value)
-    local typ = type(value)
+  local function process(localValue)
+    local typ = type(localValue)
     if typ == 'string' then
-      if string.match(value, "'") and not string.match(value, '"') then
-        write(dquote .. string.gsub(value, '[%c\\]', stringEscape) .. dquote2)
+      if string.match(localValue, "'") and not string.match(localValue, '"') then
+        write(dquote .. string.gsub(localValue, '[%c\\\128-\255]', stringEscape) .. dquote2)
       else
-        write(quote .. string.gsub(value, "[%c\\']", stringEscape) .. quote2)
+        write(quote .. string.gsub(localValue, "[%c\\'\128-\255]", stringEscape) .. quote2)
       end
-    elseif typ == 'table' and not seen[value] then
-
-      seen[value] = true
+    elseif typ == 'table' and not seen[localValue] then
+      if not recurse then seen[localValue] = true end
       write(obrace)
       local i = 1
       -- Count the number of keys so we know when to stop adding commas
       local total = 0
-      for _ in pairs(value) do total = total + 1 end
+      for _ in pairs(localValue) do total = total + 1 end
 
-      for k, v in pairs(value) do
+      local nextIndex = 1
+      for k, v in pairs(localValue) do
         indent()
-        if k == i then
-          -- if the key matches the index, don't show it.
+        if k == nextIndex then
+          -- if the key matches the last numerical index + 1
           -- This is how lists print without keys
+          nextIndex = k + 1
           process(v)
         else
           if type(k) == "string" and string.find(k,"^[%a_][%a%d_]*$") then
@@ -240,18 +283,18 @@ function dump(value)
       end
       write(cbrace)
     else
-      write(colorize(typ, tostring(value)))
+      write(colorize(typ, tostring(localValue)))
     end
   end
 
   process(value)
-
-  return table.concat(output, "")
+  local s =  table.concat(output, "")
+  return nocolor and strip(s) or s
 end
 
 -- Print replacement that goes through libuv.  This is useful on windows
 -- to use libuv's code to translate ansi escape codes to windows API calls.
-function print(...)
+function _G.print(...)
   local n = select('#', ...)
   local arguments = {...}
   for i = 1, n do
@@ -285,9 +328,10 @@ end
 if uv.guess_handle(1) == 'tty' then
   stdout = assert(uv.new_tty(1, false))
   width = uv.tty_get_winsize(stdout)
+  if width == 0 then width = 80 end
   -- auto-detect when 16 color mode should be used
-  local term = env.get("TERM")
-  if term == 'xterm' or term == 'xterm-256color' then
+  local term = getenv("TERM")
+  if term and (term == 'xterm' or term:match'-256color$') then
     defaultTheme = 256
   else
     defaultTheme = 16
@@ -306,67 +350,16 @@ else
   uv.pipe_open(stderr, 2)
 end
 
-local function bind(fn, ...)
-  local args = {...}
-  if #args == 0 then return fn end
-  return function ()
-    return fn(unpack(args))
-  end
-end
-
-local function noop(err)
-  if err then print("Unhandled callback error", err) end
-end
-
-local function adapt(c, fn, ...)
-  local nargs = select('#', ...)
-  local args = {...}
-  -- No continuation defaults to noop callback
-  if not c then c = noop end
-  local t = type(c)
-  if t == 'function' then
-    args[nargs + 1] = c
-    return fn(unpack(args))
-  elseif t ~= 'thread' then
-    error("Illegal continuation type " .. t)
-  end
-  local err, data, waiting
-  args[nargs + 1] = function (err, ...)
-    if waiting then
-      if err then
-        assert(coroutine.resume(c, nil, err))
-      else
-        assert(coroutine.resume(c, ...))
-      end
-    else
-      error, data = err, {...}
-      c = nil
-    end
-  end
-  fn(unpack(args))
-  if c then
-    waiting = true
-    return coroutine.yield(c)
-  elseif err then
-    return nil, err
-  else
-    return unpack(data)
-  end
-end
-
 return {
-  bind = bind,
   loadColors = loadColors,
   theme = theme,
   print = print,
   prettyPrint = prettyPrint,
   dump = dump,
-  strip = strip,
   color = color,
   colorize = colorize,
   stdin = stdin,
   stdout = stdout,
   stderr = stderr,
-  noop = noop,
-  adapt = adapt,
+  strip = strip,
 }

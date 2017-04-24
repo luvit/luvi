@@ -5,8 +5,7 @@ local bundle = require('luvi').bundle
 bundle.register("utils", "utils.lua")
 
 local utils = require('utils')
-local dump = require('utils').dump
-
+local p = utils.prettyPrint
 local stdout = utils.stdout
 
 
@@ -44,18 +43,6 @@ local function deepEqual(expected, actual, path)
     end
   end
   return true
-end
-
-_G.p = function (...)
-  local n = select('#', ...)
-  local arguments = { ... }
-
-  for i = 1, n do
-    arguments[i] = dump(arguments[i])
-  end
-
-  local toWrite = table.concat(arguments, "\t") .. "\n"
-  uv.write(stdout, toWrite);
 end
 
 local env = setmetatable({}, {
