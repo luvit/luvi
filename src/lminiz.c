@@ -222,7 +222,7 @@ static int lmz_writer_finalize(lua_State *L) {
 static int lmz_deflator_init(lua_State* L) {
   int level = luaL_optint(L, 1, MZ_DEFAULT_COMPRESSION);
   if (level < MZ_DEFAULT_COMPRESSION || level > MZ_BEST_COMPRESSION) {
-      luaL_error(L, "Compression level must be between -1 and 9");
+    luaL_error(L, "Compression level must be between -1 and 9");
   }
   lmz_stream_t* stream = lua_newuserdata(L, sizeof(*stream));
   mz_streamp miniz_stream = &(stream->stream);
