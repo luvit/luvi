@@ -25,6 +25,11 @@ typedef struct {
   uv_file fd;
 } lmz_file_t;
 
+typedef struct {
+  int mode; // 0 = deflate, 1 = inflate
+  mz_stream stream;
+} lmz_stream_t;
+
 static size_t lmz_file_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_t n) {
   lmz_file_t* zip = pOpaque;
   const uv_buf_t buf = uv_buf_init(pBuf, n);
@@ -214,6 +219,126 @@ static int lmz_writer_finalize(lua_State *L) {
   return 1;
 }
 
+static int lmz_deflator_init(lua_State* L) {
+  int level = luaL_optint(L, 1, MZ_DEFAULT_COMPRESSION);
+  if (level < MZ_DEFAULT_COMPRESSION || level > MZ_BEST_COMPRESSION) {
+      luaL_error(L, "Compression level must be between -1 and 9");
+  }
+  lmz_stream_t* stream = lua_newuserdata(L, sizeof(*stream));
+  mz_streamp miniz_stream = &(stream->stream);
+  luaL_getmetatable(L, "miniz_deflator");
+  lua_setmetatable(L, -2);
+  memset(miniz_stream, 0, sizeof(*miniz_stream));
+  int status = mz_deflateInit(miniz_stream, level);
+  if (status != MZ_OK) {
+    const char* msg = mz_error(status);
+    if (msg) {
+      luaL_error(L, "Problem initializing stream: %s", msg);
+    } else {
+      luaL_error(L, "Problem initializing stream");
+    }
+  }
+  stream->mode = 0;
+  return 1;
+}
+
+static int lmz_inflator_init(lua_State* L) {
+  lmz_stream_t* stream = lua_newuserdata(L, sizeof(*stream));
+  mz_streamp miniz_stream = &(stream->stream);
+  luaL_getmetatable(L, "miniz_inflator");
+  lua_setmetatable(L, -2);
+  memset(miniz_stream, 0, sizeof(*miniz_stream));
+  int status = mz_inflateInit(miniz_stream);
+  if (status != MZ_OK) {
+    const char* msg = mz_error(status);
+    if (msg) {
+      luaL_error(L, "Problem initializing stream: %s", msg);
+    } else {
+      luaL_error(L, "Problem initializing stream");
+    }
+  }
+  stream->mode = 1;
+  return 1;
+}
+
+static int lmz_deflator_gc(lua_State* L) {
+  lmz_stream_t* stream = luaL_checkudata(L, 1, "miniz_deflator");
+  mz_deflateEnd(&(stream->stream));
+  return 0;
+}
+
+static int lmz_inflator_gc(lua_State* L) {
+  lmz_stream_t* stream = luaL_checkudata(L, 1, "miniz_inflator");
+  mz_inflateEnd(&(stream->stream));
+  return 0;
+}
+
+static const char* flush_types[] = {
+  "no", "partial", "sync", "full", "finish", "block",
+  NULL
+};
+
+static int lmz_inflator_deflator_impl(lua_State* L, lmz_stream_t* stream) {
+  mz_streamp miniz_stream = &(stream->stream);
+  size_t data_size;
+  const char* data = luaL_checklstring(L, 2, &data_size);
+  int flush = luaL_checkoption(L, 3, "no", flush_types);
+  miniz_stream->avail_in = data_size;
+  miniz_stream->next_in = (const unsigned char*)data;
+  luaL_Buffer buf;
+  luaL_buffinit(L, &buf);
+  while (1) {
+    char* buffer = luaL_prepbuffer(&buf);
+    memset(buffer, 0, LUAL_BUFFERSIZE);
+    miniz_stream->avail_out = LUAL_BUFFERSIZE;
+    miniz_stream->next_out = (unsigned char*)buffer;
+    size_t before = miniz_stream->total_out;
+    int status;
+    if (stream->mode) {
+      status = mz_inflate(miniz_stream, flush);
+    } else {
+      status = mz_deflate(miniz_stream, flush);
+    }
+    size_t added = miniz_stream->total_out - before;
+    luaL_addsize(&buf, added);
+    switch (status) {
+      case MZ_OK:
+      case MZ_STREAM_END:
+        luaL_pushresult(&buf);
+        return 1;
+      case MZ_STREAM_ERROR:
+      case MZ_DATA_ERROR:
+      case MZ_PARAM_ERROR:
+        luaL_pushresult(&buf);
+        lua_pushnil(L);
+        lua_insert(L, -2);
+        lua_pushstring(L, mz_error(status));
+        lua_insert(L, -2);
+        return 3;
+      case MZ_BUF_ERROR:
+        if (stream->mode) {
+        // not enough input
+        luaL_pushresult(&buf);
+        lua_pushnil(L);
+        lua_insert(L, -2);
+        lua_pushstring(L, "Not enough input data");
+        lua_insert(L, -2);
+        return 3;
+        }
+        break;
+    }
+  }
+}
+
+static int lmz_deflator_deflate(lua_State* L) {
+  lmz_stream_t* stream = luaL_checkudata(L, 1, "miniz_deflator");
+  return lmz_inflator_deflator_impl(L, stream);
+}
+static int lmz_inflator_inflate(lua_State* L) {
+  lmz_stream_t* stream = luaL_checkudata(L, 1, "miniz_inflator");
+  return lmz_inflator_deflator_impl(L, stream);
+}
+
 static int ltinfl(lua_State* L) {
   size_t in_len;
   const char* in_buf = luaL_checklstring(L, 1, &in_len);
@@ -254,11 +379,23 @@ static const luaL_Reg lminiz_write_m[] = {
   {NULL, NULL}
 };
 
+static const luaL_Reg lminiz_deflate_m[] = {
+  {"deflate", lmz_deflator_deflate},
+  {NULL,NULL}
+};
+
+static const luaL_Reg lminiz_inflate_m[] = {
+  {"inflate", lmz_inflator_inflate},
+  {NULL,NULL}
+};
+
 static const luaL_Reg lminiz_f[] = {
   {"new_reader", lmz_reader_init},
   {"new_writer", lmz_writer_init},
   {"inflate", ltinfl},
   {"deflate", ltdefl},
+  {"new_deflator", lmz_deflator_init},
+  {"new_inflator", lmz_inflator_init},
   {NULL, NULL}
 };
 
@@ -273,6 +410,18 @@ LUALIB_API int luaopen_miniz(lua_State *L) {
   luaL_newlib(L, lminiz_write_m);
   lua_setfield(L, -2, "__index");
   lua_pushcfunction(L, lmz_writer_gc);
+  lua_setfield(L, -2, "__gc");
+  lua_pop(L, 1);
+  luaL_newmetatable(L, "miniz_deflator");
+  luaL_newlib(L, lminiz_deflate_m);
+  lua_setfield(L, -2, "__index");
+  lua_pushcfunction(L, lmz_deflator_gc);
+  lua_setfield(L, -2, "__gc");
+  lua_pop(L, 1);
+  luaL_newmetatable(L, "miniz_inflator");
+  luaL_newlib(L, lminiz_inflate_m);
+  lua_setfield(L, -2, "__index");
+  lua_pushcfunction(L, lmz_inflator_gc);
   lua_setfield(L, -2, "__gc");
   lua_pop(L, 1);
   luaL_newlib(L, lminiz_f);
