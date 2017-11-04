@@ -1,4 +1,4 @@
-all: luvi-native luvi-i386 luvi-arm32v7 luvi-arm64v8 luvi-alpine-native luvi-alpine-i386 luvi-alpine-arm32v7 luvi-alpine-arm64v8
+all: luvi-native luvi-i386 luvi-arm32v7 luvi-arm64v8 luvi-alpine-native luvi-alpine-i386 luvi-alpine-arm32v6 luvi-alpine-arm64v8
 
 luvi-alpine-native:
 	docker build . -f Dockerfile.alpine.native -t luvi-alpine-native
