@@ -1,0 +1,11 @@
+FROM alpine
+
+RUN apk update
+RUN apk upgrade
+RUN apk add build-base cmake ninja git
+ENV generator=Ninja
+RUN git clone --branch=v2.7.6 --depth=1 --recursive https://github.com/luvit/luvi.git
+WORKDIR /luvi
+RUN make tiny
+RUN make
+RUN make test
