@@ -1,0 +1,11 @@
+FROM arm32v7/ubuntu
+COPY qemu-arm-static /usr/bin/qemu-arm-static
+RUN apt-get update
+RUN apt-get dist-upgrade -y
+RUN apt-get install build-essential cmake ninja-build git -y
+ENV generator=Ninja
+RUN git clone --branch=v2.7.6 --depth=1 --recursive https://github.com/luvit/luvi.git
+WORKDIR /luvi
+RUN make tiny
+RUN make
+RUN make test
