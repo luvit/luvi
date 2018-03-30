@@ -203,3 +203,5 @@ if options.rex then
 end
 
 print("All tests pass!\n")
+
+require('uv').run()
