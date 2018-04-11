@@ -1,0 +1,8 @@
+# Look for the library.
+FIND_LIBRARY(LPEGLIB NAMES lpeg PATH_SUFFIXES)
+
+# Handle the QUIETLY and REQUIRED arguments and set LPEG_FOUND to TRUE if all listed variables are TRUE.
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LPEG DEFAULT_MSG LPEGLIB)
+
+MARK_AS_ADVANCED(LPEGLIB)
