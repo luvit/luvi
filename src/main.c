@@ -29,7 +29,6 @@ int luaopen_rex_pcre(lua_State* L);
 #ifdef WITH_PLAIN_LUA
 #include "../deps/bit.c"
 #endif
-#include "lbit.c"
 
 #ifdef WITH_CUSTOM
 int luvi_custom(lua_State* L);
