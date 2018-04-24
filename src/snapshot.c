@@ -59,33 +59,6 @@ static void mark_object(lua_State *L, lua_State *dL, const void * parent, const 
 #if LUA_VERSION_NUM == 501
 
 static void
-luaL_checkversion(lua_State *L) {
-	if (lua_pushthread(L) == 0) {
-		luaL_error(L, "Must require in main thread");
-	}
-	lua_setfield(L, LUA_REGISTRYINDEX, "mainthread");
-}
-
-static void
-lua_rawsetp(lua_State *L, int idx, const void *p) {
-	if (idx < 0) {
-		idx += lua_gettop(L) + 1;
-	}
-	lua_pushlightuserdata(L, (void *)p);
-	lua_insert(L, -2);
-	lua_rawset(L, idx);
-}
-
-static void
-lua_rawgetp(lua_State *L, int idx, const void *p) {
-	if (idx < 0) {
-		idx += lua_gettop(L) + 1;
-	}
-	lua_pushlightuserdata(L, (void *)p);
-	lua_rawget(L, idx);
-}
-
-static void
 mark_function_env(lua_State *L, lua_State *dL, const void * t) {
 	lua_getfenv(L,-1);
 	if (lua_istable(L,-1)) {

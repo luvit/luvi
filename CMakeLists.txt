@@ -103,6 +103,11 @@ else (WithSharedLibluv)
   add_subdirectory(deps/luv)
 endif (WithSharedLibluv)
 
+set(LUA_COMPAT53_DIR deps/luv/deps/lua-compat-5.3)
+if($ENV{LUA_COMPAT53_DIR})
+  set(LUA_COMPAT53_DIR $ENV{LUA_COMPAT53_DIR})
+endif()
+include_directories(${LUA_COMPAT53_DIR})
 
 if (WithOpenSSL)
   include(deps/openssl.cmake)
@@ -141,6 +146,7 @@ endif ()
 lua_add_executable(luvi
   ${winsvc}
   src/main.c
+  src/luvi_compat.c
   src/lua/init.lua
   src/lua/luvipath.lua
   src/lua/luvibundle.lua
