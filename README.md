@@ -195,16 +195,20 @@ based on CMake and is pretty simple.
 First clone this repo recursively.
 
 ```shell
-git clone --recursive git@github.com:luvit/luvi.git
+git clone --recursive https://github.com/luvit/luvi.git
 ```
 
 Then run the makefile inside it. (Note this assumes you have cmake in your path.)
 If you're on windows, there is a `make.bat` file that works mostly like the unix
 `Makefile`.
 
+Prior to building the `luvi` binary you must configure the version of `luvi`
+that you want to build. Currently there are two versions: `regular` and `tiny`.
+
 
 ```sh
 cd luvi
+make regular
 make
 make test
 ```
