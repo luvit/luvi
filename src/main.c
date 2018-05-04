@@ -25,7 +25,6 @@
 #ifdef WITH_PCRE
 int luaopen_rex_pcre(lua_State* L);
 #endif
-#include "../deps/strlib.c"
 #ifdef WITH_PLAIN_LUA
 #include "../deps/bit.c"
 #endif
@@ -60,13 +59,8 @@ static lua_State* vm_acquire(){
   if (L == NULL)
     return L;
 
-  // Add in the lua standard libraries
-  luaL_openlibs(L);
-
-  // Add string lua 5.3 compat apis, pack,unpack,packsize
-#if LUA_VERSION_NUM < 503
-  make_compat53_string(L);
-#endif
+  // Add in the lua standard and compat libraries
+  luvi_openlibs(L);
 
   // Get package.preload so we can store builtins in it.
   lua_getglobal(L, "package");
