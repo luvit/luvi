@@ -129,7 +129,7 @@ the binary, the I/O to read from this is the same.  This is exposed as the
 #### bundle.stat(path)
 
 Load metadata about a file in the bundle.  This includes `type` ("file" or
-"tree"), `mtime` (in ms since epoch), and `size` (in bytes).
+"directory"), `mtime` (in ms since epoch), and `size` (in bytes).
 
 If the file doesn't exist, it returns `nil`.
 
