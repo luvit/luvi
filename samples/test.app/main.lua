@@ -171,6 +171,45 @@ writer:add("main.lua", 'print(require("luvi").version)', 9)
 
 p("zip bytes", #writer:finalize())
 
+do
+  print("miniz zlib compression - full data")
+  local original = bundle.readfile("sonnet-133.txt")
+  local deflator = miniz.new_deflator(9)
+  local deflated, err, part = deflator:deflate(original, "finish")
+  p("Compressed", #(deflated or part or ""))
+  deflated = assert(deflated, err)
+  local inflator = miniz.new_inflator()
+  local inflated, err, part = inflator:inflate(deflated, "finish")
+  p("Decompressed", #(inflated or part or ""))
+  inflated = assert(inflated, err)
+
+  assert(inflated == original, "inflated data doesn't match original")
+end
+
+do
+  print("miniz zlib compression - partial data stream")
+  local original_full = bundle.readfile("sonnet-133.txt")
+  local original_parts = { }
+  for part in original_full:gmatch((".?"):rep(64)) do
+    original_parts[#original_parts+1] = part
+  end
+  local deflator = miniz.new_deflator(9)
+  local inflator = miniz.new_inflator()
+  for i, part in ipairs(original_parts) do
+    p("part", part)
+    local deflated, err, partial = deflator:deflate(part,
+      i == #original_parts and "finish" or "sync")
+    p("compressed", deflated, partial)
+    deflated = assert(not err, err) and (deflated or partial)
+    local inflated, err, partial = inflator:inflate(deflated,
+      i == #original_parts and "finish" or "sync")
+    p("decompressed", inflated, partial)
+    inflated = assert(not err, err) and (inflated or partial)
+
+    assert(inflated == part, "inflated data doesn't match original")
+  end
+end
+
 local options = require('luvi').options
 
 if options.zlib then
