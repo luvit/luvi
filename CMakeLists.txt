@@ -40,6 +40,10 @@ if(MSVC)
   endforeach()
 endif()
 
+if(CMAKE_COMPILER_IS_GNUCC)
+  add_definitions( -Wno-unused-function)
+endif()
+
 if (EXISTS "VERSION")
   file (STRINGS "VERSION" LUVI_VERSION)
   message("-- Found luvi version: ${LUVI_VERSION}")
