@@ -40,6 +40,10 @@ if(MSVC)
   endforeach()
 endif()
 
+if(CMAKE_COMPILER_IS_GNUCC)
+  add_definitions( -Wno-unused-function)
+endif()
+
 if (EXISTS "VERSION")
   file (STRINGS "VERSION" LUVI_VERSION)
   message("-- Found luvi version: ${LUVI_VERSION}")
@@ -118,6 +122,11 @@ if (WithPCRE)
 endif (WithPCRE)
 
 if (WithLPEG)
+  set(LPEGLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lpeg)
+  if(DEFINED ENV{LPEGLIB_DIR})
+    set(LPEGLIB_DIR $ENV{LPEGLIB_DIR})
+  endif()
+
   include (deps/lpeg.cmake)
 endif (WithLPEG)
 
@@ -143,6 +152,9 @@ if (WITH_LUA_ENGINE STREQUAL Lua)
   add_definitions(-DWITH_PLAIN_LUA)
 endif ()
 
+if(LPEGLIB_DIR)
+  set(lpeg_re_lua ${LPEGLIB_DIR}/re.lua)
+endif()
 lua_add_executable(luvi
   ${winsvc}
   src/main.c
@@ -150,6 +162,7 @@ lua_add_executable(luvi
   src/lua/init.lua
   src/lua/luvipath.lua
   src/lua/luvibundle.lua
+  ${lpeg_re_lua}
 )
 
 if(APPLE)
