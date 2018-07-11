@@ -66,7 +66,7 @@ static lua_State* vm_acquire(){
   lua_getglobal(L, "package");
   lua_getfield(L, -1, "loaded");
 
-  // load luv into uv in advanced so that the metatables for async work.
+  // load luv into uv in advance so that the metatables for async work.
   lua_pushcfunction(L, luaopen_luv);
   lua_call(L, 0, 1);
   lua_setfield(L, -2, "uv");
