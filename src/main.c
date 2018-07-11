@@ -62,14 +62,21 @@ static lua_State* vm_acquire(){
   // Add in the lua standard and compat libraries
   luvi_openlibs(L);
 
-  // Get package.preload so we can store builtins in it.
+  // Get package.loaded so that we can load modules
   lua_getglobal(L, "package");
+  lua_getfield(L, -1, "loaded");
+
+  // load luv into uv in advanced so that the metatables for async work.
+  lua_pushcfunction(L, luaopen_luv);
+  lua_call(L, 0, 1);
+  lua_setfield(L, -2, "uv");
+  
+  // remove package.loaded
+  lua_remove(L, -1);
+
+  // Get package.preload so we can store builtins in it.
   lua_getfield(L, -1, "preload");
   lua_remove(L, -2); // Remove package
-
-  // Store uv module definition at preload.uv
-  lua_pushcfunction(L, luaopen_luv);
-  lua_setfield(L, -2, "uv");
 
   lua_pushcfunction(L, luaopen_env);
   lua_setfield(L, -2, "env");
