@@ -41,8 +41,10 @@ endif
 ifndef NPROCS
 ifeq ($(OS),Linux)
 	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
+	SHAREDSSL=ON
 else ifeq ($(OS),Darwin)
 	NPROCS:=$(shell sysctl hw.ncpu | awk '{print $$2}')
+	SHAREDSSL=OFF
 endif
 endif
 
@@ -63,10 +65,10 @@ tiny: deps/luv/CMakeLists.txt
 
 # Configure the build with openssl statically included
 regular: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF
+	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=$(SHAREDSSL) -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF
 
 regular-asm: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithOpenSSLASM=ON -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF
+	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=$(SHAREDSSL) -DWithOpenSSLASM=ON -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF
 
 package: deps/luv/CMakeLists.txt
 	cmake --build build -- package
