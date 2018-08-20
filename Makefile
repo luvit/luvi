@@ -41,10 +41,10 @@ endif
 ifndef NPROCS
 ifeq ($(OS),Linux)
 	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
-	SHAREDSSL=ON
+	SHAREDSSL?=ON
 else ifeq ($(OS),Darwin)
 	NPROCS:=$(shell sysctl hw.ncpu | awk '{print $$2}')
-	SHAREDSSL=OFF
+	SHAREDSSL?=OFF
 endif
 endif
 

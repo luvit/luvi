@@ -4,6 +4,7 @@ if(DEFINED ENV{LUA_OPENSSL_DIR})
 endif()
 
 include_directories(
+  ${CMAKE_BINARY_DIR}/include
   ${LUA_OPENSSL_DIR}/deps/auxiliar
   ${LUA_OPENSSL_DIR}/deps/lua-compat
   ${LUA_OPENSSL_DIR}/src
@@ -66,13 +67,13 @@ add_library(lua_openssl
   ${LUA_OPENSSL_DIR}/src/xstore.c
 )
 
-set_target_properties(lua_openssl PROPERTIES
-    COMPILE_FLAGS "-DLUA_LIB")
+set_target_properties(lua_openssl PROPERTIES COMPILE_FLAGS "-DLUA_LIB")
 
 if (WithSharedOpenSSL)
   target_link_libraries(lua_openssl ssl crypto)
 else (WithSharedOpenSSL)
-  target_link_libraries(lua_openssl openssl)
+  add_dependencies(lua_openssl openssl)
+  target_link_libraries(lua_openssl openssl_ssl openssl_crypto)
 endif (WithSharedOpenSSL)
 
 set(EXTRA_LIBS ${EXTRA_LIBS} lua_openssl)
