@@ -22,13 +22,14 @@ else (WithSharedOpenSSL)
       set(OPENSSL_BUILD_COMMAND nmake)
   else()
       set(OPENSSL_CONFIGURE_COMMAND ./config ${OPENSSL_CONFIG_OPTIONS})
-      set(OPENSSL_BUILD_COMMAND make)
+      set(OPENSSL_BUILD_COMMAND make -j6)
   endif()
   
   ExternalProject_Add(openssl
       PREFIX            openssl
       URL               https://www.openssl.org/source/openssl-1.1.0i.tar.gz
       URL_HASH          SHA256=ebbfc844a8c8cc0ea5dc10b86c9ce97f401837f3fa08c17b2cdadc118253cf99
+      LOG_BUILD         ON
       BUILD_IN_SOURCE   YES
       BUILD_COMMAND     ${OPENSSL_BUILD_COMMAND}
       CONFIGURE_COMMAND ${OPENSSL_CONFIGURE_COMMAND}
