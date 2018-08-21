@@ -12,6 +12,7 @@ else (WithSharedOpenSSL)
   include(ExternalProject)
 
   set(OPENSSL_CONFIG_OPTIONS no-unit-test no-shared no-asm no-stdio no-idea no-mdc2 no-rc5 --prefix=${CMAKE_BINARY_DIR})
+  set(OPENSSL_BUILD_COMMAND ${MAKE})
 
   if(WIN32)
       if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
@@ -19,10 +20,8 @@ else (WithSharedOpenSSL)
       else()
         set(OPENSSL_CONFIGURE_COMMAND perl ./Configure VC-WIN32 ${OPENSSL_CONFIG_OPTIONS})
       endif()
-      set(OPENSSL_BUILD_COMMAND nmake)
   else()
       set(OPENSSL_CONFIGURE_COMMAND ./config ${OPENSSL_CONFIG_OPTIONS})
-      set(OPENSSL_BUILD_COMMAND make)
   endif()
   
   ExternalProject_Add(openssl
