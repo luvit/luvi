@@ -12,6 +12,7 @@ else (WithSharedOpenSSL)
   include(ExternalProject)
 
   set(OPENSSL_CONFIG_OPTIONS no-unit-test no-shared no-asm no-stdio no-idea no-mdc2 no-rc5 --prefix=${CMAKE_BINARY_DIR})
+  set(OPENSSL_BUILD_COMMAND ${MAKE})
 
   if(WIN32)
       if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
@@ -28,6 +29,7 @@ else (WithSharedOpenSSL)
       URL               https://www.openssl.org/source/openssl-1.1.0i.tar.gz
       URL_HASH          SHA256=ebbfc844a8c8cc0ea5dc10b86c9ce97f401837f3fa08c17b2cdadc118253cf99
       BUILD_IN_SOURCE   YES
+      BUILD_COMMAND     ${OPENSSL_BUILD_COMMAND}
       CONFIGURE_COMMAND ${OPENSSL_CONFIGURE_COMMAND}
       INSTALL_COMMAND   ""
       TEST_COMMAND      ""
