@@ -2,6 +2,8 @@ luvi
 ====
 
 [![Linux Build Status](https://travis-ci.org/luvit/luvi.svg?branch=master)](https://travis-ci.org/luvit/luvi)
+[![Code Quality: Cpp](https://img.shields.io/lgtm/grade/cpp/g/luvit/luvi.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/luvit/luvi/context:cpp)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/luvit/luvi.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/luvit/luvi/alerts)
 
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/h643wg5hkwsnu0wd/branch/master?svg=true)](https://ci.appveyor.com/project/racker-buildbot/luvi/branch/master)
 
