@@ -158,6 +158,7 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
 endif()
 
 target_link_libraries(luvi ${LUVI_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+set_target_properties(luvi PROPERTIES ENABLE_EXPORTS ON)
 
 ###############################################################################
 ## Installation Targets
