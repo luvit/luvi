@@ -108,7 +108,7 @@ else (WithSharedLibluv)
 endif (WithSharedLibluv)
 
 set(LUA_COMPAT53_DIR deps/luv/deps/lua-compat-5.3)
-if($ENV{LUA_COMPAT53_DIR})
+if(DEFINED ENV{LUA_COMPAT53_DIR})
   set(LUA_COMPAT53_DIR $ENV{LUA_COMPAT53_DIR})
 endif()
 include_directories(${LUA_COMPAT53_DIR})
