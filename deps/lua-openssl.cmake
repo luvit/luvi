@@ -54,7 +54,6 @@ add_library(lua_openssl
   ${LUA_OPENSSL_DIR}/src/private.h
   ${LUA_OPENSSL_DIR}/src/rsa.c
   ${LUA_OPENSSL_DIR}/src/sk.h
-  ${LUA_OPENSSL_DIR}/src/sm2.c
   ${LUA_OPENSSL_DIR}/src/srp.c
   ${LUA_OPENSSL_DIR}/src/ssl.c
   ${LUA_OPENSSL_DIR}/src/th-lock.c
