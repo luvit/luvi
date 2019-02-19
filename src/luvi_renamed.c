@@ -1,8 +1,10 @@
 #include "windows.h"
 #include "delayimp.h"
 FARPROC WINAPI LoadFailureHook(unsigned dliNotify, PDelayLoadInfo pdli);
+#if _MSC_FULL_VER >= 190024210 // MSVC 2015 Update 3
 #ifndef DELAYIMP_INSECURE_WRITABLE_HOOKS
 const
+#endif
 #endif
 extern PfnDliHook __pfnDliFailureHook2 = LoadFailureHook;
 
