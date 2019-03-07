@@ -17,6 +17,7 @@ ifdef WITHOUT_AMALG
 endif
 
 WITH_SHARED_LIBLUV ?= OFF
+SHAREDSSL ?= OFF
 
 CMAKE_FLAGS += \
 	-DWithSharedLibluv=$(WITH_SHARED_LIBLUV)
@@ -41,10 +42,8 @@ endif
 ifndef NPROCS
 ifeq ($(OS),Linux)
 	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
-	SHAREDSSL?=ON
 else ifeq ($(OS),Darwin)
 	NPROCS:=$(shell sysctl hw.ncpu | awk '{print $$2}')
-	SHAREDSSL?=OFF
 endif
 endif
 
