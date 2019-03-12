@@ -11,7 +11,10 @@ else (WithSharedOpenSSL)
   message("Enabling Static OpenSSL")
   include(ExternalProject)
 
-  set(OPENSSL_CONFIG_OPTIONS no-unit-test no-shared no-asm no-stdio no-idea no-mdc2 no-rc5 --prefix=${CMAKE_BINARY_DIR})
+  set(OPENSSL_CONFIG_OPTIONS no-unit-test no-shared no-stdio no-idea no-mdc2 no-rc5 --prefix=${CMAKE_BINARY_DIR})
+  if(NOT WithOpenSSLASM)
+    set(OPENSSL_CONFIG_OPTIONS no-asm ${OPENSSL_CONFIG_OPTIONS})
+  endif()
 
   if(WIN32)
       if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
