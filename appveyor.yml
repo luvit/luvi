@@ -10,6 +10,10 @@ environment:
 matrix:
   fast_finish: true
 
+install:
+  - choco install nasm
+  - set PATH="C:\Program Files\NASM";%PATH%
+
 build_script:
  - git submodule update --init --recursive
  - Make.bat %BUILD_TYPE%
@@ -21,3 +25,7 @@ test_script:
 artifacts:
  - path: luvi.exe
 
+cache:
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - C:\Program Files\NASM -> appveyor.yml
