@@ -81,6 +81,36 @@ git clean -f -d
 git checkout .
 GOTO :end
 
+:artifacts-tiny
+IF NOT EXIST artifacts MKDIR artifacts
+COPY build\Release\luvi.exe artifacts\luvi-tiny-Windows-amd64.exe
+COPY build\Release\luvi.lib artifacts\luvi-tiny-Windows-amd64.lib
+COPY build\Release\luvi_renamed.lib artifacts\luvi_renamed-tiny-Windows-amd64.lib
+GOTO :end
+
+:artifacts-tiny32
+IF NOT EXIST artifacts MKDIR artifacts
+COPY build\Release\luvi.exe artifacts\luvi-tiny-Windows-ia32.exe
+COPY build\Release\luvi.lib artifacts\luvi-tiny-Windows-ia32.lib
+COPY build\Release\luvi_renamed.lib artifacts\luvi_renamed-tiny-Windows-ia32.lib
+GOTO :end
+
+:artifacts-regular
+:artifacts-regular-asm
+IF NOT EXIST artifacts MKDIR artifacts
+COPY build\Release\luvi.exe artifacts\luvi-regular-Windows-amd64.exe
+COPY build\Release\luvi.lib artifacts\luvi-regular-Windows-amd64.lib
+COPY build\Release\luvi_renamed.lib artifacts\luvi_renamed-regular-Windows-amd64.lib
+GOTO :end
+
+:artifacts-regular32
+:artifacts-regular32-asm
+IF NOT EXIST artifacts MKDIR artifacts
+COPY build\Release\luvi.exe artifacts\luvi-regular-Windows-ia32.exe
+COPY build\Release\luvi.lib artifacts\luvi-regular-Windows-ia32.lib
+COPY build\Release\luvi_renamed.lib artifacts\luvi_renamed-regular-Windows-ia32.lib
+GOTO :end
+
 :publish-tiny
 CALL make.bat reset
 CALL make.bat tiny
