@@ -4,6 +4,7 @@ configuration: Release
 environment:
   matrix:
     - BUILD_TYPE: tiny
+    - BUILD_TYPE: tiny32
     - BUILD_TYPE: regular-asm
     - BUILD_TYPE: regular32-asm
 
@@ -22,10 +23,26 @@ build_script:
 test_script:
  - Make.bat test
 
+after_build:
+ - Make.bat artifacts-%BUILD_TYPE%
+
 artifacts:
- - path: luvi.exe
+ - path: artifacts\*.exe
+ - path: artifacts\*.lib
 
 cache:
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
   - C:\Program Files\NASM -> appveyor.yml
+
+deploy:
+  description: '' # appveyor says this is mandatory
+  provider: GitHub
+  auth_token:
+    secure: Z1U2OG/0SsMQWFB4ReA0R/661E/r4PS2IVJ+jXC7UOBdj78TBjdmtJeUIWaCLoLQ
+  artifact: /.*/ # everything
+  draft: false
+  prerelease: false
+  force_update: true
+  on:
+    APPVEYOR_REPO_TAG: true # tags only
