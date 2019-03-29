@@ -73,6 +73,7 @@ jobs:
         file:
           - "luvi-regular-Darwin_x86_64"
           - "luvi-tiny-Darwin_x86_64"
+          - "luvi-src-$TRAVIS_TAG.tar.gz"
         overwrite: true
         skip_cleanup: true
         on:
