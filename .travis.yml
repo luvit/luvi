@@ -15,7 +15,7 @@ env:
 
 os:
   - linux
-  # - osx
+  - osx
 
 before_install:
   - git submodule update --init --recursive
@@ -55,6 +55,24 @@ jobs:
           - "luvi-tiny-Linux_x86_64"
           - "luvi-regular-Linux_i686"
           - "luvi-tiny-Linux_i686"
+        overwrite: true
+        skip_cleanup: true
+        on:
+          tags: true
+    - stage: deploy
+      if: tag IS present
+      os: osx
+      env: []
+      script:
+        # fetch tags so that git describe works
+        - git fetch --unshallow
+        - make travis-publish
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        file:
+          - "luvi-regular-Darwin_x86_64"
+          - "luvi-tiny-Darwin_x86_64"
         overwrite: true
         skip_cleanup: true
         on:

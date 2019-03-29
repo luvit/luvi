@@ -6,6 +6,7 @@ LUVI_PREFIX?=/usr/local
 LUVI_BINDIR?=$(LUVI_PREFIX)/bin
 
 OS:=$(shell uname -s)
+ARCH:=$(shell uname -m)
 
 CMAKE_FLAGS+= -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
 ifdef GENERATOR
@@ -103,6 +104,19 @@ luvi-src.tar.gz:
 	  --exclude 'luvi-src.tar.gz' --exclude '.git*' --exclude build . && \
 	mv ../luvi-src.tar.gz . && \
 	rm VERSION
+
+
+travis-publish:	reset luvi-src.tar.gz travis-tiny travis-regular-asm
+	$(MAKE)
+	mv luvi-src.tar.gz luvi-src-${LUVI_TAG}.tar.gz
+
+travis-tiny: reset tiny
+	$(MAKE)
+	mv build/luvi luvi-tiny-$(OS)_$(ARCH)
+
+travis-regular-asm: reset regular-asm
+	$(MAKE)
+	mv build/luvi luvi-regular-$(OS)_$(ARCH)
 
 linux-build: linux-build-box-regular linux-build-box32-regular linux-build-box-tiny linux-build-box32-tiny
 
