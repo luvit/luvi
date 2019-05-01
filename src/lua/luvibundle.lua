@@ -5,8 +5,8 @@ local luviPath = require('luvipath')
 local pathJoin = luviPath.pathJoin
 local getenv = require('os').getenv
 
-loadstring = loadstring or load
-unpack     = unpack     or table.unpack
+local loadstring = loadstring or load
+local unpack     = unpack     or _G.table.unpack
 
 local tmpBase = luviPath.isWindows and (getenv("TMP") or uv.cwd()) or
                                        (getenv("TMPDIR") or '/tmp')

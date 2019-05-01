@@ -16,6 +16,7 @@
  */
 
 #include "./luvi.h"
+#define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 #include "../deps/miniz.c"
 
 typedef struct {
@@ -33,6 +34,7 @@ typedef struct {
 static size_t lmz_file_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_t n) {
   lmz_file_t* zip = pOpaque;
   const uv_buf_t buf = uv_buf_init(pBuf, n);
+  file_ofs += zip->archive.m_pState->m_file_archive_start_ofs;
   uv_fs_read(zip->loop, &(zip->req), zip->fd, &buf, 1, file_ofs, NULL);
   return zip->req.result;
 }
@@ -54,7 +56,8 @@ static int lmz_reader_init(lua_State* L) {
   archive->m_pIO_opaque = zip;
   if (!mz_zip_reader_init(archive, size, flags)) {
     lua_pushnil(L);
-    lua_pushfstring(L, "%s does not appear to be a zip file", path);
+    lua_pushfstring(L, "read %s fail because of %s", path,
+      mz_zip_get_error_string(mz_zip_get_last_error(archive)));
     return 2;
   }
   return 1;
@@ -168,7 +171,7 @@ static int lmz_reader_extract(lua_State *L) {
 static int lmz_reader_get_offset(lua_State *L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
   mz_zip_archive* archive = &(zip->archive);
-  lua_pushinteger(L, archive->m_start_ofs);
+  lua_pushinteger(L, archive->m_pState->m_file_archive_start_ofs);
   return 1;
 }
 
@@ -361,6 +364,88 @@ static int ltdefl(lua_State* L) {
   return 1;
 }
 
+static int lmz_adler32(lua_State* L) {
+  mz_ulong adler = luaL_optint(L, 1, 0);
+  size_t buf_len = 0;
+  const unsigned char* ptr = (const unsigned char*)luaL_optlstring(L, 2, NULL, &buf_len);
+  adler = mz_adler32(adler, ptr, buf_len);
+  lua_pushinteger(L, adler);
+  return 1;
+}
+
+static int lmz_crc32(lua_State* L) {
+  mz_ulong crc32 = luaL_optint(L, 1, 0);
+  size_t buf_len = 0;
+  const unsigned char* ptr = (const unsigned char*)luaL_optlstring(L, 2, NULL, &buf_len);
+  crc32 = mz_crc32(crc32, ptr, buf_len);
+  lua_pushinteger(L, crc32);
+  return 1;
+}
+
+static int lmz_version(lua_State* L) {
+  lua_pushstring(L, mz_version());
+  return 1;
+}
+
+static int lmz_compress(lua_State* L)
+{
+  int level, ret;
+  size_t in_len, out_len;
+  const unsigned char *inb;
+  unsigned char *outb;
+  in_len = 0;
+  inb = (const unsigned char *)luaL_checklstring(L, 1, &in_len);
+  level = luaL_optint(L, 1, MZ_DEFAULT_COMPRESSION);
+  if (level < MZ_DEFAULT_COMPRESSION || level > MZ_BEST_COMPRESSION) {
+    luaL_error(L, "Compression level must be between -1 and 9");
+  }
+
+  out_len = mz_compressBound(in_len);
+  outb = malloc(out_len);
+  ret = mz_compress2(outb, &out_len, inb, in_len, level);
+
+  switch (ret) {
+    case MZ_OK:
+      lua_pushlstring(L, (const char*)outb, out_len);
+      ret = 1;
+      break;
+    default:
+      lua_pushnil(L);
+      lua_pushstring(L, mz_error(ret));
+      ret = 2;
+      break;
+  }
+  free(outb);
+  return ret;
+}
+
+static int lmz_uncompress(lua_State* L)
+{
+  int ret;
+  size_t in_len, out_len;
+  const unsigned char* inb;
+  unsigned char* outb;
+  in_len = 0;
+  inb = (const unsigned char*)luaL_checklstring(L, 1, &in_len);
+
+  out_len = in_len;
+  outb = malloc(out_len);
+  ret = mz_uncompress(outb, &out_len, inb, in_len);
+  switch (ret) {
+    case MZ_OK:
+      lua_pushlstring(L, (const char*)outb, out_len);
+      ret = 1;
+      break;
+    default:
+      lua_pushnil(L);
+      lua_pushstring(L, mz_error(ret));
+      ret = 2;
+      break;
+  }
+  free(outb);
+  return ret;
+}
+
 static const luaL_Reg lminiz_read_m[] = {
   {"get_num_files", lmz_reader_get_num_files},
   {"stat", lmz_reader_stat},
@@ -394,6 +479,11 @@ static const luaL_Reg lminiz_f[] = {
   {"new_writer", lmz_writer_init},
   {"inflate", ltinfl},
   {"deflate", ltdefl},
+  {"adler32", lmz_adler32},
+  {"crc32", lmz_crc32},
+  {"compress", lmz_compress},
+  {"uncompress", lmz_uncompress},
+  {"version", lmz_version},
   {"new_deflator", lmz_deflator_init},
   {"new_inflator", lmz_inflator_init},
   {NULL, NULL}
