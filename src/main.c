@@ -20,6 +20,9 @@
 #include "luv.h"
 #include "lenv.c"
 #include "luvi.c"
+#ifndef MINIZ_NO_STDIO
+#define MINIZ_NO_STDIO
+#endif
 #include "lminiz.c"
 #include "snapshot.c"
 #ifdef WITH_PCRE
