@@ -193,7 +193,7 @@ mark_table(lua_State *L, lua_State *dL, const void * parent, const char * desc) 
 			lua_pop(L,1);
 		} else {
 			char temp[32];
-			const char * desc = keystring(L, -2, temp);
+			desc = keystring(L, -2, temp);
 			mark_object(L, dL, t , desc);
 		}
 		if (!weakk) {
