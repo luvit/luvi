@@ -27,6 +27,7 @@ typedef struct {
   int lua_cb_ref;
   BOOL return_code;
   DWORD error;
+  lua_State* L;
 } svc_dispatch_info;
 
 typedef struct {
@@ -50,6 +51,7 @@ typedef struct _svc_baton {
   LPTSTR *lpszArgv;
   svc_handler_block block;
   struct _svc_baton* next;
+  lua_State* L;
 } svc_baton;
 
 /* linked list of batons */
@@ -87,9 +89,9 @@ DWORD WINAPI HandlerEx(_In_  DWORD dwControl, _In_  DWORD dwEventType, _In_  LPV
 }
 
 static void svchandler_cb(uv_async_t* handle) {
-  luv_handle_t* data = (luv_handle_t*)handle->data;
-  lua_State* L = data->ctx->L;
   svc_baton* baton = handle->data;
+  lua_State* L = baton->L;
+
   lua_pushstring(L, "winsvc_error_cb");
   lua_gettable(L, LUA_REGISTRYINDEX);
   lua_rawgeti(L, LUA_REGISTRYINDEX, baton->block.lua_cb_ref);
@@ -107,9 +109,9 @@ static void svchandler_cb(uv_async_t* handle) {
 }
 
 static void svcmain_cb(uv_async_t* handle) {
-  luv_handle_t* data = (luv_handle_t*)handle->data;
-  lua_State* L = data->ctx->L;
   svc_baton* baton = handle->data;
+  lua_State* L = baton->L;
+
   lua_pushstring(L, "winsvc_error_cb");
   lua_gettable(L, LUA_REGISTRYINDEX);
   lua_rawgeti(L, LUA_REGISTRYINDEX, baton->lua_main_ref);
@@ -123,7 +125,9 @@ static void svcmain_cb(uv_async_t* handle) {
   lua_pcall(L, 2, 0, -4);
 }
 
-static svc_baton* svc_create_baton(uv_loop_t* loop, const char* name, int main_ref, int cb_ref) {
+static svc_baton* svc_create_baton(lua_State* L, const char* name, int main_ref, int cb_ref) {
+  luv_ctx_t* ctx = luv_context(L);
+  uv_loop_t* loop = ctx->loop;
   svc_baton* baton = LocalAlloc(LPTR, sizeof(svc_baton));
   baton->lua_main_ref = main_ref;
   baton->block.lua_cb_ref = cb_ref;
@@ -135,6 +139,7 @@ static svc_baton* svc_create_baton(uv_loop_t* loop, const char* name, int main_r
   baton->svc_end_event = CreateEvent(NULL, TRUE, FALSE, NULL);
   baton->block.block_end_event = CreateEvent(NULL, TRUE, FALSE, NULL);
   baton->next = NULL;
+  baton->L = ctx->L;
   return baton;
 }
 
@@ -301,8 +306,7 @@ static int lua_StartService(lua_State *L) {
 
 static void svcdispatcher_end_cb(uv_async_t* handle) {
   svc_dispatch_info *info = (svc_dispatch_info*)handle->data;
-  luv_handle_t* data = (luv_handle_t*)handle->data;
-  lua_State* L = data->ctx->L;
+  lua_State* L = info->L;
 
   /* Cleanup baton linked list */
   svc_baton *svc_baton_it = gBatons;
@@ -353,6 +357,7 @@ static int lua_SpawnServiceCtrlDispatcher(lua_State *L) {
   BOOL ret = FALSE;
   size_t len = 0;
   svc_dispatch_info *info = LocalAlloc(LPTR, sizeof(svc_dispatch_info));
+  info->L = L;
   uv_async_init(luv_loop(L), &info->end_async_handle, svcdispatcher_end_cb);
   svc_baton** baton_pp = &gBatons;
 
@@ -376,7 +381,7 @@ static int lua_SpawnServiceCtrlDispatcher(lua_State *L) {
     int cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
     lua_pop(L, 3);
 
-    *baton_pp = svc_create_baton(luv_loop(L), _strdup(name), main_ref, cb_ref);
+    *baton_pp = svc_create_baton(L, _strdup(name), main_ref, cb_ref);
     baton_pp = &(*baton_pp)->next;
 
     // count the entries
