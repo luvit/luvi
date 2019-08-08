@@ -87,7 +87,8 @@ DWORD WINAPI HandlerEx(_In_  DWORD dwControl, _In_  DWORD dwEventType, _In_  LPV
 }
 
 static void svchandler_cb(uv_async_t* handle) {
-  lua_State* L = luv_state(handle->loop);
+  luv_handle_t* data = (luv_handle_t*)handle->data;
+  lua_State* L = data->ctx->L;
   svc_baton* baton = handle->data;
   lua_pushstring(L, "winsvc_error_cb");
   lua_gettable(L, LUA_REGISTRYINDEX);
@@ -106,7 +107,8 @@ static void svchandler_cb(uv_async_t* handle) {
 }
 
 static void svcmain_cb(uv_async_t* handle) {
-  lua_State* L = luv_state(handle->loop);
+  luv_handle_t* data = (luv_handle_t*)handle->data;
+  lua_State* L = data->ctx->L;
   svc_baton* baton = handle->data;
   lua_pushstring(L, "winsvc_error_cb");
   lua_gettable(L, LUA_REGISTRYINDEX);
@@ -299,7 +301,8 @@ static int lua_StartService(lua_State *L) {
 
 static void svcdispatcher_end_cb(uv_async_t* handle) {
   svc_dispatch_info *info = (svc_dispatch_info*)handle->data;
-  lua_State* L = luv_state(handle->loop);
+  luv_handle_t* data = (luv_handle_t*)handle->data;
+  lua_State* L = data->ctx->L;
 
   /* Cleanup baton linked list */
   svc_baton *svc_baton_it = gBatons;
