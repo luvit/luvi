@@ -6,7 +6,7 @@ FARPROC WINAPI LoadFailureHook(unsigned dliNotify, PDelayLoadInfo pdli);
 const
 #endif
 #endif
-extern PfnDliHook __pfnDliFailureHook2 = LoadFailureHook;
+PfnDliHook __pfnDliFailureHook2 = LoadFailureHook;
 
 
 FARPROC WINAPI LoadFailureHook(unsigned dliNotify, PDelayLoadInfo pdli)
