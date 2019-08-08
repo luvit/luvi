@@ -136,7 +136,7 @@ endif (WithZLIB)
 
 add_definitions( -DLUVI_VERSION="${LUVI_VERSION}" )
 
-if(MSVC)
+if(WIN32)
   set(winsvc src/winsvc.h src/winsvcaux.h src/winsvc.c src/winsvcaux.c)
   add_definitions( -DWITH_WINSVC -DLUA_BUILD_AS_DLL -DBUILDING_UV_SHARED )
   add_definitions( -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS )

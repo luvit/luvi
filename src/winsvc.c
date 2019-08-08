@@ -518,24 +518,32 @@ static int lua_ChangeServiceConfig2(lua_State *L) {
   SC_HANDLE h = lua_touserdata(L, 1);
   DWORD dwInfoLevel = luaL_checkint(L, 2);
   union {
-    SERVICE_DELAYED_AUTO_START_INFO autostart;
     SERVICE_DESCRIPTION description;
     SERVICE_FAILURE_ACTIONS failure_actions;
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN6
+    SERVICE_DELAYED_AUTO_START_INFO autostart;
     SERVICE_FAILURE_ACTIONS_FLAG failure_actions_flag;
-    SERVICE_PREFERRED_NODE_INFO preferred_node;
     SERVICE_PRESHUTDOWN_INFO preshutdown_info;
     SERVICE_REQUIRED_PRIVILEGES_INFO privileges_info;
     SERVICE_SID_INFO sid_info;
+#endif
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN7
+    SERVICE_PREFERRED_NODE_INFO preferred_node;
+#endif
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN8LUE
     SERVICE_LAUNCH_PROTECTED_INFO protected_info;
+#endif
   } info, *infop = &info;
   memset(infop, 0, sizeof(info));
   luaL_checktype(L, 3, LUA_TTABLE);
 
   switch (dwInfoLevel)
   {
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN6
   case SERVICE_CONFIG_DELAYED_AUTO_START_INFO:
     info.autostart.fDelayedAutostart = GetIntFromTable(L, "fDelayedAutostart");
     break;
+#endif
   case SERVICE_CONFIG_DESCRIPTION:
     info.description.lpDescription = (char*)GetStringFromTable(L, "lpDescription");
     break;
@@ -561,13 +569,18 @@ static int lua_ChangeServiceConfig2(lua_State *L) {
       lua_pop(L, 1);
     }
     break;
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN6
   case SERVICE_CONFIG_FAILURE_ACTIONS_FLAG:
     info.failure_actions_flag.fFailureActionsOnNonCrashFailures = GetIntFromTable(L, "fFailureActionsOnNonCrashFailures");
     break;
+#endif
+#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN7
   case SERVICE_CONFIG_PREFERRED_NODE:
     info.preferred_node.usPreferredNode = GetIntFromTable(L, "usPreferredNode");
     info.preferred_node.fDelete = GetIntFromTable(L, "fDelete");
     break;
+#endif
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN6
   case SERVICE_CONFIG_PRESHUTDOWN_INFO:
     info.preshutdown_info.dwPreshutdownTimeout = GetIntFromTable(L, "dwPreshutdownTimeout");
     break;
@@ -577,10 +590,13 @@ static int lua_ChangeServiceConfig2(lua_State *L) {
   case SERVICE_CONFIG_SERVICE_SID_INFO:
     info.sid_info.dwServiceSidType = GetIntFromTable(L, "dwServiceSidType");
     break;
+#endif
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN8LUE
   /* case SERVICE_CONFIG_TRIGGER_INFO unsupported by ANSI version of ChangeServiceConfig2 */
   case SERVICE_CONFIG_LAUNCH_PROTECTED:
     info.protected_info.dwLaunchProtected = GetIntFromTable(L, "dwLaunchProtected");
     break;
+#endif
   default:
     infop = NULL;
     break;
@@ -690,9 +706,11 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
   SETINT(SERVICE_CONTROL_HARDWAREPROFILECHANGE);
   SETINT(SERVICE_CONTROL_POWEREVENT);
   SETINT(SERVICE_CONTROL_SESSIONCHANGE);
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN6
   SETINT(SERVICE_CONTROL_PRESHUTDOWN);
   SETINT(SERVICE_CONTROL_TIMECHANGE);
   SETINT(SERVICE_CONTROL_TRIGGEREVENT);
+#endif
 
   SETINT(SERVICE_STOPPED);
   SETINT(SERVICE_START_PENDING);
@@ -710,9 +728,11 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
   SETINT(SERVICE_ACCEPT_HARDWAREPROFILECHANGE);
   SETINT(SERVICE_ACCEPT_POWEREVENT);
   SETINT(SERVICE_ACCEPT_SESSIONCHANGE);
+#if defined(_WINNT_VER) && _WINNT_VER >= _WIN32_WINNT_WIN6
   SETINT(SERVICE_ACCEPT_PRESHUTDOWN);
   SETINT(SERVICE_ACCEPT_TIMECHANGE);
   SETINT(SERVICE_ACCEPT_TRIGGEREVENT);
+#endif
 
   SETINT(SC_MANAGER_CONNECT);
   SETINT(SC_MANAGER_CREATE_SERVICE);
@@ -735,6 +755,7 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
 
   SETINT(SERVICE_RUNS_IN_SYSTEM_PROCESS);
 
+#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN6
   SETINT(SERVICE_CONFIG_DESCRIPTION);
   SETINT(SERVICE_CONFIG_FAILURE_ACTIONS);
   SETINT(SERVICE_CONFIG_DELAYED_AUTO_START_INFO);
@@ -807,13 +828,17 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
   SETINT(SERVICE_STOP_REASON_MINOR_MAX);
   SETINT(SERVICE_STOP_REASON_MINOR_MIN_CUSTOM);
   SETINT(SERVICE_STOP_REASON_MINOR_MAX_CUSTOM);
+#endif
 
+#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN6
   SETINT(SERVICE_CONTROL_STATUS_REASON_INFO);
 
   SETINT(SERVICE_SID_TYPE_NONE);
   SETINT(SERVICE_SID_TYPE_UNRESTRICTED);
   SETINT(SERVICE_SID_TYPE_RESTRICTED);
+#endif
 
+#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN7
   SETINT(SERVICE_TRIGGER_TYPE_DEVICE_INTERFACE_ARRIVAL);
   SETINT(SERVICE_TRIGGER_TYPE_IP_ADDRESS_AVAILABILITY);
   SETINT(SERVICE_TRIGGER_TYPE_DOMAIN_JOIN);
@@ -828,7 +853,9 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
   SETINT(SERVICE_TRIGGER_DATA_TYPE_LEVEL);
   SETINT(SERVICE_TRIGGER_DATA_TYPE_KEYWORD_ANY);
   SETINT(SERVICE_TRIGGER_DATA_TYPE_KEYWORD_ALL);
+#endif
 
+#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN7
   SETINT(SERVICE_START_REASON_DEMAND);
   SETINT(SERVICE_START_REASON_AUTO);
   SETINT(SERVICE_START_REASON_TRIGGER);
@@ -836,14 +863,19 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
   SETINT(SERVICE_START_REASON_DELAYEDAUTO);
 
   SETINT(SERVICE_DYNAMIC_INFORMATION_LEVEL_START_REASON);
+#endif
 
+#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN8LUE
   SETINT(SERVICE_LAUNCH_PROTECTED_NONE);
   SETINT(SERVICE_LAUNCH_PROTECTED_WINDOWS);
   SETINT(SERVICE_LAUNCH_PROTECTED_WINDOWS_LIGHT);
   SETINT(SERVICE_LAUNCH_PROTECTED_ANTIMALWARE_LIGHT);
+#endif
 
+#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN7
   SETINT(SERVICE_TRIGGER_ACTION_SERVICE_START);
   SETINT(SERVICE_TRIGGER_ACTION_SERVICE_STOP);
+#endif
 
   SETINT(SC_ACTION_NONE);
   SETINT(SC_ACTION_RESTART);
