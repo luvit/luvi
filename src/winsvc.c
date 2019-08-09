@@ -244,13 +244,10 @@ static int lua_SetServiceStatus(lua_State *L) {
 
   BOOL set = SetServiceStatus(SvcStatusHandler, (LPSERVICE_STATUS)&status);
   lua_pushboolean(L, set);
-  if (set) {
-    lua_pushnil(L);
-  }
-  else {
-    lua_pushinteger(L, GetLastError());
-  }
-  return 3;
+  if (set)
+    return 1;
+  lua_pushinteger(L, GetLastError());
+  return 2;
 }
 
 static int lua_ControlService(lua_State *L) {
@@ -261,12 +258,9 @@ static int lua_ControlService(lua_State *L) {
   BOOL set = ControlService(SvcCtrlHandler, dwControl, (LPSERVICE_STATUS)&status);
   lua_pushboolean(L, set);
   ServiceStatus_to_table(L, &status);
-  if (set) {
-    lua_pushnil(L);
-  }
-  else {
-    lua_pushinteger(L, GetLastError());
-  }
+  if (set)
+    return 2;
+  lua_pushinteger(L, GetLastError());
   return 3;
 }
 
@@ -295,12 +289,9 @@ static int lua_StartService(lua_State *L) {
 
   BOOL set = StartService(SvcCtrlHandler, (DWORD)numargs, args);
   lua_pushboolean(L, set);
-  if (set) {
-    lua_pushnil(L);
-  }
-  else {
-    lua_pushinteger(L, GetLastError());
-  }
+  if (set)
+    return 1;
+  lua_pushinteger(L, GetLastError());
   return 2;
 }
 
@@ -357,7 +348,7 @@ static int lua_SpawnServiceCtrlDispatcher(lua_State *L) {
   BOOL ret = FALSE;
   size_t len = 0;
   svc_dispatch_info *info = LocalAlloc(LPTR, sizeof(svc_dispatch_info));
-  info->L = L;
+  info->L = luv_state(L);
   uv_async_init(luv_loop(L), &info->end_async_handle, svcdispatcher_end_cb);
   svc_baton** baton_pp = &gBatons;
 
@@ -420,12 +411,9 @@ static int lua_SpawnServiceCtrlDispatcher(lua_State *L) {
   ret = thread != NULL;
 
   lua_pushboolean(L, ret);
-  if (ret) {
-    lua_pushnil(L);
-  }
-  else {
-    lua_pushinteger(L, GetLastError());
-  }
+  if (ret)
+    return 1;
+  lua_pushinteger(L, GetLastError());
   return 2;
 }
 
@@ -436,12 +424,10 @@ static int lua_OpenSCManager(lua_State *L) {
   SC_HANDLE h = OpenSCManager(machinename, databasename, access);
   if (h != NULL) {
     lua_pushlightuserdata(L, h);
-    lua_pushnil(L);
+    return 1;
   }
-  else {
-    lua_pushnil(L);
-    lua_pushinteger(L, GetLastError());
-  }
+  lua_pushnil(L);
+  lua_pushinteger(L, GetLastError());
   return 2;
 }
 
@@ -453,12 +439,10 @@ static int lua_OpenService(lua_State *L)
   SC_HANDLE h = OpenService(hSCManager, servicename, access);
   if (h != NULL) {
     lua_pushlightuserdata(L, h);
-    lua_pushnil(L);
+    return 1;
   }
-  else {
-    lua_pushnil(L);
-    lua_pushinteger(L, GetLastError());
-  }
+  lua_pushnil(L);
+  lua_pushinteger(L, GetLastError());
   return 2;
 }
 
@@ -483,13 +467,11 @@ static int lua_CreateService(lua_State *L) {
   if (h != NULL) {
     lua_pushlightuserdata(L, h);
     lua_pushinteger(L, tagid);
-    lua_pushnil(L);
+    return 2;
   }
-  else {
-    lua_pushnil(L);
-    lua_pushnil(L);
-    lua_pushinteger(L, GetLastError());
-  }
+  lua_pushnil(L);
+  lua_pushnil(L);
+  lua_pushinteger(L, GetLastError());
   return 3;
 }
 
@@ -497,12 +479,9 @@ static int lua_CloseServiceHandle(lua_State *L) {
   SC_HANDLE h = lua_touserdata(L, 1);
   BOOL ret = CloseServiceHandle(h);
   lua_pushboolean(L, ret);
-  if (ret) {
-    lua_pushnil(L);
-  }
-  else {
-    lua_pushinteger(L, GetLastError());
-  }
+  if (ret)
+    return 1;
+  lua_pushinteger(L, GetLastError());
   return 2;
 }
 
@@ -510,12 +489,9 @@ static int lua_DeleteService(lua_State *L) {
   SC_HANDLE h = lua_touserdata(L, 1);
   BOOL ret = DeleteService(h);
   lua_pushboolean(L, ret);
-  if (ret) {
-    lua_pushnil(L);
-  }
-  else {
-    lua_pushinteger(L, GetLastError());
-  }
+  if (ret)
+    return 1;
+  lua_pushinteger(L, GetLastError());
   return 2;
 }
 
@@ -760,9 +736,9 @@ LUALIB_API int luaopen_winsvc(lua_State *L) {
 
   SETINT(SERVICE_RUNS_IN_SYSTEM_PROCESS);
 
-#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN6
   SETINT(SERVICE_CONFIG_DESCRIPTION);
   SETINT(SERVICE_CONFIG_FAILURE_ACTIONS);
+#if defined(_WINNT_VER) && _WINNT_VER > _WIN32_WINNT_WIN6
   SETINT(SERVICE_CONFIG_DELAYED_AUTO_START_INFO);
   SETINT(SERVICE_CONFIG_FAILURE_ACTIONS_FLAG);
   SETINT(SERVICE_CONFIG_SERVICE_SID_INFO);

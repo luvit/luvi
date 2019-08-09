@@ -27,13 +27,10 @@ static int lua_GetModuleFileName(lua_State *L)
   if (ret > 0)
   {
     lua_pushstring(L, name);
-    lua_pushnil(L);
+    return 1;
   }
-  else
-  {
-    lua_pushnil(L);
-    lua_pushinteger(L, GetLastError());
-  }
+  lua_pushnil(L);
+  lua_pushinteger(L, GetLastError());
   return 2;
 }
 
@@ -58,13 +55,11 @@ static int lua_GetErrorString(lua_State *L)
           lpMsgBuf[len - 2] = '\0';
       }
       lua_pushstring(L, lpMsgBuf);
-      lua_pushnil(L);
       LocalFree(lpMsgBuf);
+      return 1;
   }
-  else {
-      lua_pushstring(L, "");
-      lua_pushinteger(L, GetLastError());
-  }
+  lua_pushnil(L);
+  lua_pushinteger(L, GetLastError());
   return 2;
 }
 
