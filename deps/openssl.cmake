@@ -38,8 +38,6 @@ else (WithSharedOpenSSL)
       CONFIGURE_COMMAND ${OPENSSL_CONFIGURE_COMMAND}
       INSTALL_COMMAND   ""
       TEST_COMMAND      ""
-      UPDATE_COMMAND    ""
-      UPDATE_DISCONNECTED YES
   )
   
   set(OPENSSL_DIR ${CMAKE_BINARY_DIR}/openssl/src/openssl)
