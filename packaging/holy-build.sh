@@ -21,6 +21,6 @@ make ${BUILD_TYPE}
 make -j${NPROCS}
 ldd build/luvi
 libcheck build/luvi
-# holy-build-box adds -g to CFLAGS, so we need to strip
-strip --strip-all build/luvi
+# holy-build-box adds -g to CFLAGS, so we need to strip debug symbols
+strip --strip-debug build/luvi
 cp build/luvi /io
