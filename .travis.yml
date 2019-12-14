@@ -1,12 +1,5 @@
 language: c
 
-addons:
-  apt:
-    sources:
-    - kalakris-cmake
-    packages:
-    - cmake
-
 sudo: false
 
 env:
