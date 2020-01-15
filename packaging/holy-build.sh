@@ -9,6 +9,9 @@ set -e
 
 # Activate Holy Build Box environment.
 source /hbb_exe/activate
+# Remove -fvisibility=hidden and -g from CFLAGS
+CFLAGS=${CFLAGS//-fvisibility=hidden}
+CFLAGS=${CFLAGS//-g}
 
 set -x
 
@@ -21,6 +24,4 @@ make ${BUILD_TYPE}
 make -j${NPROCS}
 ldd build/luvi
 libcheck build/luvi
-# holy-build-box adds -g to CFLAGS, so we need to strip
-strip --strip-all build/luvi
 cp build/luvi /io
