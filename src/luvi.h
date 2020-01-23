@@ -34,7 +34,7 @@
 #endif
 
 #if (LUA_VERSION_NUM!=503)
-#include "c-api/compat-5.3.h"
+#include "compat-5.3.h"
 #endif
 
 #ifdef WITH_OPENSSL

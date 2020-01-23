@@ -3,8 +3,8 @@
 #define lutf8lib_c
 
 #include "luvi.h"
-#include "c-api/compat-5.3.h"
-#include "c-api/compat-5.3.c"
+#include "compat-5.3.h"
+#include "compat-5.3.c"
 
 #include "lprefix.h"
 #include "lstrlib.c"

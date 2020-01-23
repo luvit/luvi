@@ -111,7 +111,7 @@ set(LUA_COMPAT53_DIR deps/luv/deps/lua-compat-5.3)
 if(DEFINED ENV{LUA_COMPAT53_DIR})
   set(LUA_COMPAT53_DIR $ENV{LUA_COMPAT53_DIR})
 endif()
-include_directories(${LUA_COMPAT53_DIR})
+include_directories(${LUA_COMPAT53_DIR}/c-api)
 
 if (WithOpenSSL)
   include(deps/openssl.cmake)
