@@ -27,11 +27,11 @@ else (WithSharedOpenSSL)
       set(OPENSSL_CONFIGURE_COMMAND ./config ${OPENSSL_CONFIG_OPTIONS})
       set(OPENSSL_BUILD_COMMAND make)
   endif()
-  
+
   ExternalProject_Add(openssl
       PREFIX            openssl
-      URL               https://www.openssl.org/source/openssl-1.1.1b.tar.gz
-      URL_HASH          SHA256=5c557b023230413dfb0756f3137a13e6d726838ccd1430888ad15bfb2b43ea4b
+      URL               https://www.openssl.org/source/openssl-1.1.1d.tar.gz
+      URL_HASH          SHA256=1e3a91bc1f9dfce01af26026f856e064eab4c8ee0a8f457b5ae30b40b8b711f2
       LOG_BUILD         ON
       BUILD_IN_SOURCE   YES
       BUILD_COMMAND     ${OPENSSL_BUILD_COMMAND}
@@ -39,10 +39,10 @@ else (WithSharedOpenSSL)
       INSTALL_COMMAND   ""
       TEST_COMMAND      ""
   )
-  
+
   set(OPENSSL_DIR ${CMAKE_BINARY_DIR}/openssl/src/openssl)
   set(OPENSSL_INCLUDE ${OPENSSL_DIR}/include)
-  
+
   if(WIN32)
     set(OPENSSL_LIB_CRYPTO ${OPENSSL_DIR}/libcrypto.lib)
     set(OPENSSL_LIB_SSL ${OPENSSL_DIR}/libssl.lib)
@@ -50,12 +50,12 @@ else (WithSharedOpenSSL)
     set(OPENSSL_LIB_CRYPTO ${OPENSSL_DIR}/libcrypto.a)
     set(OPENSSL_LIB_SSL ${OPENSSL_DIR}/libssl.a)
   endif()
-  
+
   add_library(openssl_ssl STATIC IMPORTED)
   set_target_properties(openssl_ssl PROPERTIES IMPORTED_LOCATION ${OPENSSL_LIB_SSL})
   add_library(openssl_crypto STATIC IMPORTED)
   set_target_properties(openssl_crypto PROPERTIES IMPORTED_LOCATION ${OPENSSL_LIB_CRYPTO})
-  
+
   include_directories(${OPENSSL_INCLUDE})
   list(APPEND LIB_LIST openssl_ssl openssl_crypto)
 endif (WithSharedOpenSSL)
