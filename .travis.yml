@@ -36,7 +36,7 @@ jobs:
       env: []
       script:
         # fetch tags so that git describe works
-        - git fetch --unshallow
+        - git fetch --unshallow --no-recurse-submodules
         - make linux-build
       services:
         - docker
