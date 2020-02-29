@@ -390,7 +390,6 @@ static int lmz_compress(lua_State* L)
   out_len = mz_compressBound(in_len);
   outb = malloc(out_len);
   ret = mz_compress2(outb, &out_len, inb, in_len, level);
-
   switch (ret) {
     case MZ_OK:
       lua_pushlstring(L, (const char*)outb, out_len);
@@ -414,9 +413,20 @@ static int lmz_uncompress(lua_State* L)
   unsigned char* outb;
   in_len = 0;
   inb = (const unsigned char*)luaL_checklstring(L, 1, &in_len);
-  out_len = luaL_optint(L, 2, in_len * 10);
-  outb = malloc(out_len);
-  ret = mz_uncompress(outb, &out_len, inb, in_len);
+  out_len = luaL_optint(L, 2, in_len * 2);
+  if (out_len < 1 || out_len > INT_MAX) {
+    luaL_error(L, "Initial buffer size must be between 1 and %d", INT_MAX);
+  }
+  do {
+    outb = malloc(out_len);
+    ret = mz_uncompress(outb, &out_len, inb, in_len);
+    if (ret == MZ_BUF_ERROR) {
+      out_len *= 2;
+      free(outb);
+    } else {
+      break;
+    }
+  } while (out_len > 1 && out_len < INT_MAX);
   switch (ret) {
     case MZ_OK:
       lua_pushlstring(L, (const char*)outb, out_len);
