@@ -173,16 +173,15 @@ p("zip bytes", #writer:finalize())
 
 do
   print("miniz zlib compression - full data")
-  local original = bundle.readfile("sonnet-133.txt")
+  local original = string.rep(bundle.readfile("sonnet-133.txt"), 1000)
   local deflator = miniz.new_deflator(9)
   local deflated, err, part = deflator:deflate(original, "finish")
   p("Compressed", #(deflated or part or ""))
   deflated = assert(deflated, err)
   local inflator = miniz.new_inflator()
-  local inflated, err, part = inflator:inflate(deflated, "finish")
+  local inflated, err, part = inflator:inflate(deflated)
   p("Decompressed", #(inflated or part or ""))
   inflated = assert(inflated, err)
-
   assert(inflated == original, "inflated data doesn't match original")
 end
 
@@ -208,6 +207,14 @@ do
 
     assert(inflated == part, "inflated data doesn't match original")
   end
+end
+
+do
+  print("miniz zlib compression - no stream")
+  local original = string.rep(bundle.readfile("sonnet-133.txt"), 1000)
+  local compressed = assert(miniz.compress(original))
+  local uncompressed = assert(miniz.uncompress(compressed, #original))
+  assert(uncompressed == original, "inflated data doesn't match original")
 end
 
 local options = require('luvi').options

@@ -39,6 +39,14 @@ static size_t lmz_file_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_
   return zip->req.result;
 }
 
+static int lmz_check_compression_level(lua_State* L, int index) {
+  int level = luaL_optint(L, index, MZ_DEFAULT_COMPRESSION);
+  if (level < MZ_DEFAULT_COMPRESSION || level > MZ_BEST_COMPRESSION) {
+    luaL_error(L, "Compression level must be between %d and %d", MZ_DEFAULT_COMPRESSION, MZ_BEST_COMPRESSION);
+  }
+  return level;
+}
+
 static int lmz_reader_init(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
   mz_uint32 flags = luaL_optint(L, 2, 0);
@@ -223,10 +231,7 @@ static int lmz_writer_finalize(lua_State *L) {
 }
 
 static int lmz_deflator_init(lua_State* L) {
-  int level = luaL_optint(L, 1, MZ_DEFAULT_COMPRESSION);
-  if (level < MZ_DEFAULT_COMPRESSION || level > MZ_BEST_COMPRESSION) {
-    luaL_error(L, "Compression level must be between -1 and 9");
-  }
+  int level = lmz_check_compression_level(L, 1);
   lmz_stream_t* stream = lua_newuserdata(L, sizeof(*stream));
   mz_streamp miniz_stream = &(stream->stream);
   luaL_getmetatable(L, "miniz_deflator");
@@ -290,47 +295,33 @@ static int lmz_inflator_deflator_impl(lua_State* L, lmz_stream_t* stream) {
   miniz_stream->next_in = (const unsigned char*)data;
   luaL_Buffer buf;
   luaL_buffinit(L, &buf);
-  while (1) {
-    char* buffer = luaL_prepbuffer(&buf);
-    memset(buffer, 0, LUAL_BUFFERSIZE);
+  do {
     miniz_stream->avail_out = LUAL_BUFFERSIZE;
-    miniz_stream->next_out = (unsigned char*)buffer;
-    size_t before = miniz_stream->total_out;
+    miniz_stream->next_out = (unsigned char*)luaL_prepbuffer(&buf);
     int status;
+    size_t before = miniz_stream->total_out;
     if (stream->mode) {
       status = mz_inflate(miniz_stream, flush);
     } else {
       status = mz_deflate(miniz_stream, flush);
     }
     size_t added = miniz_stream->total_out - before;
-    luaL_addsize(&buf, added);
     switch (status) {
       case MZ_OK:
       case MZ_STREAM_END:
-        luaL_pushresult(&buf);
-        return 1;
-      case MZ_STREAM_ERROR:
-      case MZ_DATA_ERROR:
-      case MZ_PARAM_ERROR:
-        luaL_pushresult(&buf);
-        lua_pushnil(L);
-        lua_insert(L, -2);
-        lua_pushstring(L, mz_error(status));
-        lua_insert(L, -2);
-        return 3;
-      case MZ_BUF_ERROR:
-        if (stream->mode) {
-        // not enough input
-        luaL_pushresult(&buf);
-        lua_pushnil(L);
-        lua_insert(L, -2);
-        lua_pushstring(L, "Not enough input data");
-        lua_insert(L, -2);
-        return 3;
-        }
+        luaL_addsize(&buf, added);
         break;
+      case MZ_BUF_ERROR:
+        break;
+      default:
+        lua_pushnil(L);
+        lua_pushstring(L, mz_error(status));
+        luaL_pushresult(&buf);
+        return 3;
     }
-  }
+  } while (miniz_stream->avail_out == 0);
+  luaL_pushresult(&buf);
+  return 1;
 }
 
 static int lmz_deflator_deflate(lua_State* L) {
@@ -395,15 +386,10 @@ static int lmz_compress(lua_State* L)
   unsigned char *outb;
   in_len = 0;
   inb = (const unsigned char *)luaL_checklstring(L, 1, &in_len);
-  level = luaL_optint(L, 1, MZ_DEFAULT_COMPRESSION);
-  if (level < MZ_DEFAULT_COMPRESSION || level > MZ_BEST_COMPRESSION) {
-    luaL_error(L, "Compression level must be between -1 and 9");
-  }
-
+  level = lmz_check_compression_level(L, 2);
   out_len = mz_compressBound(in_len);
   outb = malloc(out_len);
   ret = mz_compress2(outb, &out_len, inb, in_len, level);
-
   switch (ret) {
     case MZ_OK:
       lua_pushlstring(L, (const char*)outb, out_len);
@@ -427,10 +413,20 @@ static int lmz_uncompress(lua_State* L)
   unsigned char* outb;
   in_len = 0;
   inb = (const unsigned char*)luaL_checklstring(L, 1, &in_len);
-
-  out_len = in_len;
-  outb = malloc(out_len);
-  ret = mz_uncompress(outb, &out_len, inb, in_len);
+  out_len = luaL_optint(L, 2, in_len * 2);
+  if (out_len < 1 || out_len > INT_MAX) {
+    luaL_error(L, "Initial buffer size must be between 1 and %d", INT_MAX);
+  }
+  do {
+    outb = malloc(out_len);
+    ret = mz_uncompress(outb, &out_len, inb, in_len);
+    if (ret == MZ_BUF_ERROR) {
+      out_len *= 2;
+      free(outb);
+    } else {
+      break;
+    }
+  } while (out_len > 1 && out_len < INT_MAX);
   switch (ret) {
     case MZ_OK:
       lua_pushlstring(L, (const char*)outb, out_len);
