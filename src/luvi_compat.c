@@ -39,11 +39,10 @@ void luvi_openlibs(lua_State *L) {
   luaL_requiref(L, LUA_UTF8LIBNAME, luaopen_utf8, 1);
 
 #if (LUA_VERSION_NUM == 501)
-
   lua_pushlstring(L, UTF8PATT_501, sizeof(UTF8PATT_501)/sizeof(char) - 1);
   lua_setfield(L, -2, "charpattern");
+#endif
   lua_pop(L, 1);
 
-#endif
 #endif
 }
