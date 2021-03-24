@@ -2,6 +2,45 @@
 
 High-level changes between release versions.
 
+## v2.11.0
+
+ - luv: Updated to 1.34.2-1 (from 1.34.1-1)
+ - miniz: binding fixes (#227) [SinisterRectus]
+   - Fixed byte streams not being fully processed in inflator:inflate /
+     deflator:deflate when they were larger than the output buffer
+   - Fixed miniz.compress using the wrong stack index for the compression level
+     selection
+   - Fixed output buffer size of miniz.uncompress: made it grow as needed to fit
+     the actual output size and added an optional argument to specify the initial
+     buffer size
+
+## v2.10.1
+
+ - Fixed Linux/Mac builds (#225)
+
+## v2.10.0
+
+ - luajit: Updated to latest 2.1 version
+ - luv: Updated to 1.34.1
+ - openssl: Updated to 1.1.1d
+
+## v2.9.3
+
+Release v2.9.3
+
+## v2.9.1
+
+ - luvi: Fix __pfnDliFailureHook2 redefinition on MSVC versions < 2015 Update 3
+   (#190) [Ryan Liptak]
+ - luvi: Fix WithSharedLibluv OFF not linking against static uv (#191)
+   [Ryan Liptak]
+
+## v2.9.0
+
+Lots of good changes from the community.
+
+It's been almost a year!
+
 ## v2.7.6
 
  - luv: Update to 1.9.1-1 (Tim Caswell)
