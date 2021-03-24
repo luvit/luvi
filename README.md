@@ -1,5 +1,4 @@
-luvi
-====
+# luvi
 
 [![Linux Build Status](https://travis-ci.org/luvit/luvi.svg?branch=master)](https://travis-ci.org/luvit/luvi)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/h643wg5hkwsnu0wd/branch/master?svg=true)](https://ci.appveyor.com/project/racker-buildbot/luvi/branch/master)
@@ -12,8 +11,8 @@ The goal of this is to make building [luvit][] and [derivatives][] much easier.
 
 ## Workflow
 
-Luvi has a somewhat unique, but very easy workflow for creating self-contained
-binaries on systems that don't have a compiler.
+Luvi has a somewhat unique, but very easy workflow for creating self-contained binaries on systems that don't have a
+compiler.
 
 ```sh
 # Make a folder
@@ -31,40 +30,37 @@ luvi myapp -o mybinary
 
 ## Main API
 
-Your `main.lua` is run in a mostly stock [luajit][] environment with a few extra
-things added.  This means you can use the luajit [extensions][] including
-`DLUAJIT_ENABLE_LUA52COMPAT` features which we turn on.
+Your `main.lua` is run in a mostly stock [luajit][] environment with a few extra things added. This means you can use
+the luajit [extensions][] including `DLUAJIT_ENABLE_LUA52COMPAT` features, which we turn on.
 
-### LibUV is baked in.
+### Libuv is baked in
 
-The "uv" module contains bindings to [libuv][] as defined in the [luv][]
-project.  Simply `require("uv")` to access it.
+The "uv" module contains bindings to [libuv][] as defined in the [luv][] project. Simply `require("uv")` to access it.
 
-Use this for file I/O, network I/O, timers, or various interfaces with the
-operating system.  This lets you write fast non-blocking network servers or
-frameworks.  The APIs in [luv][] mirror what's in [libuv][] allowing you to add
+Use this for file I/O, network I/O, timers, or various interfaces with the operating system. This lets you write fast
+non-blocking network servers or frameworks. The APIs in [luv][] mirror what's in [libuv][] allowing you to add
 whatever API sugar you want on top be it callbacks, coroutines, or whatever.
 
-Just be sure to call `uv.run()` and the end of your script to start the
-event loop if you want to actually wait for any events to happen.
+Just be sure to call `uv.run()` and the end of your script to start the event loop if you want to actually wait for any
+events to happen.
 
 ```lua
 local uv = require('uv')
 
 local function setTimeout(timeout, callback)
-  local timer = uv.new_timer()
-  local function ontimeout()
-    print("ontimeout", self)
-    uv.timer_stop(timer)
-    uv.close(timer)
-    callback(self)
-  end
-  uv.timer_start(timer, timeout, 0, ontimeout)
-  return timer
+    local timer = uv.new_timer()
+    local function ontimeout()
+        print("ontimeout", self)
+        uv.timer_stop(timer)
+        uv.close(timer)
+        callback(self)
+    end
+    uv.timer_start(timer, timeout, 0, ontimeout)
+    return timer
 end
 
 setTimeout(1000, function ()
-  print("This happens later")
+    print("This happens later")
 end)
 
 print("This happens first")
@@ -73,44 +69,43 @@ print("This happens first")
 uv.run()
 ```
 
-### Integration with C's main function.
+### Integration with C's main function
 
-The raw `argc` and `argv` from C side is exposed as a **zero** indexed lua table
-of strings at `args`.
+The raw `argc` and `argv` from C side is exposed as a **zero** indexed lua table of strings at `args`.
 
 ```lua
 print("Your arguments were", args)
 ```
 
-The "env" module provides read/write access to your local environment variables
-via `env.keys`, `env.get`, `env.put`, `env.set`, and `env.unset`.
+The "env" module provides read/write access to your local environment variables via `env.keys`, `env.get`, `env.put`,
+`env.set`, and `env.unset`.
 
 ```lua
 local env = require('env')
 
 -- Convert the module to a mutable magic table.
 local environment = setmetatable({}, {
-  __pairs = function (table)
-    local keys = env.keys()
-    local index = 0
-    return function (...)
-      index = index + 1
-      local name = keys[index]
-      if name then
-        return name, table[name]
-      end
+    __pairs = function (table)
+        local keys = env.keys()
+        local index = 0
+        return function (...)
+            index = index + 1
+            local name = keys[index]
+            if name then
+                return name, table[name]
+            end
+        end
+    end,
+    __index = function (table, name)
+        return env.get(name)
+    end,
+    __newindex = function (table, name, value)
+        if value then
+            env.set(name, value, 1)
+        else
+            env.unset(name)
+        end
     end
-  end,
-  __index = function (table, name)
-    return env.get(name)
-  end,
-  __newindex = function (table, name, value)
-    if value then
-      env.set(name, value, 1)
-    else
-      env.unset(name)
-    end
-  end
 }))
 ```
 
@@ -118,31 +113,30 @@ If you return an integer from `main.lua` it will be your program's exit code.
 
 ### Bundle I/O
 
-If you're running from a unzipped folder on disk or a zipped bundle appended to
-the binary, the I/O to read from this is the same.  This is exposed as the
- `bundle` property in the "luvi" module.
+If you're running from a unzipped folder on disk or a zipped bundle appended to the binary, the I/O to read from this
+is the same. This is exposed as the `bundle` property in the "luvi" module.
 
- ```lua
- local bundle = require("luvi").bundle
- local files = bundle.readdir("")
- ```
+```lua
+local bundle = require("luvi").bundle
+local files = bundle.readdir("")
+```
 
 #### bundle.stat(path)
 
-Load metadata about a file in the bundle.  This includes `type` ("file" or
+Load metadata about a file in the bundle. This includes `type` ("file" or
 "directory"), `mtime` (in ms since epoch), and `size` (in bytes).
 
 If the file doesn't exist, it returns `nil`.
 
 #### bundle.readdir(path)
 
-Read a directory.  Returns a list of filenames in the directory.
+Read a directory. Returns a list of filenames in the directory.
 
 If the directory doesn't exist, it return `nil`.
 
 #### bundle.readfile(path)
 
-Read the contents of a file.  Returns a string if the file exists and `nil` if
+Read the contents of a file. Returns a string if the file exists and `nil` if
 it doesn't.
 
 ### Utils
@@ -156,15 +150,15 @@ local dump = require('utils').dump
 -- Create a global p() function that pretty prints any values
 -- to stdout using libuv's APIs
 _G.p = function (...)
-  local n = select('#', ...)
-  local arguments = { ... }
+    local n = select('#', ...)
+    local arguments = { ... }
 
-  for i = 1, n do
-    arguments[i] = dump(arguments[i])
-  end
+    for i = 1, n do
+        arguments[i] = dump(arguments[i])
+    end
 
-  local toWrite = table.concat(arguments, "\t") .. "\n"
-  uv.write(stdout, toWrite);
+    local toWrite = table.concat(arguments, "\t") .. "\n"
+    uv.write(stdout, toWrite);
 end
 ```
 
@@ -177,25 +171,31 @@ end
 
 ## Building from Source
 
-We maintain several [binary releases of
-luvi](https://github.com/luvit/luvi/releases) to ease bootstrapping of lit and
+We maintain several [binary releases of luvi](https://github.com/luvit/luvi/releases) to ease bootstrapping of lit and
 luvit apps.
 
 The following platforms are supported:
 
- - Windows (amd64)
- - FreeBSD 10.1 (amd64)
- - Raspberry PI Raspbian (armv6)
- - Raspberry PI 2 Raspbian (armv7)
- - Ubuntu 14.04 (x86_64)
- - OSX Yosemite (x86_64)
+- Windows (x86_64 / i386)
+- FreeBSD 10.1 (x86_64)
+- Raspberry PI Raspbian (armv6)
+- Raspberry PI 2 Raspbian (armv7)
+- Debian 9 "Stretch" (x86_64)
+- OSX 10.14 "Mojave" (x86_64)
 
-If you want to not wait for pre-built binaries and dive right in, building is
-based on CMake and is pretty simple.
+If you want to not wait for pre-built binaries and dive right in, building is based on CMake and is pretty simple.
+
+### Build Dependencies
+
+- Git
+- CMake
+- A C Compiler (visual studio on Windows)
+- Perl (required for OpenSSL)
+- NASM (required for OpenSSL ASM optimizations on Windows)
 
 First clone this repo recursively.
 
-```shell
+```sh
 git clone --recursive https://github.com/luvit/luvi.git
 ```
 
@@ -204,8 +204,11 @@ If you're on windows, there is a `make.bat` file that works mostly like the unix
 `Makefile`.
 
 Prior to building the `luvi` binary you must configure the version of `luvi`
-that you want to build. Currently there are two versions: `regular` and `tiny`.
+that you want to build. Currently there are three versions:
 
+- tiny: only the necessities; omits OpenSSL, LPeg, and lrexlib
+- regular: the normal luvit experience; includes OpenSSL, lpeg and lrexlib
+- regular-asm: includes OpenSSL's ASM optimizations
 
 ```sh
 cd luvi
@@ -214,7 +217,7 @@ make
 make test
 ```
 
-When that's done you should have a shiny little binary `in build/luvi`.
+When that's done you should have a shiny little binary in `build/luvi`.
 
 ```sh
 $ ls -lh build/luvi
@@ -275,7 +278,7 @@ build/luvi samples/test.app
 You can use the predefined makefile targets if you want or use cmake directly
 for more control.
 
-```
+```text
 WithOpenSSL (Default: OFF)      - Enable OpenSSL Support
 WithOpenSSLASM (Default: OFF)   - Enable OpenSSL Assembly Optimizations
 WithSharedOpenSSL (Default: ON) - Use System OpenSSL Library
@@ -288,22 +291,23 @@ OPENSSL_LIBRARIES               - Override the OpenSSL Library Path
 
 Example (Static OpenSSL):
 
-```
+```sh
 cmake \
-  -DWithOpenSSL=ON \
-  -DWithSharedOpenSSL=OFF \
-  ..
+    -DWithOpenSSL=ON \
+    -DWithSharedOpenSSL=OFF \
+    ..
 ```
 
 Example (Shared OpenSSL):
-```
+
+```sh
 cmake \
-  -DWithSharedOpenSSL=ON \
-  -DWithOpenSSL=ON \
-  -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-  -DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include \
-  -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib \
-  ..
+    -DWithSharedOpenSSL=ON \
+    -DWithOpenSSL=ON \
+    -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+    -DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include \
+    -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib \
+    ..
 ```
 
 ## Holy Build
@@ -315,7 +319,7 @@ portable executable for i686 and x86_64 environments.
 
 Note: If you are attempting this on OSX, please install GNU tar from homebrew:
 
-```
+```sh
 brew install gnu-tar
 ```
 
@@ -323,17 +327,15 @@ To get started:
 
 1. Create a docker machine:
 
-```
-docker-machine create --driver vmwarefusion --vmwarefusion-cpu-count 3 holy-build-box
-eval $(docker-machine env holy-build-box)
-```
+    ```sh
+    docker-machine create --driver vmwarefusion --vmwarefusion-cpu-count 3 holy-build-box
+    eval $(docker-machine env holy-build-box)
+    ```
 
 2. Start the build
 
-```
-make linux-build
-```
+    ```sh
+    make linux-build
+    ```
 
 3. Results should be the current working directory.
-
-[Prebuilt binaries]: https://github.com/luvit/luvi/releases
