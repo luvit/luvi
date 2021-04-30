@@ -2,6 +2,15 @@
 
 High-level changes between release versions.
 
+## v2.12.0
+
+ - luv: Update to 1.41.0-0
+   - Fix protocol being treated as family in getaddrinfo inputs/outputs.
+   - Add `uv_socketpair`, `uv_pipe`, `uv_loop_mode`, `uv_loop_configure`, `udp_set_source_membership` bindings.
+   - Several cleanups in fs bindings.
+   - Various bug fixes, documentation updates, and improvements to build system.
+ - openssl: Update to openssl 1.1.1g and lua-openssl to 0.7.8-0
+
 ## v2.11.0
 
  - luv: Updated to 1.34.2-1 (from 1.34.1-1)
