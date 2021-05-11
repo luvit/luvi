@@ -39,7 +39,7 @@ deploy:
   description: '' # appveyor says this is mandatory
   provider: GitHub
   auth_token:
-    secure: bTslNShNLTsJrZ1cOoWU6gzI4boK7gveIkOzqn7SMwAyHOpb1HkemYgTvfZK2VRI
+    secure: ZQtPAVaybUWlOtbbHkn1HkoE6zrEUE7wjEXUqCA1vdVRqZYHZUvmVowHxzMtQpLC
   artifact: /.*/ # everything
   draft: false
   prerelease: false
