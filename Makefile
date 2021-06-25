@@ -1,4 +1,4 @@
-LUVI_TAG=$(shell git describe)
+LUVI_TAG=$(shell git describe --tags)
 LUVI_ARCH=$(shell uname -s)_$(shell uname -m)
 LUVI_PUBLISH_USER?=luvit
 LUVI_PUBLISH_REPO?=luvi
