@@ -1,0 +1,84 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+        build_type: [tiny, regular-asm]
+    env:
+      BUILD_TYPE: ${{ matrix.build_type }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Configure
+      run: WITHOUT_AMALG=1 make ${BUILD_TYPE}
+
+    - name: Build
+      run: make
+
+    - name: Test
+      run: make test
+
+  deploy-linux:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Fetch
+      run: git fetch --unshallow --no-recurse-submodules
+
+    - name: Build
+      run: make linux-build
+
+    - name: Github Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: |
+          luvi-regular-Linux_x86_64
+          luvi-tiny-Linux_x86_64
+          luvi-regular-Linux_i686
+          luvi-tiny-Linux_i686
+        draft: false
+        prerelease: false
+
+  deploy-macos:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build]
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Fetch
+      run: git fetch --unshallow --no-recurse-submodules
+
+    - name: Build
+      run: make travis-publish
+
+    - name: Github Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: |
+          luvi-regular-Darwin_x86_64
+          luvi-tiny-Darwin_x86_64
+          luvi-src-*.tar.gz
+        draft: false
+        prerelease: false
