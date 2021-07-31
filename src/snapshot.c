@@ -23,6 +23,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "./luvi.h"
 
+#if (LUA_VERSION_NUM > 501)
+#define	lua_getfenv lua_getuservalue
+#define	lua_setfenv lua_setuservalue
+#endif
+
 #if defined(_MSC_VER) && _MSC_VER < 1900
 
 #define snprintf c99_snprintf
