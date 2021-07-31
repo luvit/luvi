@@ -3,6 +3,8 @@
 #define lutf8lib_c
 
 #include "luvi.h"
+
+#if (LUA_VERSION_NUM < 503)
 #include "compat-5.3.h"
 #include "compat-5.3.c"
 
@@ -10,12 +12,13 @@
 #include "lstrlib.c"
 #include "ltablib.c"
 #include "lutf8lib.c"
+#endif
 
+#if (LUA_VERSION_NUM == 501)
 #ifndef LUA_UTF8LIBNAME
 #define LUA_UTF8LIBNAME	"utf8"
 #endif
 
-#if (LUA_VERSION_NUM == 501)
 #ifndef UTF8PATT_501
 #define UTF8PATT_501 "[%z\x01-\x7F\xC2-\xF4][\x80-\xBF]*"
 #endif
@@ -23,7 +26,7 @@
 
 void luvi_openlibs(lua_State *L) {
   luaL_openlibs(L);
-#if (LUA_VERSION_NUM!=503)
+#if (LUA_VERSION_NUM < 503)
   {
     static luaL_Reg const funcs[] = {
       { "pack", str_pack },
@@ -32,7 +35,11 @@ void luvi_openlibs(lua_State *L) {
       { NULL, NULL }
     };
 
+#if (LUA_VERSION_NUM > 501)
+    luaL_newlib(L, funcs);
+#else
     luaL_register(L, LUA_STRLIBNAME, funcs);
+#endif
   }
   lua_pop(L, 1);
 
