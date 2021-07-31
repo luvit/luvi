@@ -40,7 +40,7 @@ static size_t lmz_file_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_
 }
 
 static int lmz_check_compression_level(lua_State* L, int index) {
-  int level = luaL_optint(L, index, MZ_DEFAULT_COMPRESSION);
+  int level = luaL_optinteger(L, index, MZ_DEFAULT_COMPRESSION);
   if (level < MZ_DEFAULT_COMPRESSION || level > MZ_BEST_COMPRESSION) {
     luaL_error(L, "Compression level must be between %d and %d", MZ_DEFAULT_COMPRESSION, MZ_BEST_COMPRESSION);
   }
@@ -49,7 +49,7 @@ static int lmz_check_compression_level(lua_State* L, int index) {
 
 static int lmz_reader_init(lua_State* L) {
   const char* path = luaL_checkstring(L, 1);
-  mz_uint32 flags = luaL_optint(L, 2, 0);
+  mz_uint32 flags = luaL_optinteger(L, 2, 0);
   mz_uint64 size;
   lmz_file_t* zip = lua_newuserdata(L, sizeof(*zip));
   mz_zip_archive* archive = &(zip->archive);
@@ -94,7 +94,7 @@ static int lmz_reader_get_num_files(lua_State *L) {
 static int lmz_reader_locate_file(lua_State *L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
   const char *path = luaL_checkstring(L, 2);
-  mz_uint32 flags = luaL_optint(L, 3, 0);
+  mz_uint32 flags = luaL_optinteger(L, 3, 0);
   int index = mz_zip_reader_locate_file(&(zip->archive), path, NULL, flags);
   if (index < 0) {
     lua_pushnil(L);
@@ -168,7 +168,7 @@ static int lmz_reader_is_file_a_directory(lua_State  *L) {
 static int lmz_reader_extract(lua_State *L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
   mz_uint file_index = (mz_uint)luaL_checkinteger(L, 2) - 1;
-  mz_uint flags = luaL_optint(L, 3, 0);
+  mz_uint flags = luaL_optinteger(L, 3, 0);
   size_t out_len;
   char* out_buf = mz_zip_reader_extract_to_heap(&(zip->archive), file_index, &out_len, flags);
   lua_pushlstring(L, out_buf, out_len);
@@ -184,8 +184,8 @@ static int lmz_reader_get_offset(lua_State *L) {
 }
 
 static int lmz_writer_init(lua_State *L) {
-  size_t size_to_reserve_at_beginning = luaL_optint(L, 1, 0);
-  size_t initial_allocation_size = luaL_optint(L, 2, 128 * 1024);
+  size_t size_to_reserve_at_beginning = luaL_optinteger(L, 1, 0);
+  size_t initial_allocation_size = luaL_optinteger(L, 2, 128 * 1024);
   lmz_file_t* zip = lua_newuserdata(L, sizeof(*zip));
   mz_zip_archive* archive = &(zip->archive);
   luaL_getmetatable(L, "miniz_writer");
@@ -213,7 +213,7 @@ static int lmz_writer_add_mem(lua_State *L) {
   const char* path = luaL_checkstring(L, 2);
   size_t size;
   const char* data = luaL_checklstring(L, 3, &size);
-  mz_uint flags = luaL_optint(L, 4, 0);
+  mz_uint flags = luaL_optinteger(L, 4, 0);
   if (!mz_zip_writer_add_mem(&(zip->archive), path, data, size, flags)) {
     return luaL_error(L, "Failure to add entry to zip");
   }
@@ -337,7 +337,7 @@ static int ltinfl(lua_State* L) {
   size_t in_len;
   const char* in_buf = luaL_checklstring(L, 1, &in_len);
   size_t out_len;
-  int flags = luaL_optint(L, 2, 0);
+  int flags = luaL_optinteger(L, 2, 0);
   char* out_buf = tinfl_decompress_mem_to_heap(in_buf, in_len, &out_len, flags);
   lua_pushlstring(L, out_buf, out_len);
   free(out_buf);
@@ -348,7 +348,7 @@ static int ltdefl(lua_State* L) {
   size_t in_len;
   const char* in_buf = luaL_checklstring(L, 1, &in_len);
   size_t out_len;
-  int flags = luaL_optint(L, 2, 0);
+  int flags = luaL_optinteger(L, 2, 0);
   char* out_buf = tdefl_compress_mem_to_heap(in_buf, in_len, &out_len, flags);
   lua_pushlstring(L, out_buf, out_len);
   free(out_buf);
@@ -356,7 +356,7 @@ static int ltdefl(lua_State* L) {
 }
 
 static int lmz_adler32(lua_State* L) {
-  mz_ulong adler = luaL_optint(L, 1, 0);
+  mz_ulong adler = luaL_optinteger(L, 1, 0);
   size_t buf_len = 0;
   const unsigned char* ptr = (const unsigned char*)luaL_optlstring(L, 2, NULL, &buf_len);
   adler = mz_adler32(adler, ptr, buf_len);
@@ -365,7 +365,7 @@ static int lmz_adler32(lua_State* L) {
 }
 
 static int lmz_crc32(lua_State* L) {
-  mz_ulong crc32 = luaL_optint(L, 1, 0);
+  mz_ulong crc32 = luaL_optinteger(L, 1, 0);
   size_t buf_len = 0;
   const unsigned char* ptr = (const unsigned char*)luaL_optlstring(L, 2, NULL, &buf_len);
   crc32 = mz_crc32(crc32, ptr, buf_len);
@@ -413,7 +413,7 @@ static int lmz_uncompress(lua_State* L)
   unsigned char* outb;
   in_len = 0;
   inb = (const unsigned char*)luaL_checklstring(L, 1, &in_len);
-  out_len = luaL_optint(L, 2, in_len * 2);
+  out_len = luaL_optinteger(L, 2, in_len * 2);
   if (out_len < 1 || out_len > INT_MAX) {
     luaL_error(L, "Initial buffer size must be between 1 and %d", INT_MAX);
   }
