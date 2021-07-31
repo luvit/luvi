@@ -9,8 +9,10 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
         build_type: [tiny, regular-asm]
+        lua_engine: [LuaJIT, Lua]
     env:
       BUILD_TYPE: ${{ matrix.build_type }}
+      WITH_LUA_ENGINE: ${{ matrix.lua_engine }}
 
     steps:
     - uses: actions/checkout@v2
@@ -18,7 +20,7 @@ jobs:
         submodules: recursive
 
     - name: Configure
-      run: WITHOUT_AMALG=1 make ${BUILD_TYPE}
+      run: WITHOUT_AMALG=1 make ${BUILD_TYPE} WITH_LUA_ENGINE=${WITH_LUA_ENGINE}
 
     - name: Build
       run: make
