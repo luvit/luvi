@@ -88,6 +88,8 @@ Examples:
   print((string.gsub(usage, "%$%(LUVI%)", args[0])))
 end
 
+local EXIT_SUCCESS = 0
+
 return function(args)
 
   -- First check for a bundled zip file appended to the executable
@@ -153,7 +155,7 @@ return function(args)
   end
 
   -- Don't run app when printing version or help
-  if options.version or options.help then return -1 end
+  if options.version or options.help then return EXIT_SUCCESS end
 
   -- Build the app if output is given
   if options.output then
