@@ -56,7 +56,7 @@ static int lmz_reader_init(lua_State* L) {
   luaL_getmetatable(L, "miniz_reader");
   lua_setmetatable(L, -2);
   memset(archive, 0, sizeof(*archive));
-  zip->loop = uv_default_loop();
+  zip->loop = luv_loop(L);
   zip->fd = uv_fs_open(zip->loop, &(zip->req), path, O_RDONLY, 0644, NULL);
   uv_fs_fstat(zip->loop, &(zip->req), zip->fd, NULL);
   size = zip->req.statbuf.st_size;
@@ -191,7 +191,7 @@ static int lmz_writer_init(lua_State *L) {
   luaL_getmetatable(L, "miniz_writer");
   lua_setmetatable(L, -2);
   memset(archive, 0, sizeof(*archive));
-  zip->loop = uv_default_loop();
+  zip->loop = luv_loop(L);
   if (!mz_zip_writer_init_heap(archive, size_to_reserve_at_beginning, initial_allocation_size)) {
     return luaL_error(L, "Problem initializing heap writer");
   }
