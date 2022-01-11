@@ -26,15 +26,28 @@ MACRO(LUAJIT_add_custom_commands luajit_target)
 
       set(generated_file "${CMAKE_BINARY_DIR}/jitted_tmp/${stripped_file}_${luajit_target}_generated${CMAKE_C_OUTPUT_EXTENSION}")
 
-      add_custom_command(
-        OUTPUT ${generated_file}
-        MAIN_DEPENDENCY ${source_file}
-        COMMAND "LUA_PATH=${LUA_PATH}" luajit
-        ARGS -b ${LJ_BYTECODE_OPTS}
-          ${source_file}
-          ${generated_file}
-        COMMENT "Building Luajitted ${source_file}: ${generated_file}"
-      )
+      # Only use LUA_PATH if it's set
+      IF(LUA_PATH)
+        add_custom_command(
+          OUTPUT ${generated_file}
+          MAIN_DEPENDENCY ${source_file}
+          COMMAND "LUA_PATH=${LUA_PATH}" luajit
+          ARGS -b ${LJ_BYTECODE_OPTS}
+            ${source_file}
+            ${generated_file}
+          COMMENT "Building Luajitted ${source_file}: ${generated_file}"
+        )
+      ELSE()
+        add_custom_command(
+          OUTPUT ${generated_file}
+          MAIN_DEPENDENCY ${source_file}
+          COMMAND luajit
+          ARGS -b ${LJ_BYTECODE_OPTS}
+            ${source_file}
+            ${generated_file}
+          COMMENT "Building Luajitted ${source_file}: ${generated_file}"
+        )
+      ENDIF()
 
       get_filename_component(basedir ${generated_file} PATH)
       file(MAKE_DIRECTORY ${basedir})
