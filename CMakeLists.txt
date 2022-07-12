@@ -170,10 +170,6 @@ lua_add_executable(luvi
   ${lpeg_re_lua}
 )
 
-if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "-pagezero_size 10000 -image_base 100000000 ${CMAKE_EXE_LINKER_FLAGS}")
-endif()
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,-E")
 endif()
