@@ -97,6 +97,8 @@ static lua_State* vm_acquire(){
 
 #ifdef WITH_PCRE
   lua_pushcfunction(L, luaopen_rex_pcre);
+  lua_pushvalue(L, -1);
+  lua_setfield(L, -3, "rex_pcre");
   lua_setfield(L, -2, "rex");
 #endif
 
