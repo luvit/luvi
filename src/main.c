@@ -73,7 +73,7 @@ static lua_State* vm_acquire(){
   lua_pushcfunction(L, luaopen_luv);
   lua_call(L, 0, 1);
   lua_setfield(L, -2, "uv");
-  
+
   // remove package.loaded
   lua_remove(L, -1);
 
@@ -152,14 +152,13 @@ int main(int argc, char* argv[] ) {
   // Hooks in libuv that need to be done in main.
   argv = uv_setup_args(argc, argv);
 
+  luv_set_thread_cb(vm_acquire, vm_release);
   // Create the lua state.
   L = vm_acquire();
   if (L == NULL) {
     fprintf(stderr, "luaL_newstate has failed\n");
     return 1;
   }
-
-  luv_set_thread_cb(vm_acquire, vm_release);
 
 #ifdef WITH_WINSVC
   // Store luvi module definition at preload.openssl
