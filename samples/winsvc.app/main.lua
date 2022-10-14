@@ -16,6 +16,11 @@ limitations under the License.
 
 --]]
 
+local options = require('luvi').options
+if not options.winsvc then
+  print("not has winsvc feature, skip");
+  return
+end
 local table = require('table')
 local winsvc = require('winsvc')
 local winsvcaux = require('winsvcaux')
@@ -55,18 +60,18 @@ end
 
 
 local function SvcHandler(dwControl, dwEventType, lpEventData, lpContext)
-  -- Handle the requested control code. 
+  -- Handle the requested control code.
 
-  if dwControl == winsvc.SERVICE_CONTROL_STOP then 
+  if dwControl == winsvc.SERVICE_CONTROL_STOP then
     ReportSvcStatus(winsvc.SERVICE_STOP_PENDING, winsvc.NO_ERROR, 0)
 
     -- Signal the service to stop.
 
     gRunning = false
     ReportSvcStatus(gSvcStatus.dwCurrentState, winsvc.NO_ERROR, 0)
-         
+
     return winsvc.NO_ERROR
-  elseif dwControl == winsvc.SERVICE_CONTROL_INTERROGATE then 
+  elseif dwControl == winsvc.SERVICE_CONTROL_INTERROGATE then
     return winsvc.NO_ERROR
   else
     return winsvc.ERROR_CALL_NOT_IMPLEMENTED
@@ -96,7 +101,7 @@ end
 
 local function SvcInit(args, context)
   -- TO_DO: Declare and set any required variables.
-  --   Be sure to periodically call ReportSvcStatus() with 
+  --   Be sure to periodically call ReportSvcStatus() with
   --   SERVICE_START_PENDING. If initialization fails, call
   --   ReportSvcStatus with SERVICE_STOPPED.
 
@@ -106,7 +111,7 @@ local function SvcInit(args, context)
   ReportSvcStatus(winsvc.SERVICE_RUNNING, winsvc.NO_ERROR, 0)
 
   -- TO_DO: Setup Serive Work To Be done
-  
+
   local timer = uv.new_timer()
   uv.timer_start(timer, 0, 2000, function()
     if gRunning then
