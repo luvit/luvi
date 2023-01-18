@@ -18,6 +18,8 @@ limitations under the License.
 
 return function (stdin, stdout, uv, utils, greeting)
 
+  local loadstring = loadstring or load
+
   local print = function(...)
     uv.write(stdout, table.concat({...}, "\t") .. "\n")
   end
@@ -67,7 +69,7 @@ return function (stdin, stdout, uv, utils, greeting)
       end
     else
 
-      if err:match "'<eof>'$" then
+      if err and err:match "'<eof>'$" then
         -- Lua expects some more input; stow it away for next time
         buffer = chunk .. '\n'
         return '>>'

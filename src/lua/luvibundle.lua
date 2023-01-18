@@ -144,7 +144,7 @@ local function zipBundle(base, zip)
 
   -- Support zips with a single folder inserted at top-level
   local entries = bundle.readdir("")
-  if #entries == 1 and bundle.stat(entries[1]).type == "directory" then
+  if entries and #entries == 1 and bundle.stat(entries[1]).type == "directory" then
     chrootBundle(bundle, entries[1] .. '/')
   end
 

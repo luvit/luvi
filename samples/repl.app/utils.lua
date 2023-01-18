@@ -1,6 +1,7 @@
 local uv = require('uv')
 local env = require('env')
 
+local unpack = unpack or table.unpack
 local prettyPrint, dump, strip, color, colorize, loadColors
 local theme = {}
 local useColors = false
