@@ -20,32 +20,32 @@ GOTO :build
 
 :regular
 ECHO "Building regular64"
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF -H. -Bbuild -G"%GENERATOR%" -Ax64
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF -H. -Bbuild -G"%GENERATOR%" -Ax64 %EXTRA_OPTIONS%
 GOTO :end
 
 :regular-asm
 ECHO "Building regular64 asm"
-cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF -H. -Bbuild -G"%GENERATOR%" -Ax64
+cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF -H. -Bbuild -G"%GENERATOR%" -Ax64 %EXTRA_OPTIONS%
 GOTO :end
 
 :regular32
 ECHO "Building regular32"
-cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF -H. -Bbuild -G"%GENERATOR%" -AWin32
+cmake -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF -H. -Bbuild -G"%GENERATOR%" -AWin32 %EXTRA_OPTIONS%
 GOTO :end
 
 :regular32-asm
 ECHO "Building regular32 asm"
-cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF -H. -Bbuild -G"%GENERATOR%" -AWin32
+cmake -DWithOpenSSLASM=ON -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF -H. -Bbuild -G"%GENERATOR%" -AWin32 %EXTRA_OPTIONS%
 GOTO :end
 
 :tiny
 ECHO "Building tiny64"
-cmake -H. -Bbuild -G"%GENERATOR%" -Ax64
+cmake -H. -Bbuild -G"%GENERATOR%" -Ax64 %EXTRA_OPTIONS%
 GOTO :end
 
 :tiny32
 ECHO "Building tiny32"
-cmake -H. -Bbuild -G"%GENERATOR%" -AWin32
+cmake -H. -Bbuild -G"%GENERATOR%" -AWin32 %EXTRA_OPTIONS%
 GOTO :end
 
 :build

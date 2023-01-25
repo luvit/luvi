@@ -80,10 +80,6 @@ regular-shared:
 package: deps/luv/CMakeLists.txt
 	cmake --build build -- package
 
-# In case the user forgot to pull in submodules, grab them.
-deps/luv/CMakeLists.txt:
-	git submodule update --init --recursive
-
 clean:
 	rm -rf build luvi-*
 
