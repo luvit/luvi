@@ -1,8 +1,9 @@
 set(LREXLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lrexlib)
+if (DEFINED ENV{LREXLIB_DIR})
+  set(LREXLIB_DIR $ENV{LREXLIB_DIR})
+endif()
 
-include_directories(
-  ${LREXLIB_DIR}/src
-)
+include_directories( ${LREXLIB_DIR}/src )
 
 add_library(lrexlib
   ${LREXLIB_DIR}/src/common.c
@@ -11,7 +12,7 @@ add_library(lrexlib
 )
 
 set_target_properties(lrexlib PROPERTIES
-    COMPILE_FLAGS "-DLUA_LIB -DLUA_COMPAT_APIINTCASTS -DVERSION=\\\"2.8.0\\\"")
+  COMPILE_FLAGS "-DLUA_LIB -DLUA_COMPAT_APIINTCASTS -DVERSION=\\\"2.8.0\\\"")
 target_link_libraries(lrexlib pcre)
 
 set(EXTRA_LIBS ${EXTRA_LIBS} lrexlib)

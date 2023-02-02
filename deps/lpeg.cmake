@@ -1,6 +1,9 @@
-include_directories(
-  ${LPEGLIB_DIR}
-)
+set(LPEGLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lpeg)
+if (DEFINED ENV{LPEGLIB_DIR})
+  set(LPEGLIB_DIR $ENV{LPEGLIB_DIR})
+endif()
+
+include_directories( ${LPEGLIB_DIR} )
 
 add_library(LPEGLIB
   ${LPEGLIB_DIR}/lpcap.c
@@ -12,6 +15,6 @@ add_library(LPEGLIB
 
 set(EXTRA_LIBS ${EXTRA_LIBS} LPEGLIB)
 
-add_definitions(-DLUA_LIB -DWITH_LPEG)
+add_definitions(-DWITH_LPEG)
 remove_definitions(-DNDEBUG)
 remove_definitions(-DVERSION)

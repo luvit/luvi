@@ -1,183 +1,125 @@
-LUVI_TAG=$(shell git describe --tags)
-LUVI_ARCH=$(shell uname -s)_$(shell uname -m)
-LUVI_PUBLISH_USER?=luvit
-LUVI_PUBLISH_REPO?=luvi
-LUVI_PREFIX?=/usr/local
-LUVI_BINDIR?=$(LUVI_PREFIX)/bin
+################################################################################
+# Default build options
+################################################################################
 
-OS:=$(shell uname -s)
-ARCH:=$(shell uname -m)
+CMAKE_BUILD_TYPE ?= Release
 
-CMAKE_FLAGS+= -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
-ifdef GENERATOR
-	CMAKE_FLAGS+= -G"${GENERATOR}"
-endif
-
-ifdef WITHOUT_AMALG
-	CMAKE_FLAGS+= -DWITH_AMALG=OFF
-endif
-
-ifdef WITH_LUA_ENGINE
-	CMAKE_FLAGS+= -DWITH_LUA_ENGINE=$(WITH_LUA_ENGINE)
-endif
-
+# Default to using the amalgamated Lua source.
+# This speeds up the build at the cost of using more memory.
+WITH_AMALG ?= ON
+WITH_LUA_ENGINE ?= LuaJIT
 WITH_SHARED_LIBLUV ?= OFF
+WITH_SHARED_LIBUV ?= OFF
+WITH_SHARED_LUA ?= OFF
 
-CMAKE_FLAGS += \
-	-DWithSharedLibluv=$(WITH_SHARED_LIBLUV)
+## For regular builds
 
-CPACK_FLAGS=-DWithPackageSH=ON -DWithPackageTGZ=ON -DWithPackageTBZ2=ON
-ifdef CPACK_DEB
-	CPACK_FLAGS=-DWithPackageDEB=ON
+WITH_OPENSSL ?= ON
+WITH_PCRE ?= ON
+WITH_LPEG ?= ON
+WITH_ZLIB ?= OFF
+
+WITH_SHARED_OPENSSL ?= OFF
+WITH_OPENSSL_ASM ?= OFF
+WITH_SHARED_PCRE ?= OFF
+WITH_SHARED_LPEG ?= OFF
+WITH_SHARED_ZLIB ?= OFF
+
+ifeq (${OS},Windows_NT)
+  PREFIX ?= C:/Program Files/luvit
+else
+  PREFIX ?= /usr/local
 endif
+BINPREFIX ?= ${PREFIX}/bin
 
-ifdef CPACK_RPM
-	CPACK_FLAGS=-DWithPackageRPM=ON
-endif
+BUILD_PREFIX ?= build
 
-ifdef CPACK_NSIS
-	CPACK_FLAGS=-DWithPackageNSIS=ON
-endif
+# NPROCS: Number of processors to use for parallel builds, passed as -jN to make
+# GENERATOR: CMake generator to use, passed as -G"GENERATOR" to cmake
+# PREFIX: Where to install luvi, defaults to /usr/local
+# BINPREFIX: Where to install luvi binary, defaults to $PREFIX/bin
+# EXTRA_BUILD_FLAGS: extra options to pass to make when building
+# EXTRA_CONFIGURE_FLAGS: extra options to pass to cmake when configuring
+#
+# Note: WITH_SHARED_LUA=ON and WITH_LUA_ENGINE=Lua is known to be very buggy.
+#       This is an artifact of how incompatible PUC Lua bytecode is with
+#       Different systems.
+#
+#       It *should* work on your system, but don't expect it to work anywhere else.
+#
+################################################################################
 
-ifdef CPACK_BUNDLE
-	CPACK_FLAGS=-DWithPackageBUNDLE=ON
+CONFIGURE_FLAGS := \
+	-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+	-DWITH_AMALG=${WITH_AMALG} \
+	-DWITH_LUA_ENGINE=${WITH_LUA_ENGINE} \
+	-DWithSharedLibluv=${WITH_SHARED_LIBLUV} \
+	-DWithSharedLibuv=${WITH_SHARED_LIBUV} \
+	-DWithSharedLua=${WITH_SHARED_LUA}
+
+CONFIGURE_REGULAR_FLAGS := ${CONFIGURE_FLAGS} \
+	-DWithOpenSSL=${WITH_OPENSSL} \
+	-DWithPCRE=${WITH_PCRE} \
+	-DWithLPEG=${WITH_LPEG} \
+	-DWithZLIB=${WITH_ZLIB} \
+	-DWithSharedOpenSSL=${WITH_SHARED_OPENSSL} \
+	-DWithOpenSSLASM=${WITH_OPENSSL_ASM} \
+	-DWithSharedPCRE=${WITH_SHARED_PCRE} \
+	-DWithSharedLPEG=${WITH_SHARED_LPEG} \
+	-DWithSharedZLIB=${WITH_SHARED_ZLIB}
+
+ifdef GENERATOR
+	CONFIGURE_FLAGS+= -G"${GENERATOR}"
 endif
 
 ifndef NPROCS
-ifeq ($(OS),Linux)
+ifeq (${OS},Linux)
 	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
-else ifeq ($(OS),Darwin)
+else ifeq (${OS},Darwin)
 	NPROCS:=$(shell sysctl hw.ncpu | awk '{print $$2}')
 endif
 endif
 
 ifdef NPROCS
-  EXTRA_OPTIONS:=-j${NPROCS}
+  BUILD_OPTIONS:=-j${NPROCS}
 endif
 
 # This does the actual build and configures as default flavor is there is no build folder.
 luvi: build
-	cmake --build build -- ${EXTRA_OPTIONS}
+	cmake --build ${BUILD_PREFIX} -- ${BUILD_OPTIONS} ${EXTRA_BUILD_FLAGS}
 
 build:
-	@echo "Please run tiny' or 'regular' make target first to configure"
+	@echo "Please run 'make tiny' or 'make regular' first to configure"
 
 # Configure the build with minimal dependencies
 tiny: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS)
+	cmake -H. -B${BUILD_PREFIX} ${CONFIGURE_FLAGS} ${EXTRA_CONFIGURE_FLAGS}
 
-# Configure the build with openssl statically included
+# Configure the build with openssl, pcre and lpeg
 regular: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF
-
-regular-asm: deps/luv/CMakeLists.txt
-	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=OFF -DWithOpenSSLASM=ON -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF
-
-# Configure the build with shared openssl
-regular-shared:
-	cmake $(CMAKE_FLAGS) $(CPACK_FLAGS) -DWithOpenSSL=ON -DWithSharedOpenSSL=ON -DWithPCRE=ON -DWithLPEG=ON -DWithSharedPCRE=OFF
-
-package: deps/luv/CMakeLists.txt
-	cmake --build build -- package
+	cmake -H. -B${BUILD_PREFIX} ${CONFIGURE_REGULAR_FLAGS} ${EXTRA_CONFIGURE_FLAGS}
 
 clean:
-	rm -rf build luvi-*
+	rm -rf ${BUILD_PREFIX} test.bin
+
+install: luvi
+	install -p ${BUILD_PREFIX}/luvi ${BINPREFIX}/luvi
+
+uninstall:
+	rm -f ${BINPREFIX}/luvi
+
+# In case the user forgot to pull in submodules, grab them.
+deps/luv/CMakeLists.txt:
+	git submodule update --init --recursive
 
 test: luvi
 	rm -f test.bin
-	build/luvi samples/test.app -- 1 2 3 4
-	build/luvi samples/test.app -o test.bin
+	${BUILD_PREFIX}/luvi samples/test.app -- 1 2 3 4
+	${BUILD_PREFIX}/luvi samples/test.app -o test.bin
 	./test.bin 1 2 3 4
 	rm -f test.bin
-
-install: luvi
-	install -p build/luvi $(LUVI_BINDIR)/
-
-uninstall:
-	rm -f /usr/local/bin/luvi
 
 reset:
 	git submodule update --init --recursive && \
 	git clean -f -d && \
 	git checkout .
-
-luvi-src.tar.gz:
-	echo ${LUVI_TAG} > VERSION && \
-	COPYFILE_DISABLE=true tar -czvf ../luvi-src.tar.gz \
-	  --exclude 'luvi-src.tar.gz' --exclude '.git*' --exclude build . && \
-	mv ../luvi-src.tar.gz . && \
-	rm VERSION
-
-
-travis-publish:	reset luvi-src.tar.gz travis-tiny travis-regular-asm
-	$(MAKE)
-	mv luvi-src.tar.gz luvi-src-${LUVI_TAG}.tar.gz
-
-travis-tiny: reset tiny
-	$(MAKE)
-	mv build/luvi luvi-tiny-$(OS)_$(ARCH)
-
-travis-regular-asm: reset regular-asm
-	$(MAKE)
-	mv build/luvi luvi-regular-$(OS)_$(ARCH)
-
-linux-build: linux-build-box-regular linux-build-box32-regular linux-build-box-tiny linux-build-box32-tiny
-
-linux-build-box-regular: luvi-src.tar.gz
-	rm -rf build && mkdir -p build
-	cp packaging/holy-build.sh luvi-src.tar.gz build
-	mkdir -p build
-	docker run -i --rm \
-		  -v `pwd`/build:/io phusion/holy-build-box-64:latest bash /io/holy-build.sh regular-asm
-	mv build/luvi luvi-regular-Linux_x86_64
-
-linux-build-box32-regular: luvi-src.tar.gz
-	rm -rf build && mkdir -p build
-	cp packaging/holy-build.sh luvi-src.tar.gz build
-	docker run -i --rm \
-		  -v `pwd`/build:/io phusion/holy-build-box-32:latest linux32 bash /io/holy-build.sh regular-asm
-	mv build/luvi luvi-regular-Linux_i686
-
-linux-build-box-tiny: luvi-src.tar.gz
-	rm -rf build && mkdir -p build
-	cp packaging/holy-build.sh luvi-src.tar.gz build
-	mkdir -p build
-	docker run -i --rm \
-		  -v `pwd`/build:/io phusion/holy-build-box-64:latest bash /io/holy-build.sh tiny
-	mv build/luvi luvi-tiny-Linux_x86_64
-
-linux-build-box32-tiny: luvi-src.tar.gz
-	rm -rf build && mkdir -p build
-	cp packaging/holy-build.sh luvi-src.tar.gz build
-	docker run -i --rm \
-		  -v `pwd`/build:/io phusion/holy-build-box-32:latest linux32 bash /io/holy-build.sh tiny
-	mv build/luvi luvi-tiny-Linux_i686
-
-publish-src: reset luvi-src.tar.gz
-	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
-	  --file luvi-src.tar.gz --name luvi-src-${LUVI_TAG}.tar.gz
-
-publish:
-	$(MAKE) clean publish-tiny
-	$(MAKE) clean publish-regular
-
-publish-linux: reset
-	$(MAKE) linux-build && \
-	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
-	  --file luvi-regular-Linux_i686 --name luvi-regular-Linux_i686 && \
-	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
-	  --file luvi-regular-Linux_x86_64 --name luvi-regular-Linux_x86_64 && \
-	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
-	  --file luvi-tiny-Linux_x86_64 --name luvi-tiny-Linux-x86_64 && \
-	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
-	  --file luvi-tiny-Linux_i686 --name luvi-tiny-Linux-i686
-
-publish-tiny: reset
-	$(MAKE) tiny test && \
-	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
-	  --file build/luvi --name luvi-tiny-${LUVI_ARCH}
-
-publish-regular: reset
-	$(MAKE) regular-asm test && \
-	github-release upload --user ${LUVI_PUBLISH_USER} --repo ${LUVI_PUBLISH_REPO} --tag ${LUVI_TAG} \
-	  --file build/luvi --name luvi-regular-${LUVI_ARCH}
