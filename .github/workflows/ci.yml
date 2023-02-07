@@ -134,6 +134,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Prepare NASM
+        uses: ilammy/setup-nasm@v1
+
       - name: Configure
         run: ./make ${{ matrix.build_type }}
 

@@ -1,5 +1,5 @@
 -- This runs `make regular` with all possible combinations of defines and checks if it succeeds
--- This is currently 3888 invocations
+-- This is currently 2916 invocations
 --
 -- This script expects:
 -- - an environment that can build luvi using the Makefile
@@ -43,7 +43,6 @@ addDefineToMatrix("WITH_LPEG", {"ON", "OFF"})
 addDefineToMatrix("WITH_ZLIB", {"ON", "OFF"})
 
 addDefineToMatrix("WITH_SHARED_OPENSSL", {"ON", "OFF"}, "WITH_OPENSSL=ON")
-addDefineToMatrix("WITH_OPENSSL_ASM", {"ON", "OFF"}, "WITH_SHARED_OPENSSL=OFF")
 addDefineToMatrix("WITH_SHARED_PCRE", {"ON", "OFF"}, "WITH_PCRE=ON")
 addDefineToMatrix("WITH_SHARED_ZLIB", {"ON", "OFF"}, "WITH_ZLIB=ON")
 
