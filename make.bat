@@ -22,12 +22,12 @@ GOTO :build
 
 :regular
 ECHO "Building regular"
-cmake -DWithOpenSSL=ON -DWithPCRE=ON -DWithLPEG=ON -H. -Bbuild "%GENERATOR%" %EXTRA_OPTIONS%
+cmake -DWithOpenSSL=ON -DWithPCRE=ON -DWithLPEG=ON -H. -Bbuild %PLATFORM% %EXTRA_OPTIONS%
 GOTO :end
 
 :tiny
 ECHO "Building tiny"
-cmake -H. -Bbuild "%GENERATOR%" %EXTRA_OPTIONS%
+cmake -H. -Bbuild %PLATFORM% %EXTRA_OPTIONS%
 GOTO :end
 
 :build
