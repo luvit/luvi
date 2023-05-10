@@ -151,7 +151,10 @@ local function zipBundle(base, zip)
   return bundle
 end
 
-local function buildBundle(target, bundle)
+local function buildBundle(options, bundle)
+  assert(type(options)=='table')
+  local target = assert(options.output, "missing output target")
+  local strip = options.strip
   target = pathJoin(uv.cwd(), target)
   print("Creating new binary: " .. target)
   local fd = assert(uv.fs_open(target, "w", 511)) -- 0777
@@ -173,6 +176,7 @@ local function buildBundle(target, bundle)
     uv.fs_close(fd2)
   end
 
+  local load = loadstring or load
   local writer = miniz.new_writer()
   local function copyFolder(path)
     local files = bundle.readdir(path)
@@ -187,7 +191,12 @@ local function buildBundle(target, bundle)
           copyFolder(child)
         elseif stat.type == "file" then
           print("    " .. child)
-          writer:add(child, bundle.readfile(child), 9)
+          local ctx = bundle.readfile(child)
+          if strip and child:sub(-4, -1)=='.lua' then
+            ctx = assert(load(ctx, child))
+            ctx = string.dump(ctx, strip)
+          end
+          writer:add(child, ctx, 9)
         end
       end
     end
