@@ -239,6 +239,7 @@ Usage: luvi bundle+ [options] [-- extra args]
   --version         Show luvi version and compiled in options.
   --output target   Build a luvi app by zipping the bundle and inserting luvi.
   --main path       Specify a custom main bundle path (normally main.lua)
+  --strip           Compile lua code and strip debug info
   --help            Show this help file.
   --                All args after this go to the luvi app itself.
 
