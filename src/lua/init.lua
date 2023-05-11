@@ -46,7 +46,7 @@ local commands = {
   ["--version"] = "version",
   ["-h"] = "help",
   ["--help"] = "help",
-  ["--copy"] = "copy",
+  ["--compile"] = "compile",
   ["--force"] = "force",
   ["-s"] = "strip",
   ["--strip"] = "strip"
@@ -68,9 +68,9 @@ Usage: $(LUVI) bundle+ [options] [-- extra args]
   --version         Show luvi version and compiled in options.
   --output target   Build a luvi app by zipping the bundle and inserting luvi.
   --main path       Specify a custom main bundle path (normally main.lua)
-  --copy            Do not compile, just copy Lua code and compress.
+  --compile         Compile Lua code into bytecode before bundling.
   --strip           Compile Lua code and strip debug info.
-  --force           Force build then bundle, ignore Lua compile error.
+  --force           Ignore errors when compiling Lua code.
   --help            Show this help file.
   --                All args after this go to the luvi app itself.
 
