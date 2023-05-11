@@ -191,10 +191,10 @@ local function buildBundle(options, bundle)
         elseif stat.type == "file" then
           print("    " .. child)
           local ctx = bundle.readfile(child)
-          local isLua = name:sub(-4, -1) == ".lua"
+          local isLua = name:sub(-4, -1):lower() == ".lua"
+          local compile = options.strip or options.compile
 
-          -- compile, strip lua code, but skip package.lua
-          if isLua and name ~= 'package.lua' and not options.copy then
+          if compile and isLua and name:lower() ~= 'package.lua' then
             local fn, err = load(ctx, child)
             if not fn and not options.force then
               error(err)
@@ -202,6 +202,7 @@ local function buildBundle(options, bundle)
               ctx = string.dump(fn, options.strip)
             end
           end
+
           writer:add(child, ctx, 9)
         end
       end
