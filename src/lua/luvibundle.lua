@@ -192,7 +192,7 @@ local function buildBundle(options, bundle)
         elseif stat.type == "file" then
           print("    " .. child)
           local ctx = bundle.readfile(child)
-          if strip and child:sub(-4, -1)=='.lua' then
+          if strip and name ~= "package.lua" and child:sub(-4, -1)=='.lua' then
             ctx = assert(load(ctx, child))
             ctx = string.dump(ctx, strip)
           end
