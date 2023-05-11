@@ -21,8 +21,12 @@ git init myapp
 vim myapp/main.lua
 # Run the app
 luvi myapp
-# Build the binary when done
+# Build the binary with compiled Lua code when done
 luvi myapp -o mybinary
+# Build the binary with compiled, striped Lua code when done
+luvi myapp -o mybinary -s
+# Build the binary just copy Lua code when done
+luvi myapp -o mybinary --copy
 # Run the new self-contained binary
 ./mybinary
 # Deploy / Publish / Profit!
@@ -235,11 +239,13 @@ Usage: luvi bundle+ [options] [-- extra args]
 
   bundle            Path to directory or zip file containing bundle source.
                     `bundle` can be specified multiple times to layer bundles
-                    on top of eachother.
+                    on top of each other.
   --version         Show luvi version and compiled in options.
   --output target   Build a luvi app by zipping the bundle and inserting luvi.
   --main path       Specify a custom main bundle path (normally main.lua)
-  --strip           Compile lua code and strip debug info
+  --copy            Do not compile, just copy Lua code and compress.
+  --strip           Compile Lua code and strip debug info.
+  --force           Force build then bundle, ignore Lua compile error.
   --help            Show this help file.
   --                All args after this go to the luvi app itself.
 

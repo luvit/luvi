@@ -154,7 +154,6 @@ end
 local function buildBundle(options, bundle)
   assert(type(options)=='table')
   local target = assert(options.output, "missing output target")
-  local strip = options.strip
   target = pathJoin(uv.cwd(), target)
   print("Creating new binary: " .. target)
   local fd = assert(uv.fs_open(target, "w", 511)) -- 0777
@@ -192,9 +191,16 @@ local function buildBundle(options, bundle)
         elseif stat.type == "file" then
           print("    " .. child)
           local ctx = bundle.readfile(child)
-          if strip and name ~= "package.lua" and child:sub(-4, -1)=='.lua' then
-            ctx = assert(load(ctx, child))
-            ctx = string.dump(ctx, strip)
+          local isLua = name:sub(-4, -1) == ".lua"
+
+          -- compile, strip lua code, but skip package.lua
+          if isLua and name ~= 'package.lua' and not options.copy then
+            local fn, err = load(ctx, child)
+            if not fn and not options.force then
+              error(err)
+            else
+              ctx = string.dump(fn, options.strip)
+            end
           end
           writer:add(child, ctx, 9)
         end
