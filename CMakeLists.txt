@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.18)
 
 if(WIN32)
   set(projects C ASM ASM_MASM)
