@@ -1,5 +1,7 @@
 set(LREXLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lrexlib)
 
+add_definitions( -DPCRE2_CODE_UNIT_WIDTH=8 )
+
 include_directories(
   ${LREXLIB_DIR}/src
 )
