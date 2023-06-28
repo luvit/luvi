@@ -40,8 +40,9 @@
 #ifdef WITH_OPENSSL
 #include "openssl.h"
 #endif
-#ifdef WITH_PCRE
-#include "pcre.h"
+#ifdef WITH_PCRE2
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include "pcre2.h"
 #endif
 #ifdef WITH_ZLIB
 #include "zlib.h"

@@ -25,8 +25,8 @@
 #endif
 #include "lminiz.c"
 #include "snapshot.c"
-#ifdef WITH_PCRE
-int luaopen_rex_pcre(lua_State* L);
+#ifdef WITH_PCRE2
+int luaopen_rex_pcre2(lua_State* L);
 #endif
 #ifdef WITH_PLAIN_LUA
 #include "../deps/bit.c"
@@ -95,10 +95,10 @@ static lua_State* vm_acquire(){
   lua_setfield(L, -2, "lpeg");
 #endif
 
-#ifdef WITH_PCRE
-  lua_pushcfunction(L, luaopen_rex_pcre);
+#ifdef WITH_PCRE2
+  lua_pushcfunction(L, luaopen_rex_pcre2);
   lua_pushvalue(L, -1);
-  lua_setfield(L, -3, "rex_pcre");
+  lua_setfield(L, -3, "rex_pcre2");
   lua_setfield(L, -2, "rex");
 #endif
 
