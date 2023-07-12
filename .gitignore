@@ -1,4 +1,5 @@
-build
-luvi-src.tar.gz
+build*
+*.tar.gz
+logs
 luvi.exe
 VERSION

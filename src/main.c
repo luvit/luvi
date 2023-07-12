@@ -72,7 +72,9 @@ static lua_State* vm_acquire(){
   // load luv into uv in advance so that the metatables for async work.
   lua_pushcfunction(L, luaopen_luv);
   lua_call(L, 0, 1);
-  lua_setfield(L, -2, "uv");
+  lua_pushvalue(L, -1);
+  lua_setfield(L, -3, "uv");
+  lua_setfield(L, -2, "luv");
 
   // remove package.loaded
   lua_remove(L, -1);

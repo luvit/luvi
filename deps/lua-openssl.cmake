@@ -10,15 +10,10 @@ include_directories(
   ${LUA_OPENSSL_DIR}/src
 )
 
-add_definitions(
-  -DCOMPAT52_IS_LUAJIT
-)
+add_definitions( -DCOMPAT52_IS_LUAJIT )
 
 if(WIN32)
-  add_definitions(
-    -DWIN32_LEAN_AND_MEAN
-    -D_CRT_SECURE_NO_WARNINGS
-  )
+  add_definitions( -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS )
 else()
   find_package(Threads)
   add_definitions(-DPTHREADS)

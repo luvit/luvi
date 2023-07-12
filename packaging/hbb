@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ "$target" == "Linux_x86_64" ]; then
+    docker run -t \
+        -v `pwd`:/work \
+        -v $1:$1 phusion/holy-build-box-64:latest \
+        /hbb_exe/activate-exec bash -c "cd /work && source $1"
+elif [ "$target" == "Linux_i686" ]; then
+    docker run -t \
+        -v `pwd`:/work \
+        -v $1:$1 phusion/holy-build-box-32:latest \
+        linux32 /hbb_exe/activate-exec bash -c "cd /work && source $1"
+else
+    source $1
+fi
