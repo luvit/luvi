@@ -41,6 +41,7 @@ add_library(lua_openssl
   ${LUA_OPENSSL_DIR}/src/ec.c
   ${LUA_OPENSSL_DIR}/src/engine.c
   ${LUA_OPENSSL_DIR}/src/hmac.c
+  ${LUA_OPENSSL_DIR}/src/kdf.c
   ${LUA_OPENSSL_DIR}/src/lbn.c
   ${LUA_OPENSSL_DIR}/src/lhash.c
   ${LUA_OPENSSL_DIR}/src/misc.c
