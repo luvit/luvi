@@ -44,8 +44,8 @@ if(CMAKE_COMPILER_IS_GNUCC)
   add_definitions( -Wno-unused-function)
 endif()
 
-if (EXISTS "${CMAKE_SOURCE_DIR}/VERSION")
-  file (STRINGS "${CMAKE_SOURCE_DIR}/VERSION" LUVI_VERSION)
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+  file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" LUVI_VERSION)
   message("-- Found luvi version: ${LUVI_VERSION}")
 else()
   exec_program(
