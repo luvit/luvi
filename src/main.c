@@ -25,12 +25,6 @@
 #endif
 #include "lminiz.c"
 #include "snapshot.c"
-#ifdef WITH_PCRE
-int luaopen_rex_pcre(lua_State* L);
-#endif
-#ifdef WITH_PLAIN_LUA
-#include "../deps/bit.c"
-#endif
 
 #ifdef WITH_CUSTOM
 int luvi_custom(lua_State* L);
@@ -70,9 +64,13 @@ static lua_State* vm_acquire(){
   lua_getfield(L, -1, "loaded");
 
   // load luv into uv in advance so that the metatables for async work.
-  lua_pushcfunction(L, luaopen_luv);
-  lua_call(L, 0, 1);
-  lua_setfield(L, -2, "uv");
+  luaL_requiref(L, "uv", luaopen_luv, 0);
+  lua_setfield(L, -2, "luv");
+
+#ifdef WITH_PLAIN_LUA
+  luaL_requiref(L, "bit", luaopen_bit, 1);
+  lua_pop(L, 1);
+#endif
 
   // remove package.loaded
   lua_remove(L, -1);
@@ -102,10 +100,6 @@ static lua_State* vm_acquire(){
   lua_setfield(L, -2, "rex");
 #endif
 
-  // Store luvi module definition at preload.luvi
-  lua_pushcfunction(L, luaopen_luvi);
-  lua_setfield(L, -2, "luvi");
-
 #ifdef WITH_OPENSSL
   // Store openssl module definition at preload.openssl
   lua_pushcfunction(L, luaopen_openssl);
@@ -118,21 +112,24 @@ static lua_State* vm_acquire(){
   lua_setfield(L, -2, "zlib");
 #endif
 
-#ifdef WITH_PLAIN_LUA
-  {
-      LUALIB_API int luaopen_init(lua_State *L);
-      LUALIB_API int luaopen_luvibundle(lua_State *L);
-      LUALIB_API int luaopen_luvipath(lua_State *L);
-      lua_pushcfunction(L, luaopen_init);
-      lua_setfield(L, -2, "init");
-      lua_pushcfunction(L, luaopen_luvibundle);
-      lua_setfield(L, -2, "luvibundle");
-      lua_pushcfunction(L, luaopen_luvipath);
-      lua_setfield(L, -2, "luvipath");
-      luaL_requiref(L, "bit", luaopen_bit, 1);
-      lua_pop(L, 1);
-  }
+#ifdef WITH_WINSVC
+  // Store luvi module definition at preload.winsvc
+  lua_pushcfunction(L, luaopen_winsvc);
+  lua_setfield(L, -2, "winsvc");
+  lua_pushcfunction(L, luaopen_winsvcaux);
+  lua_setfield(L, -2, "winsvcaux");
 #endif
+
+  // Store luvi module definition at preload.luvi
+  lua_pushcfunction(L, luaopen_luvi);
+  lua_setfield(L, -2, "luvi");
+
+  lua_pushcfunction(L, luaopen_init);
+  lua_setfield(L, -2, "init");
+  lua_pushcfunction(L, luaopen_luvibundle);
+  lua_setfield(L, -2, "luvibundle");
+  lua_pushcfunction(L, luaopen_luvipath);
+  lua_setfield(L, -2, "luvipath");
 
 #ifdef WITH_CUSTOM
   luvi_custom(L);
@@ -161,14 +158,6 @@ int main(int argc, char* argv[] ) {
     fprintf(stderr, "luaL_newstate has failed\n");
     return 1;
   }
-
-#ifdef WITH_WINSVC
-  // Store luvi module definition at preload.openssl
-  lua_pushcfunction(L, luaopen_winsvc);
-  lua_setfield(L, -2, "winsvc");
-  lua_pushcfunction(L, luaopen_winsvcaux);
-  lua_setfield(L, -2, "winsvcaux");
-#endif
 
   /* push debug function */
   lua_pushcfunction(L, luvi_traceback);
