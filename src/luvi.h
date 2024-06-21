@@ -40,9 +40,9 @@
 #ifdef WITH_OPENSSL
 #include "openssl.h"
 #endif
-#ifdef WITH_PCRE
-#include "pcre.h"
-int luaopen_rex_pcre(lua_State* L);
+#ifdef WITH_PCRE2
+#include "pcre2.h"
+int luaopen_rex_pcre2(lua_State* L);
 #endif
 #ifdef WITH_ZLIB
 #include "zlib.h"
