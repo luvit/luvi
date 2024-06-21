@@ -13,9 +13,9 @@
 [submodule "deps/lrexlib"]
 	path = deps/lrexlib
 	url = https://github.com/rrthomas/lrexlib.git
-[submodule "deps/pcre"]
-	path = deps/pcre
-	url = https://github.com/luvit/pcre.git
 [submodule "deps/lpeg"]
 	path = deps/lpeg
 	url = https://github.com/luvit/lpeg.git
+[submodule "deps/pcre2"]
+	path = deps/pcre2
+	url = https://github.com/PCRE2Project/pcre2
