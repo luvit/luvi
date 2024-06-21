@@ -3,25 +3,28 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-posix:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
-        build_type: [tiny, regular-asm]
+        os: [macos-13, macos-latest]
+        build_type: [tiny, regular]
         lua_engine: [LuaJIT, Lua]
     env:
-      BUILD_TYPE: ${{ matrix.build_type }}
-      WITH_LUA_ENGINE: ${{ matrix.lua_engine }}
-      NPROCS: 1
+      MAKEFLAGS: -j4
+      NPROCS: 4
+      CFLAGS: -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib -Wno-nullability-completeness
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
+        fetch-depth: 0
         submodules: recursive
 
     - name: Configure
-      run: WITHOUT_AMALG=1 make ${BUILD_TYPE} WITH_LUA_ENGINE=${WITH_LUA_ENGINE}
+      run: |
+        make ${{ matrix.build_type }} WITH_LUA_ENGINE=${{ matrix.lua_engine }}
 
     - name: Build
       run: make
@@ -29,59 +32,236 @@ jobs:
     - name: Test
       run: make test
 
-  deploy-linux:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: [build]
+    - name: Fetch System Name
+      run: |
+        OS=$(uname -s)
+        ARCH=$(uname -m)
+        LUA=${{ matrix.lua_engine }}
+        BUILD=${{ matrix.build_type }}
+
+        echo "ARTIFACT=$OS-$ARCH-$(echo $LUA | awk '{print tolower($0)}')-$BUILD" >> $GITHUB_ENV
+
+    - name: Rename Artifacts
+      run: |
+        cp build/luvi luvi-${{ env.ARTIFACT }}
+
+    - name: Publish Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT }}
+        path: |
+          luvi-${{ env.ARTIFACT }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [tiny, regular]
+        lua_engine: [LuaJIT, Lua]
+        arch: [x86_64, i686, aarch64]
+        libc: [glibc, musl]
+    env:
+      MAKEFLAGS: -j4
+      NPROCS: 4
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Setup QEMU
+      if: matrix.arch == 'aarch64'
+      run: |
+        sudo apt-get install -y qemu-user-static
+
+    - name: Build
+      run: |
+        bash packaging/linux-run.sh ${{ matrix.libc }} ${{ matrix.arch }} ${{ matrix.build_type }} ${{ matrix.lua_engine }}
+
+    - name: Fetch System Name
+      run: |
+        OS=$(uname -s)
+        ARCH=${{ matrix.arch }}
+        LUA=${{ matrix.lua_engine }}
+        BUILD=${{ matrix.build_type }}
+        if [ ${{ matrix.libc }} == "glibc" ]; then
+          LIBC=""
+        else
+          LIBC=-${{ matrix.libc }}
+        fi
+
+        echo "ARTIFACT=$OS-$ARCH-${LUA,,}-$BUILD$LIBC" >> $GITHUB_ENV
+
+    - name: Rename Artifacts
+      run: |
+        cp build/luvi luvi-${{ env.ARTIFACT }}
+
+    - name: Publish Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT }}
+        path: |
+          luvi-${{ env.ARTIFACT }}
+
+  build-mingw:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [tiny, regular]
+        lua_engine: [LuaJIT, Lua]
+        msystem: [mingw32, mingw64]
+    env:
+      MAKEFLAGS: -j4
+      NPROCS: 4
+
+    steps:
+    - name: 'Setup MSYS2'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.msystem }}
+        update: true
+        pacboy: toolchain:p cmake:p
+        install: git
+
+    - name: Install NASM
+      if: matrix.build_type == 'regular'
+      run: |
+        choco install nasm
+        echo "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Configure
+      shell: msys2 {0}
+      run: mingw32-make ${{ matrix.build_type }} WITH_LUA_ENGINE=${{ matrix.lua_engine }} GENERATOR="MinGW Makefiles"
+
+    - name: Build
+      shell: msys2 {0}
+      run: mingw32-make 
+
+    - name: Test
+      shell: msys2 {0}
+      run: mingw32-make test
+
+    - name: Fetch System Name
+      run: |
+        $MSYSTEM="${{ matrix.msystem }}"
+        $LUA="${{ matrix.lua_engine }}"
+        $BUILD="${{ matrix.build_type }}"
+
+        echo "ARTIFACT=Windows-$MSYSTEM-$($LUA.ToLower())-$BUILD" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Rename Artifacts
+      run: |
+        cp build/luvi.exe luvi-${{ env.ARTIFACT }}.exe
+
+    - name: Publish Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT }}
+        path: luvi-${{ env.ARTIFACT }}.exe
+
+  build-msvc:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [tiny, regular]
+        lua_engine: [LuaJIT, Lua]
+        arch: [amd64, x86]
+
+    steps:
+    - name: Setup MSVC Developer Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{ matrix.arch }}
+
+    - name: Install NASM
+      if: matrix.build_type == 'regular'
+      run: |
+        choco install nasm
+        echo "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Configure
+      run: nmake ${{ matrix.build_type }} WITH_LUA_ENGINE=${{ matrix.lua_engine }}
+
+    - name: Build
+      run: nmake
+
+    - name: Test
+      run: nmake test
+
+    - name: Fetch System Name
+      run: |
+        $ARCH="${{ matrix.arch }}"
+        $LUA="${{ matrix.lua_engine }}"
+        $BUILD="${{ matrix.build_type }}"
+
+        echo "ARTIFACT=Windows-$ARCH-$($LUA.ToLower())-$BUILD" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Rename Artifacts
+      run: |
+        cp build/Release/luvi.exe         build/luvi-${{ env.ARTIFACT }}.exe
+        cp build/Release/luvi.lib         build/luvi-${{ env.ARTIFACT }}.lib
+        cp build/Release/luvi_renamed.lib build/luvi-${{ env.ARTIFACT }}_renamed.lib
+
+    - name: Publish Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT }}
+        path: |
+          build/luvi-${{ env.ARTIFACT }}*
+
+  package-source:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
+        fetch-depth: 0
         submodules: recursive
 
-    - name: Fetch
-      run: git fetch --unshallow --no-recurse-submodules
+    - name: Package Source
+      run: |
+        git describe --tags > VERSION
+        touch deps/luv/deps/luajit/src/luajit_relver.txt
 
-    - name: Build
-      run: make linux-build
+        tar -czvf /tmp/luvi-source.tar.gz --exclude-vcs --exclude 'git*' .
 
-    - name: Github Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish Source
+      uses: actions/upload-artifact@v4
       with:
-        files: |
-          luvi-regular-Linux_x86_64
-          luvi-tiny-Linux_x86_64
-          luvi-regular-Linux_i686
-          luvi-tiny-Linux_i686
-        draft: false
-        prerelease: false
+        name: luvi-source
+        path: /tmp/luvi-source.tar.gz
 
-  deploy-macos:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: [build]
-    runs-on: macos-latest
+  publish:
+    needs: [build-posix, build-linux, build-mingw, build-msvc, package-source]
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
       with:
-        submodules: recursive
+        path: download
+        merge-multiple: true
 
-    - name: Fetch
-      run: git fetch --unshallow --no-recurse-submodules
-
-    - name: Build
-      run: make travis-publish
-
-    - name: Github Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish Artifact
+      uses: actions/upload-artifact@v4
       with:
-        files: |
-          luvi-regular-Darwin_x86_64
-          luvi-tiny-Darwin_x86_64
-          luvi-src-*.tar.gz
-        draft: false
-        prerelease: false
+        name: artifacts
+        path: download
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: download/*
