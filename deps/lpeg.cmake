@@ -1,8 +1,6 @@
-include_directories(
-  ${LPEGLIB_DIR}
-)
+set(LPEGLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/lpeg" CACHE PATH "Path to lpeg")
 
-add_library(LPEGLIB
+add_library(lpeglib STATIC
   ${LPEGLIB_DIR}/lpcap.c
   ${LPEGLIB_DIR}/lpcode.c
   ${LPEGLIB_DIR}/lpprint.c
@@ -10,8 +8,5 @@ add_library(LPEGLIB
   ${LPEGLIB_DIR}/lpvm.c
 )
 
-set(EXTRA_LIBS ${EXTRA_LIBS} LPEGLIB)
-
-add_definitions(-DLUA_LIB -DWITH_LPEG)
-remove_definitions(-DNDEBUG)
-remove_definitions(-DVERSION)
+list(APPEND LUVI_LIBRARIES lpeglib)
+list(APPEND LUVI_DEFINITIONS WITH_LPEG=1)
