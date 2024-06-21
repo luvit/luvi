@@ -1,70 +1,106 @@
 if (WithSharedOpenSSL)
   find_package(OpenSSL REQUIRED)
 
-  message("OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
-  message("OpenSSL libraries: ${OPENSSL_LIBRARIES}")
-
-  include_directories(${OPENSSL_INCLUDE_DIR})
-  link_directories(${OPENSSL_ROOT_DIR}/lib)
-  list(APPEND LIB_LIST ${OPENSSL_LIBRARIES})
+  message("Enabling Shared OpenSSL")
+  message("OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
+  message("OPENSSL_LIBRARIES:   ${OPENSSL_LIBRARIES}")
 else (WithSharedOpenSSL)
   message("Enabling Static OpenSSL")
-  include(ExternalProject)
 
   set(OPENSSL_CONFIG_OPTIONS no-unit-test no-shared no-stdio no-idea no-mdc2 no-rc5 --prefix=${CMAKE_BINARY_DIR})
-  if(NOT WithOpenSSLASM)
+  if (WithOpenSSLASM)
+    enable_language(ASM)
+    if (MSVC)
+      enable_language(ASM_NASM)
+    endif ()
+  else ()
     set(OPENSSL_CONFIG_OPTIONS no-asm ${OPENSSL_CONFIG_OPTIONS})
-  endif()
+  endif ()
 
-  if(WIN32)
-      if("${CMAKE_GENERATOR_PLATFORM}" MATCHES "x64")
-        set(OPENSSL_CONFIGURE_COMMAND perl ./Configure VC-WIN64A ${OPENSSL_CONFIG_OPTIONS})
-      else()
-        set(OPENSSL_CONFIGURE_COMMAND perl ./Configure VC-WIN32 ${OPENSSL_CONFIG_OPTIONS})
-      endif()
+  set(OPENSSL_CONFIGURE_TARGET)
+  set(OPENSSL_BUILD_COMMAND make)
+  if (WIN32)
+    if (MSVC)
+      set(OPENSSL_CONFIGURE_TARGET VC-WIN32)
+      if ("${CMAKE_VS_PLATFORM_NAME}" MATCHES "x64")
+        set(OPENSSL_CONFIGURE_TARGET VC-WIN64A)
+      endif ()
       set(OPENSSL_BUILD_COMMAND nmake)
-  else()
-      set(OPENSSL_CONFIGURE_COMMAND ./config ${OPENSSL_CONFIG_OPTIONS})
+    elseif (MINGW)
+      set(OPENSSL_CONFIGURE_TARGET mingw)
+      if ("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+        set(OPENSSL_CONFIGURE_TARGET mingw64)
+      endif ()
 
-      if(DEFINED $ENV{MAKEFLAGS})
-        set(OPENSSL_BUILD_COMMAND make $ENV{MAKEFLAGS})
-      else()
-        set(OPENSSL_BUILD_COMMAND make)
-      endif()
-  endif()
+      set(OPENSSL_BUILD_COMMAND mingw32-make)
+    else ()
+      # TODO: Add support for other Windows compilers
+      message(FATAL_ERROR "This platform does not support building OpenSSL")
+    endif ()
+  endif ()
 
-  ExternalProject_Add(openssl
-      PREFIX            openssl
-      URL               https://www.openssl.org/source/openssl-1.1.1w.tar.gz
-      URL_HASH          SHA256=cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8
-      LOG_BUILD         ON
-      BUILD_IN_SOURCE   YES
-      BUILD_COMMAND     ${OPENSSL_BUILD_COMMAND}
-      CONFIGURE_COMMAND ${OPENSSL_CONFIGURE_COMMAND}
-      INSTALL_COMMAND   ""
-      TEST_COMMAND      ""
+  message("OPENSSL_CONFIGURE_TARGET: ${OPENSSL_CONFIGURE_TARGET}")
+  message("OPENSSL_CONFIG_OPTIONS: ${OPENSSL_CONFIG_OPTIONS}")
+  message("OPENSSL_BUILD_COMMAND: ${OPENSSL_BUILD_COMMAND}")
+  include(FetchContent)
+
+  FetchContent_Declare(openssl
+    URL        https://github.com/openssl/openssl/releases/download/openssl-3.0.14/openssl-3.0.14.tar.gz
+    URL_HASH   SHA256=eeca035d4dd4e84fc25846d952da6297484afa0650a6f84c682e39df3a4123ca
   )
 
-  set(OPENSSL_DIR ${CMAKE_BINARY_DIR}/openssl/src/openssl)
-  set(OPENSSL_INCLUDE ${OPENSSL_DIR}/include)
+  FetchContent_MakeAvailable(openssl)
+  FetchContent_GetProperties(openssl)
 
-  if(WIN32)
-    set(OPENSSL_LIB_CRYPTO ${OPENSSL_DIR}/libcrypto.lib)
-    set(OPENSSL_LIB_SSL ${OPENSSL_DIR}/libssl.lib)
-  else()
-    set(OPENSSL_LIB_CRYPTO ${OPENSSL_DIR}/libcrypto.a)
-    set(OPENSSL_LIB_SSL ${OPENSSL_DIR}/libssl.a)
-  endif()
+  set(OPENSSL_ROOT_DIR ${openssl_SOURCE_DIR})
+
+  # Configure OpenSSL
+
+  execute_process(
+    COMMAND perl Configure ${OPENSSL_CONFIGURE_TARGET} ${OPENSSL_CONFIG_OPTIONS}
+    WORKING_DIRECTORY ${OPENSSL_ROOT_DIR}
+    RESULT_VARIABLE result
+  )
+
+  if (result)
+    message(FATAL_ERROR "Failed to configure OpenSSL")
+  endif ()
+
+  execute_process(
+    COMMAND perl configdata.pm --dump
+    WORKING_DIRECTORY ${OPENSSL_ROOT_DIR}
+  )
+  
+  if (MSVC)
+    set(OPENSSL_LIB_CRYPTO ${OPENSSL_ROOT_DIR}/libcrypto.lib)
+    set(OPENSSL_LIB_SSL ${OPENSSL_ROOT_DIR}/libssl.lib)
+  else ()
+    set(OPENSSL_LIB_CRYPTO ${OPENSSL_ROOT_DIR}/libcrypto.a)
+    set(OPENSSL_LIB_SSL ${OPENSSL_ROOT_DIR}/libssl.a)
+  endif ()
+
+  # Build OpenSSL
+
+  add_custom_target(openssl-build
+    COMMAND ${OPENSSL_BUILD_COMMAND}
+    BYPRODUCTS ${OPENSSL_LIB_CRYPTO} ${OPENSSL_LIB_SSL}
+    WORKING_DIRECTORY ${OPENSSL_ROOT_DIR}
+    USES_TERMINAL
+  )
+
+  # Define OpenSSL libraries
 
   add_library(openssl_ssl STATIC IMPORTED)
   set_target_properties(openssl_ssl PROPERTIES IMPORTED_LOCATION ${OPENSSL_LIB_SSL})
+  add_dependencies(openssl_ssl openssl-build)
+
   add_library(openssl_crypto STATIC IMPORTED)
   set_target_properties(openssl_crypto PROPERTIES IMPORTED_LOCATION ${OPENSSL_LIB_CRYPTO})
+  add_dependencies(openssl_ssl openssl-build)
 
-  include_directories(${OPENSSL_INCLUDE})
-  list(APPEND LIB_LIST openssl_ssl openssl_crypto)
+  set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
+  set(OPENSSL_LIBRARIES openssl_ssl openssl_crypto)
+
+  message("OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
+  message("OPENSSL_LIBRARIES:   ${OPENSSL_LIBRARIES}")
 endif (WithSharedOpenSSL)
-
-add_definitions(-DWITH_OPENSSL)
-include(deps/lua-openssl.cmake)
-

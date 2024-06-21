@@ -1,22 +1,14 @@
-set(ZLIB_SHARED z)
-set(ZLIB_STATIC zlibstatic)
+include(deps/zlib.cmake)
 
-set(LUA_ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/lua-zlib)
+set(LUA_ZLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/lua-zlib" CACHE STRING "Path to lua-zlib")
 
-if (WithSharedZLIB)
-  set(LUA_ZLIB_LIB ${ZLIB_SHARED})
-else ()
-  set(LUA_ZLIB_LIB ${ZLIB_STATIC})
-endif()
-
-add_library(lua_zlib
+add_library(lua_zlib STATIC
   ${LUA_ZLIB_DIR}/lua_zlib.c
   ${LUA_ZLIB_DIR}/zlib.def
 )
 
-set_target_properties(lua_zlib PROPERTIES COMPILE_FLAGS -DLUA_LIB)
+target_include_directories(lua_zlib PUBLIC ${ZLIB_INCLUDE_DIR})
+target_link_libraries(lua_zlib ${ZLIB_LIBRARIES})
 
-target_link_libraries(lua_zlib ${LUA_ZLIB_LIB})
-
-set(EXTRA_LIBS ${EXTRA_LIBS} lua_zlib)
-
+list(APPEND LUVI_LIBRARIES lua_zlib ${ZLIB_LIBRARIES})
+list(APPEND LUVI_DEFINITIONS WITH_ZLIB=1)
