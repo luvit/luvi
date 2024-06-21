@@ -20,6 +20,9 @@
 #include <windows.h>
 #include <winsvc.h>
 #include <strsafe.h>
+#if (LUA_VERSION_NUM < 503)
+#include "compat-5.3.h"
+#endif
 
 typedef struct {
   SERVICE_TABLE_ENTRY* svc_table;
@@ -100,7 +103,7 @@ static void svchandler_cb(uv_async_t* handle) {
   lua_pushlightuserdata(L, baton->block.lpEventData);
   lua_pushlightuserdata(L, baton->block.lpContext);
   if (lua_pcall(L, 4, 1, -6) == 0) {
-    baton->block.return_code = luaL_checkint(L, -1);
+    baton->block.return_code = luaL_checkinteger(L, -1);
   }
   else {
     baton->block.return_code = ERROR;
@@ -253,7 +256,7 @@ static int lua_SetServiceStatus(lua_State *L) {
 static int lua_ControlService(lua_State *L) {
   SERVICE_STATUS status;
   SC_HANDLE SvcCtrlHandler = lua_touserdata(L, 1);
-  DWORD dwControl = luaL_checkint(L, 2);
+  DWORD dwControl = luaL_checkinteger(L, 2);
 
   BOOL set = ControlService(SvcCtrlHandler, dwControl, (LPSERVICE_STATUS)&status);
   lua_pushboolean(L, set);
@@ -420,7 +423,7 @@ static int lua_SpawnServiceCtrlDispatcher(lua_State *L) {
 static int lua_OpenSCManager(lua_State *L) {
   const char* machinename = lua_tostring(L, 1);
   const char* databasename = lua_tostring(L, 2);
-  DWORD access = luaL_checkint(L, 3);
+  DWORD access = luaL_checkinteger(L, 3);
   SC_HANDLE h = OpenSCManager(machinename, databasename, access);
   if (h != NULL) {
     lua_pushlightuserdata(L, h);
@@ -435,7 +438,7 @@ static int lua_OpenService(lua_State *L)
 {
   SC_HANDLE hSCManager = lua_touserdata(L, 1);
   const char* servicename = luaL_checkstring(L, 2);
-  DWORD access = luaL_checkint(L, 3);
+  DWORD access = luaL_checkinteger(L, 3);
   SC_HANDLE h = OpenService(hSCManager, servicename, access);
   if (h != NULL) {
     lua_pushlightuserdata(L, h);
@@ -450,10 +453,10 @@ static int lua_CreateService(lua_State *L) {
   SC_HANDLE hSCManager = lua_touserdata(L, 1);
   const char* servicename = luaL_checkstring(L, 2);
   const char* displayname = luaL_checkstring(L, 3);
-  DWORD access = luaL_checkint(L, 4);
-  DWORD servicetype = luaL_checkint(L, 5);
-  DWORD starttype = luaL_checkint(L, 6);
-  DWORD errorcontrol = luaL_checkint(L, 7);
+  DWORD access = luaL_checkinteger(L, 4);
+  DWORD servicetype = luaL_checkinteger(L, 5);
+  DWORD starttype = luaL_checkinteger(L, 6);
+  DWORD errorcontrol = luaL_checkinteger(L, 7);
   const char* pathname = luaL_checkstring(L, 8);
   const char* loadordergroup = lua_tostring(L, 9);
   DWORD tagid = 0;
@@ -497,7 +500,7 @@ static int lua_DeleteService(lua_State *L) {
 
 static int lua_ChangeServiceConfig2(lua_State *L) {
   SC_HANDLE h = lua_touserdata(L, 1);
-  DWORD dwInfoLevel = luaL_checkint(L, 2);
+  DWORD dwInfoLevel = luaL_checkinteger(L, 2);
   union {
     SERVICE_DESCRIPTION description;
     SERVICE_FAILURE_ACTIONS failure_actions;
@@ -534,7 +537,7 @@ static int lua_ChangeServiceConfig2(lua_State *L) {
     lua_pushstring(L, "lpsaActions");
     lua_gettable(L, -2);
     if (lua_type(L, -1) == LUA_TTABLE) {
-      info.failure_actions.cActions = lua_objlen(L, -1);
+      info.failure_actions.cActions = lua_rawlen(L, -1);
       if (info.failure_actions.cActions) {
         info.failure_actions.lpsaActions = LocalAlloc(LPTR, sizeof(SC_ACTION) * info.failure_actions.cActions);
       }
@@ -626,7 +629,7 @@ static const luaL_Reg winsvclib[] = {
 ** Open Windows service library
 */
 LUALIB_API int luaopen_winsvc(lua_State *L) {
-  luaL_register(L, "winsvc", winsvclib);
+  luaL_newlib(L, winsvclib);
 
   // Some Windows Defines
   SETINT(ERROR);

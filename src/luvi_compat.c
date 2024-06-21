@@ -24,6 +24,10 @@
 #endif
 #endif
 
+#ifdef WITH_PLAIN_LUA
+#include "../deps/bit.c"
+#endif
+
 void luvi_openlibs(lua_State *L) {
   luaL_openlibs(L);
 #if (LUA_VERSION_NUM < 503)
