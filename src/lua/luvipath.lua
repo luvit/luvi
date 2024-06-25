@@ -2,10 +2,10 @@ local luvi = require('luvi')
 local getPrefix, splitPath, joinParts
 
 local isWindows
-if _G.jit then
-  isWindows = _G.jit.os == "Windows"
+if pcall(require, 'jit') then
+  isWindows = require('jit').os == "Windows"
 else
-  isWindows = not not package.path:match("\\")
+  isWindows = not not (package.config:sub(1, 1) == "\\" or package.path:find("\\", 1, true) or package.cpath:find("\\", 1, true))
 end
 
 if isWindows then
