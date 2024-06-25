@@ -6,10 +6,9 @@ local pathJoin = luviPath.pathJoin
 local getenv = require('os').getenv
 
 local loadstring = loadstring or load
-local unpack     = unpack     or _G.table.unpack
+local unpack     = unpack     or table.unpack
 
-local tmpBase = luviPath.isWindows and (getenv("TMP") or uv.cwd()) or
-                                       (getenv("TMPDIR") or '/tmp')
+local tmpBase = getenv("TMPDIR") or getenv("TMP") or getenv("TEMP") or (uv.fs_access("/tmp", "r") and "/tmp") or uv.cwd()
 
 -- Bundle from folder on disk
 local function folderBundle(base)
