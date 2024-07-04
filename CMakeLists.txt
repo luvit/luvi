@@ -84,6 +84,11 @@ else (WithSharedLibluv)
   else ()
     include_directories(deps/luv/deps/luajit/src)
     list(APPEND LUVI_LIBRARIES luajit-5.1)
+
+    set(luajit_vmdef ${CMAKE_CURRENT_BINARY_DIR}/deps/luv/vmdef.lua)
+    set_source_files_properties(${luajit_vmdef} PROPERTIES GENERATED TRUE)
+
+    list(APPEND LUVI_DEFINITIONS WITH_LJ_VMDEF)
   endif ()
 
   list(APPEND LUVI_LIBRARIES libluv_a uv_a)
@@ -134,6 +139,7 @@ lua_add_executable(luvi
   src/lua/init.lua
   src/lua/luvipath.lua
   src/lua/luvibundle.lua
+  ${luajit_vmdef}
   ${lpeg_re_lua}
 )
 
