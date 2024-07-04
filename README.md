@@ -1,9 +1,6 @@
 # luvi
 
-[![Linux Build Status](https://github.com/luvit/luvi/actions/workflows/ci.yml/badge.svg)](https://github.com/luvit/luvi/actions/workflows/ci.yml)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/h643wg5hkwsnu0wd/branch/master?svg=true)](https://ci.appveyor.com/project/racker-buildbot/luvi/branch/master)
-[![Code Quality: Cpp](https://img.shields.io/lgtm/grade/cpp/g/luvit/luvi.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/luvit/luvi/context:cpp)
-[![Total Alerts](https://img.shields.io/lgtm/alerts/g/luvit/luvi.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/luvit/luvi/alerts)
+[![Build Status](https://github.com/luvit/luvi/actions/workflows/ci.yml/badge.svg)](https://github.com/luvit/luvi/actions/workflows/ci.yml)
 
 A project in-between [luv][] and [luvit][].
 
@@ -34,12 +31,14 @@ luvi myapp -o mybinary --strip
 
 ## Main API
 
-Your `main.lua` is run in a mostly stock [luajit][] environment with a few extra things added. This means you can use
-the luajit [extensions][] including `DLUAJIT_ENABLE_LUA52COMPAT` features, which we turn on.
+Your `main.lua` is run in either a mostly stock [lua][] or [luajit][] environment with a few extra things added. Luajit
+is built with `LUAJIT_ENABLE_LUA52COMPAT` features turned on, and all luajit [extensions][] are available. Lua is built
+with the `bit` library included, for parity with luajit.
 
 ### Libuv is baked in
 
 The "uv" module contains bindings to [libuv][] as defined in the [luv][] project. Simply `require("uv")` to access it.
+The "uv" module is also provided under the name "luv" for parity with luarocks, so `require("luv")` will also work.
 
 Use this for file I/O, network I/O, timers, or various interfaces with the operating system. This lets you write fast
 non-blocking network servers or frameworks. The APIs in [luv][] mirror what's in [libuv][] allowing you to add
@@ -47,6 +46,14 @@ whatever API sugar you want on top be it callbacks, coroutines, or whatever.
 
 Just be sure to call `uv.run()` and the end of your script to start the event loop if you want to actually wait for any
 events to happen.
+
+[extensions]: http://luajit.org/extensions.html
+[lua]: https://www.lua.org/
+[luajit]: https://luajit.org/
+[libuv]: https://github.com/joyent/libuv
+[luv]: https://github.com/luvit/luv
+[luvit]: https://luvit.io/
+[derivatives]: http://virgoagent.com/
 
 ```lua
 local uv = require('uv')
@@ -75,43 +82,18 @@ uv.run()
 
 ### Integration with C's main function
 
-The raw `argc` and `argv` from C side is exposed as a **zero** indexed lua table of strings at `args`.
+The raw `argc` and `argv` from C side is exposed as a **zero** indexed lua table of strings at `args`. The `0`-th
+element is generally the name of the binary that was executed.
 
 ```lua
-print("Your arguments were", args)
+print("Your arguments were")
+for i = 0, #args do
+    print(i, args[i])
+end
 ```
 
 The "env" module provides read/write access to your local environment variables via `env.keys`, `env.get`, `env.put`,
 `env.set`, and `env.unset`.
-
-```lua
-local env = require('env')
-
--- Convert the module to a mutable magic table.
-local environment = setmetatable({}, {
-    __pairs = function (table)
-        local keys = env.keys()
-        local index = 0
-        return function (...)
-            index = index + 1
-            local name = keys[index]
-            if name then
-                return name, table[name]
-            end
-        end
-    end,
-    __index = function (table, name)
-        return env.get(name)
-    end,
-    __newindex = function (table, name, value)
-        if value then
-            env.set(name, value, 1)
-        else
-            env.unset(name)
-        end
-    end
-}))
-```
 
 If you return an integer from `main.lua` it will be your program's exit code.
 
@@ -127,8 +109,8 @@ local files = bundle.readdir("")
 
 #### bundle.stat(path)
 
-Load metadata about a file in the bundle. This includes `type` ("file" or
-"directory"), `mtime` (in ms since epoch), and `size` (in bytes).
+Load metadata about a file in the bundle. This includes `type` ("file" or "directory"), `mtime` (in ms since epoch),
+and `size` (in bytes).
 
 If the file doesn't exist, it returns `nil`.
 
@@ -140,60 +122,39 @@ If the directory doesn't exist, it return `nil`.
 
 #### bundle.readfile(path)
 
-Read the contents of a file. Returns a string if the file exists and `nil` if
-it doesn't.
-
-### Utils
-
-There is also a "utils" module that has some useful debugging stuff like a colorized
-pretty printer.
-
-```lua
-local uv = require('uv')
-local dump = require('utils').dump
--- Create a global p() function that pretty prints any values
--- to stdout using libuv's APIs
-_G.p = function (...)
-    local n = select('#', ...)
-    local arguments = { ... }
-
-    for i = 1, n do
-        arguments[i] = dump(arguments[i])
-    end
-
-    local toWrite = table.concat(arguments, "\t") .. "\n"
-    uv.write(stdout, toWrite);
-end
-```
-
-[extensions]: http://luajit.org/extensions.html
-[luajit]: http://luajit.org/
-[libuv]: https://github.com/joyent/libuv
-[luv]: https://github.com/luvit/luv
-[luvit]: https://luvit.io/
-[derivatives]: http://virgoagent.com/
+Read the contents of a file. Returns a string if the file exists and `nil` if it doesn't.
 
 ## Building from Source
 
 We maintain several [binary releases of luvi](https://github.com/luvit/luvi/releases) to ease bootstrapping of lit and
 luvit apps.
 
-The following platforms are supported:
+The following platforms are actively supported and tested by the CI system:
 
-- Windows (x86_64 / i386)
-- FreeBSD 10.1 (x86_64)
-- Raspberry PI Raspbian (armv6)
-- Raspberry PI 2 Raspbian (armv7)
-- Debian 9 "Stretch" (x86_64)
-- OSX 10.14 "Mojave" (x86_64)
+- Windows >= 10 (x86_64 / i386)
+- Linux >= 3.10, glibc >= 2.17 OR musl >= 1.0 (x86_64 / i386 / aarch64)
+  - Debian 8+
+  - Ubuntu 13.10+
+  - Fedora 19+
+- OSX 13+ (x86_64 / aarch64)
 
-If you want to not wait for pre-built binaries and dive right in, building is based on CMake and is pretty simple.
+The following platforms are supported but not actively tested by the CI system:
+
+- Windows >= 8 (x86_64 / i386)
+- OSX 11+ (x86_64 / aarch64)
+- FreeBSD 12+
+
+Platform support is primarily based on libuv's [platform support](https://github.com/libuv/libuv/blob/v1.x/SUPPORTED_PLATFORMS.md).
+
+Architecture support is primarily based on luajit's [platform support](https://luajit.org/luajit.html).
 
 ### Build Dependencies
 
+If you want to not wait for pre-built binaries and dive right in, building is based on CMake and is pretty simple.
+
 - Git
 - CMake
-- A C Compiler (visual studio on Windows)
+- A C Compiler (Visual Studio 15+ OR MinGW on Windows)
 - Perl (required for OpenSSL)
 - NASM (required for OpenSSL ASM optimizations on Windows)
 
@@ -203,16 +164,18 @@ First clone this repo recursively.
 git clone --recursive https://github.com/luvit/luvi.git
 ```
 
-Then run the makefile inside it. (Note this assumes you have cmake in your path.)
-If you're on windows, there is a `make.bat` file that works mostly like the unix
-`Makefile`.
+> [!IMPORTANT]
+> If you're on windows, for all following steps you will need to be in a [Visual Studio Command Prompt](https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2022).
+>
+> You will need to replace `make` with `nmake` in the following commands.
 
-Prior to building the `luvi` binary you must configure the version of `luvi`
-that you want to build. Currently there are three versions:
+Then enter the directory and run the makefile inside it, which will assume you have all the dependencies installed,
+primarily CMake.
 
-- tiny: only the necessities; omits OpenSSL, LPeg, and lrexlib
-- regular: the normal luvit experience; includes OpenSSL, lpeg and lrexlib
-- regular-asm: includes OpenSSL's ASM optimizations
+Prior to building luvi you must configure the version of luvi that you want to build. Currently there are two versions:
+
+- `tiny`: only the necessities, includes only Lua, Libuv, miniz, and minimal luvi modules.
+- `regular`: the normal luvit experience, includes OpenSSL, LPeg, and lrexlib.
 
 ```sh
 cd luvi
@@ -221,7 +184,7 @@ make
 make test
 ```
 
-When that's done you should have a shiny little binary in `build/luvi`.
+When that's done you should have a luvi binary in `build/luvi`.
 
 ```sh
 $ ls -lh build/luvi
@@ -316,33 +279,3 @@ cmake \
     -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib \
     ..
 ```
-
-## Holy Build
-
-Executables across Linux distributions are not largely portable for various
-differences. We can leverage the
-[holy-build-box](https://github.com/phusion/holy-build-box) to create a
-portable executable for i686 and x86_64 environments.
-
-Note: If you are attempting this on OSX, please install GNU tar from homebrew:
-
-```sh
-brew install gnu-tar
-```
-
-To get started:
-
-1. Create a docker machine:
-
-    ```sh
-    docker-machine create --driver vmwarefusion --vmwarefusion-cpu-count 3 holy-build-box
-    eval $(docker-machine env holy-build-box)
-    ```
-
-2. Start the build
-
-    ```sh
-    make linux-build
-    ```
-
-3. Results should be the current working directory.
