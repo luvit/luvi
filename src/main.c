@@ -131,6 +131,11 @@ static lua_State* vm_acquire(){
   lua_pushcfunction(L, luaopen_luvipath);
   lua_setfield(L, -2, "luvipath");
 
+#ifdef WITH_LJ_VMDEF
+  lua_pushcfunction(L, luaopen_vmdef);
+  lua_setfield(L, -2, "jit.vmdef");
+#endif
+
 #ifdef WITH_CUSTOM
   luvi_custom(L);
 #endif
