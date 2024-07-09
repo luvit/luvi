@@ -19,3 +19,6 @@
 [submodule "deps/pcre2"]
 	path = deps/pcre2
 	url = https://github.com/PCRE2Project/pcre2
+[submodule "deps/miniz"]
+	path = deps/miniz
+	url = https://github.com/richgel999/miniz
