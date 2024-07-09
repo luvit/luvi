@@ -132,8 +132,16 @@ if (WITH_LUA_ENGINE STREQUAL Lua)
 endif ()
 
 include(LuaAddExecutable)
+
+# TODO: define MINIZ_NO_STDIO for small size
+add_subdirectory(deps/miniz miniz.dir)
+set(lminiz src/lminiz.c)
+include_directories(deps/miniz)
+list(APPEND LUVI_LIBRARIES miniz)
+
 lua_add_executable(luvi
   ${winsvc}
+  ${lminiz}
   src/main.c
   src/luvi_compat.c
   src/lua/init.lua

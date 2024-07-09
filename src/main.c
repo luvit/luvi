@@ -20,11 +20,10 @@
 #include "luv.h"
 #include "lenv.c"
 #include "luvi.c"
-#ifndef MINIZ_NO_STDIO
-#define MINIZ_NO_STDIO
-#endif
-#include "lminiz.c"
+
 #include "snapshot.c"
+
+int luaopen_miniz(lua_State *L);
 
 #ifdef WITH_CUSTOM
 int luvi_custom(lua_State* L);

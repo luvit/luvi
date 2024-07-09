@@ -17,7 +17,7 @@
 
 #include "./luvi.h"
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
-#include "../deps/miniz.c"
+#include "../deps/miniz/miniz.h"
 
 typedef struct {
   mz_zip_archive archive;
@@ -34,7 +34,7 @@ typedef struct {
 static size_t lmz_file_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_t n) {
   lmz_file_t* zip = pOpaque;
   const uv_buf_t buf = uv_buf_init(pBuf, n);
-  file_ofs += zip->archive.m_pState->m_file_archive_start_ofs;
+  file_ofs += mz_zip_get_archive_file_start_offset(&zip->archive);
   uv_fs_read(zip->loop, &(zip->req), zip->fd, &buf, 1, file_ofs, NULL);
   return zip->req.result;
 }
@@ -179,7 +179,8 @@ static int lmz_reader_extract(lua_State *L) {
 static int lmz_reader_get_offset(lua_State *L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
   mz_zip_archive* archive = &(zip->archive);
-  lua_pushinteger(L, archive->m_pState->m_file_archive_start_ofs);
+
+  lua_pushinteger(L, mz_zip_get_archive_file_start_offset(archive));
   return 1;
 }
 
