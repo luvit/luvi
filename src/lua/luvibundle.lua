@@ -195,10 +195,10 @@ local function buildBundle(options, bundle)
 
           if compile and isLua and name:lower() ~= 'package.lua' then
             local fn, err = load(ctx, child)
-            if not fn and not options.force then
-              error(err)
-            else
+            if fn then
               ctx = string.dump(fn, options.strip)
+            elseif not options.force then
+              error(err)
             end
           end
 
