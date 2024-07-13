@@ -39,7 +39,7 @@ find_library(LUAJIT_LIBRARY
   PATH_SUFFIXES luajit-2.0)
 mark_as_advanced(LUAJIT_LIBRARY)
 
-find_package_handle_standard_args(luajit
+find_package_handle_standard_args(LuaJIT
   REQUIRED_VARS LUAJIT_INCLUDE_DIR LUAJIT_LIBRARY)
 
 if (LUAJIT_FOUND) # Set the output variables

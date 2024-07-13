@@ -25,20 +25,23 @@ include(FindPackageHandleStandardArgs)
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
   pkg_check_modules(PC_LUV QUIET libluv)
+  if (NOT PC_LUV_FOUND)
+    pkg_check_modules(PC_LUV QUIET lua5.1-luv)
+  endif ()
 endif()
 
 find_path(LUV_INCLUDE_DIR
   NAMES luv.h
   HINTS ${PC_LUV_INCLUDE_DIRS}
-  PATH_SUFFIXES luv)
+  PATH_SUFFIXES luv lua5.1/luv)
 mark_as_advanced(LUV_INCLUDE_DIR)
 
 find_library(LUV_LIBRARY
-  NAMES luv
+  NAMES luv lua5.1-luv
   HINTS ${PC_LUV_LIBRARY_DIRS})
 mark_as_advanced(LUV_LIBRARY)
 
-find_package_handle_standard_args(luv
+find_package_handle_standard_args(Luv
   REQUIRED_VARS LUV_INCLUDE_DIR LUV_LIBRARY)
 
 if (LUV_FOUND) # Set the output variables

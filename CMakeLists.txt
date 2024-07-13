@@ -62,16 +62,16 @@ set (LUVI_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 # When linking against a shared libluv, we assume that luajit and libuv are also shared
 # Luvi does not support linking a static libluv *and* a static lua/luajit or libuv
 if (WithSharedLibluv)
-  find_package(Libluv REQUIRED)
-  include_directories(${LIBLUV_INCLUDE_DIR})
+  find_package(Luv REQUIRED)
+  include_directories(${LUV_INCLUDE_DIRS})
 
   find_package(LuaJIT  REQUIRED)
-  include_directories(${LUAJIT_INCLUDE_DIR})
+  include_directories(${LUAJIT_INCLUDE_DIRS})
 
   find_package(Libuv  REQUIRED)
-  include_directories(${LIBUV_INCLUDE_DIR})
+  include_directories(${LIBUV_INCLUDE_DIRS})
 
-  list(APPEND LUVI_LIBRARIES ${LIBLUV_LIBRARIES} ${LUAJIT_LIBRARIES} ${LIBUV_LIBRARIES})
+  list(APPEND LUVI_LIBRARIES ${LUV_LIBRARIES} ${LUAJIT_LIBRARIES} ${LIBUV_LIBRARIES})
 else (WithSharedLibluv)
   # Build luv as static library instead of as module
   set(BUILD_MODULE OFF CACHE BOOL "Turn off building luv as module")

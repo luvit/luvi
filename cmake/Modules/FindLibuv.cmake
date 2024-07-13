@@ -9,13 +9,13 @@ Result Variables
 
 This module defines the following variables:
 
-``UV_FOUND``
+``LIBUV_FOUND``
   "True" if ``libuv`` found.
 
-``UV_INCLUDE_DIRS``
+``LIBUV_INCLUDE_DIRS``
   where to find ``uv.h``, etc.
 
-``UV_LIBRARIES``
+``LIBUV_LIBRARIES``
   List of libraries when using ``uv``.
 
 #]=======================================================================]
@@ -37,10 +37,10 @@ find_library(UV_LIBRARY
   HINTS ${PC_UV_LIBRARY_DIRS})
 mark_as_advanced(UV_LIBRARY)
 
-find_package_handle_standard_args(uv
+find_package_handle_standard_args(Libuv
   REQUIRED_VARS UV_INCLUDE_DIR UV_LIBRARY)
 
-if (UV_FOUND) # Set the output variables
-  set(UV_LIBRARIES ${UV_LIBRARY})
-  set(UV_INCLUDE_DIRS ${UV_INCLUDE_DIR})
+if (LIBUV_FOUND) # Set the output variables
+  set(LIBUV_LIBRARIES ${UV_LIBRARY})
+  set(LIBUV_INCLUDE_DIRS ${UV_INCLUDE_DIR})
 endif ()

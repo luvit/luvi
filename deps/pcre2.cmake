@@ -4,6 +4,8 @@ if (WithSharedPCRE2)
   message("Enabling Shared PCRE2")
   message("PCRE2_INCLUDE_DIR: ${PCRE2_INCLUDE_DIR}")
   message("PCRE2_LIBRARIES:   ${PCRE2_LIBRARIES}")
+
+  add_compile_definitions(PCRE2_CODE_UNIT_WIDTH=8)
 else (WithSharedPCRE2)
   message("Enabling Static PCRE2")
 

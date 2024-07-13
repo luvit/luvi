@@ -1,24 +1,46 @@
+#[=======================================================================[.rst:
+FindPCRE2
+--------
 
-FIND_PATH(PCRE2_INCLUDE_DIR NAMES pcre2.h)
+Find the native pcre2 (specifically the 8-bit version) headers and libraries.
 
-# Look for the library.
-FIND_LIBRARY(PCRE2_LIBRARY NAMES pcre2)
+Result Variables
+^^^^^^^^^^^^^^^^
 
-# Handle the QUIETLY and REQUIRED arguments and set PCRE2_FOUND to TRUE if all listed variables are TRUE.
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PCRE2 DEFAULT_MSG PCRE2_LIBRARY PCRE2_INCLUDE_DIR)
+This module defines the following variables:
 
-# Copy the results to the output variables.
-IF(PCRE2_FOUND)
-  SET(PCRE2_LIBRARIES ${PCRE2_LIBRARY})
-  SET(PCRE2_INCLUDE_DIRS ${PCRE2_INCLUDE_DIR})
-  SET(PCRE2_UNIT_WIDTH ${PCRE2_CODE_UNIT_WIDTH})
-ELSE(PCRE2_FOUND)
-  SET(PCRE2_LIBRARIES)
-  SET(PCRE2_INCLUDE_DIRS)
-  SET(PCRE2_UNIT_WIDTH)
-ENDIF(PCRE2_FOUND)
+``PCRE2_FOUND``
+  "True" if ``pcre2-8`` found.
 
-ADD_DEFINITIONS( -DPCRE2_CODE_UNIT_WIDTH=${PCRE2_UNIT_WIDTH} )
+``PCRE2_INCLUDE_DIRS``
+  where to find ``pcre2.h``, etc.
 
-MARK_AS_ADVANCED(PCRE2_INCLUDE_DIRS PCRE2_LIBRARIES PCRE2_UNIT_WIDTH)
+``PCRE2_LIBRARIES``
+  List of libraries when using ``pcre2-8``.
+
+#]=======================================================================]
+
+include(FindPackageHandleStandardArgs)
+
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(PC_PCRE2 QUIET libpcre2-8)
+endif()
+
+find_path(PCRE2_INCLUDE_DIR
+  NAMES pcre2.h
+  HINTS ${PC_PCRE2_INCLUDE_DIRS})
+mark_as_advanced(PCRE2_INCLUDE_DIR)
+
+find_library(PCRE2_LIBRARY
+  NAMES pcre2-8
+  HINTS ${PC_PCRE2_LIBRARY_DIRS})
+mark_as_advanced(PCRE2_LIBRARY)
+
+find_package_handle_standard_args(PCRE2
+  REQUIRED_VARS PCRE2_INCLUDE_DIR PCRE2_LIBRARY)
+
+if (PCRE2_FOUND) # Set the output variables
+  set(PCRE2_LIBRARIES ${PCRE2_LIBRARY})
+  set(PCRE2_INCLUDE_DIRS ${PCRE2_INCLUDE_DIR})
+endif ()
