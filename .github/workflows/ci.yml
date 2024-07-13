@@ -3,6 +3,27 @@ name: CI
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
+  check-shared:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Ensure dependencies are installed
+      run: |
+        sudo apt-get install -y libssl-dev libpcre2-dev zlib1g-dev lua-luv-dev libluajit-5.1-dev luajit
+
+    - name: Configure
+      run: make regular WITH_SHARED_LIBLUV=ON WITH_SHARED_OPENSSL=ON WITH_SHARED_PCRE2=ON WITH_SHARED_ZLIB=ON
+
+    - name: Build
+      run: make
+
+    - name: Test
+      run: make test
+
   build-posix:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -245,7 +266,7 @@ jobs:
         path: /tmp/luvi-source.tar.gz
 
   publish:
-    needs: [build-posix, build-linux, build-mingw, build-msvc, package-source]
+    needs: [build-posix, build-linux, build-mingw, build-msvc, package-source, check-shared]
     runs-on: ubuntu-latest
     steps:
     - name: Download Artifacts
