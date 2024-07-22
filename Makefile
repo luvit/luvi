@@ -162,11 +162,11 @@ ifdef MAKEDIR: ########################
 !ifdef MAKEDIR #### Start of nmake ####
 
 !ifdef GENERATOR
-	CONFIGURE_FLAGS += -G"$(GENERATOR)"
+CONFIGURE_FLAGS = "$(CONFIGURE_FLAGS) -G$(GENERATOR)"
 !endif
 
 !ifdef ARCH
-	CONFIGURE_FLAGS += -A"$(ARCH)"
+CONFIGURE_FLAGS = "$(CONFIGURE_FLAGS) -A$(ARCH)"
 !endif
 
 !else ####   End of nmake ####
