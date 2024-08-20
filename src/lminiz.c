@@ -356,7 +356,7 @@ static int ltdefl(lua_State* L) {
 }
 
 static int lmz_adler32(lua_State* L) {
-  mz_ulong adler = luaL_optinteger(L, 1, 0);
+  mz_ulong adler = luaL_optinteger(L, 1, 1);
   size_t buf_len = 0;
   const unsigned char* ptr = (const unsigned char*)luaL_optlstring(L, 2, NULL, &buf_len);
   adler = mz_adler32(adler, ptr, buf_len);
