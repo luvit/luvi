@@ -17,7 +17,7 @@
 
 #include "./luvi.h"
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
-#include "../deps/miniz.c"
+#include "../deps/miniz/miniz.h"
 
 typedef struct {
   mz_zip_archive archive;
