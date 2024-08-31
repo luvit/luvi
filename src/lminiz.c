@@ -17,7 +17,7 @@
 
 #include "./luvi.h"
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
-#include "../deps/miniz/miniz.h"
+#include "../deps/miniz.c"
 
 typedef struct {
   mz_zip_archive archive;
@@ -34,7 +34,7 @@ typedef struct {
 static size_t lmz_file_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_t n) {
   lmz_file_t* zip = pOpaque;
   const uv_buf_t buf = uv_buf_init(pBuf, n);
-  file_ofs += mz_zip_get_archive_file_start_offset(&zip->archive);
+  file_ofs += zip->archive.m_pState->m_file_archive_start_ofs;
   uv_fs_read(zip->loop, &(zip->req), zip->fd, &buf, 1, file_ofs, NULL);
   return zip->req.result;
 }
@@ -179,8 +179,7 @@ static int lmz_reader_extract(lua_State *L) {
 static int lmz_reader_get_offset(lua_State *L) {
   lmz_file_t* zip = luaL_checkudata(L, 1, "miniz_reader");
   mz_zip_archive* archive = &(zip->archive);
-
-  lua_pushinteger(L, mz_zip_get_archive_file_start_offset(archive));
+  lua_pushinteger(L, archive->m_pState->m_file_archive_start_ofs);
   return 1;
 }
 
@@ -340,6 +339,11 @@ static int ltinfl(lua_State* L) {
   size_t out_len;
   int flags = luaL_optinteger(L, 2, 0);
   char* out_buf = tinfl_decompress_mem_to_heap(in_buf, in_len, &out_len, flags);
+  if (!out_buf) {
+    lua_pushnil(L);
+    lua_pushstring(L, "Problem inflating data into memory");
+    return 2;
+  }
   lua_pushlstring(L, out_buf, out_len);
   free(out_buf);
   return 1;
@@ -351,6 +355,11 @@ static int ltdefl(lua_State* L) {
   size_t out_len;
   int flags = luaL_optinteger(L, 2, 0);
   char* out_buf = tdefl_compress_mem_to_heap(in_buf, in_len, &out_len, flags);
+  if (!out_buf) {
+    lua_pushnil(L);
+    lua_pushstring(L, "Problem deflating data into memory");
+    return 2;
+  }
   lua_pushlstring(L, out_buf, out_len);
   free(out_buf);
   return 1;
