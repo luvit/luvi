@@ -71,6 +71,20 @@ if (WithSharedLibluv)
   find_package(Libuv  REQUIRED)
   include_directories(${LIBUV_INCLUDE_DIRS})
 
+  include(CheckCSourceCompiles)
+  
+  set(CMAKE_REQUIRED_INCLUDES ${LUAJIT_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${LUAJIT_LIBRARIES})
+  check_c_source_compiles("
+  #include <luajit.h>
+  int main() {
+    LUAJIT_VERSION_SYM();
+    return 0;
+  }" LUAJIT_HAS_VERSION_SYM)
+  if (NOT LUAJIT_HAS_VERSION_SYM)
+    add_compile_definitions(LUAJIT_MISSING_VERSION_SYM)
+  endif ()
+
   list(APPEND LUVI_LIBRARIES ${LUV_LIBRARIES} ${LUAJIT_LIBRARIES} ${LIBUV_LIBRARIES})
 else (WithSharedLibluv)
   # Build luv as static library instead of as module
