@@ -340,6 +340,11 @@ static int ltinfl(lua_State* L) {
   size_t out_len;
   int flags = luaL_optinteger(L, 2, 0);
   char* out_buf = tinfl_decompress_mem_to_heap(in_buf, in_len, &out_len, flags);
+  if (!out_buf) {
+    lua_pushnil(L);
+    lua_pushstring(L, "Problem inflating data into memory");
+    return 2;
+  }
   lua_pushlstring(L, out_buf, out_len);
   free(out_buf);
   return 1;
@@ -351,6 +356,11 @@ static int ltdefl(lua_State* L) {
   size_t out_len;
   int flags = luaL_optinteger(L, 2, 0);
   char* out_buf = tdefl_compress_mem_to_heap(in_buf, in_len, &out_len, flags);
+  if (!out_buf) {
+    lua_pushnil(L);
+    lua_pushstring(L, "Problem deflating data into memory");
+    return 2;
+  }
   lua_pushlstring(L, out_buf, out_len);
   free(out_buf);
   return 1;
