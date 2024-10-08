@@ -55,6 +55,17 @@ static lua_State* vm_acquire(){
   if (L == NULL)
     return L;
 
+  // Ensure that the version of lua interpreter is compatible with the version luvi was compiled with.
+#ifdef WITH_PLAIN_LUA
+#if (LUA_VERSION_NUM >= 502)
+  luaL_checkversion(L);
+#endif
+#else
+#ifndef LUAJIT_MISSING_VERSION_SYM // debian patches luajit to remove this symbol, so we can't check it.
+  LUAJIT_VERSION_SYM();
+#endif
+#endif
+
   // Add in the lua standard and compat libraries
   luvi_openlibs(L);
 

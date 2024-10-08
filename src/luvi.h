@@ -22,6 +22,9 @@
 #include "lauxlib.h"
 #include "uv.h"
 #include "luv.h"
+#ifndef WITH_PLAIN_LUA
+#include "luajit.h"
+#endif
 
 #include <string.h>
 #include <stdlib.h>
