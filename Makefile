@@ -142,6 +142,7 @@ endif    ####   End of gmake ####
 ###############################################################################
 
 CONFIGURE_FLAGS = \
+	-Wno-dev \
 	-DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) \
 	-DWITH_AMALG=$(WITH_AMALG) \
 	-DWITH_LUA_ENGINE=$(WITH_LUA_ENGINE) \
