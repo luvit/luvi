@@ -7,7 +7,18 @@ if (WithSharedOpenSSL)
 else (WithSharedOpenSSL)
   message("Enabling Static OpenSSL")
 
-  set(OPENSSL_CONFIG_OPTIONS no-unit-test no-shared no-stdio no-idea no-mdc2 no-rc5 --prefix=${CMAKE_BINARY_DIR})
+  execute_process(
+    COMMAND openssl info -configdir
+    OUTPUT_VARIABLE OPENSSL_CONFIG_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  set(OPENSSL_CONFIG_OPTIONS no-tests no-shared no-pinshared no-makedepend --prefix=${CMAKE_BINARY_DIR})
+  if (OPENSSL_CONFIG_DIR)
+    message("Using existing OpenSSL configuration directory: ${OPENSSL_CONFIG_DIR}")
+    set(OPENSSL_CONFIG_OPTIONS ${OPENSSL_CONFIG_OPTIONS} --openssldir=${OPENSSL_CONFIG_DIR})
+  endif ()
+
   if (WithOpenSSLASM)
     enable_language(ASM)
     if (MSVC)
@@ -45,8 +56,8 @@ else (WithSharedOpenSSL)
   include(FetchContent)
 
   FetchContent_Declare(openssl
-    URL        https://github.com/openssl/openssl/releases/download/openssl-3.0.14/openssl-3.0.14.tar.gz
-    URL_HASH   SHA256=eeca035d4dd4e84fc25846d952da6297484afa0650a6f84c682e39df3a4123ca
+    URL        https://github.com/openssl/openssl/releases/download/openssl-3.4.0/openssl-3.4.0.tar.gz
+    URL_HASH   SHA256=e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf
   )
 
   FetchContent_MakeAvailable(openssl)
@@ -100,6 +111,10 @@ else (WithSharedOpenSSL)
 
   set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
   set(OPENSSL_LIBRARIES openssl_ssl openssl_crypto)
+
+  if (WIN32)
+    set(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} crypt32)
+  endif ()
 
   message("OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
   message("OPENSSL_LIBRARIES:   ${OPENSSL_LIBRARIES}")
