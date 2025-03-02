@@ -18,6 +18,10 @@ if (MINGW)
   add_compile_options(-Wno-error=incompatible-pointer-types)
 endif ()
 
+if (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+  add_compile_options(-Wno-incompatible-pointer-types)
+endif()
+
 if (UNIX)
   add_compile_options(-Wall)
 endif ()
