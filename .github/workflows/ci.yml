@@ -13,6 +13,7 @@ jobs:
 
     - name: Ensure dependencies are installed
       run: |
+        sudo apt-get update
         sudo apt-get install -y libssl-dev libpcre2-dev zlib1g-dev lua-luv-dev libluajit-5.1-dev luajit
 
     - name: Configure
@@ -95,6 +96,7 @@ jobs:
     - name: Setup QEMU
       if: matrix.arch == 'aarch64'
       run: |
+        sudo apt-get update
         sudo apt-get install -y qemu-user-static
 
     - name: Build

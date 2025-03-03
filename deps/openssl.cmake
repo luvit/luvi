@@ -13,7 +13,7 @@ else (WithSharedOpenSSL)
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
-  set(OPENSSL_CONFIG_OPTIONS no-tests no-shared no-pinshared no-makedepend --prefix=${CMAKE_BINARY_DIR})
+  set(OPENSSL_CONFIG_OPTIONS no-tests no-module no-shared no-pinshared no-makedepend --prefix=${CMAKE_BINARY_DIR})
   if (OPENSSL_CONFIG_DIR)
     message("Using existing OpenSSL configuration directory: ${OPENSSL_CONFIG_DIR}")
     set(OPENSSL_CONFIG_OPTIONS ${OPENSSL_CONFIG_OPTIONS} --openssldir=${OPENSSL_CONFIG_DIR})
