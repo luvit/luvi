@@ -38,6 +38,9 @@
 
 #if (LUA_VERSION_NUM < 503)
 #include "compat-5.3.h"
+#ifndef WITH_PLAIN_LUA
+#undef luaL_traceback /* luajit has its own version */
+#endif
 #endif
 
 #ifdef WITH_OPENSSL

@@ -194,7 +194,7 @@ local function buildBundle(options, bundle)
           local compile = options.strip or options.compile
 
           if compile and isLua and name:lower() ~= 'package.lua' then
-            local fn, err = load(ctx, child)
+            local fn, err = load(ctx, '@' .. child)
             if fn then
               ctx = string.dump(fn, options.strip)
             elseif not options.force then
@@ -333,7 +333,7 @@ local function commonBundle(bundlePaths, mainPath, args)
     if not path then path = name + ".lua" end
     package.preload[name] = function (...)
       local lua = assert(bundle.readfile(path))
-      return assert(loadstring(lua, "bundle:" .. path))(...)
+      return assert(loadstring(lua, "@bundle:" .. path))(...)
     end
   end
 
@@ -360,7 +360,7 @@ local function commonBundle(bundlePaths, mainPath, args)
   else
     local main = bundle.readfile(mainPath)
     if not main then error("Missing " .. mainPath .. " in " .. bundle.base) end
-    local fn = assert(loadstring(main, "bundle:" .. mainPath))
+    local fn = assert(loadstring(main, "@bundle:" .. mainPath))
     return fn(unpack(args))
   end
 end
