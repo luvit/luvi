@@ -101,6 +101,8 @@ static lua_State* vm_acquire(){
 #ifdef WITH_LPEG
   lua_pushcfunction(L, luaopen_lpeg);
   lua_setfield(L, -2, "lpeg");
+  lua_pushcfunction(L, luaopen_re);
+  lua_setfield(L, -2, "re");
 #endif
 
 #ifdef WITH_PCRE2
