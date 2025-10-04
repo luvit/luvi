@@ -60,6 +60,7 @@ LUALIB_API int luaopen_zlib(lua_State * const L);
 #endif
 #ifdef WITH_LPEG
 int luaopen_lpeg(lua_State* L);
+LUALIB_API int luaopen_re(lua_State *L);
 #endif
 #ifdef WITH_PLAIN_LUA
 LUALIB_API int luaopen_bit(lua_State *L);
