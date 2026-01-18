@@ -32,11 +32,11 @@ add_library(lua_openssl STATIC
   ${LUA_OPENSSL_DIR}/src/dsa.c
   ${LUA_OPENSSL_DIR}/src/ec.c
   ${LUA_OPENSSL_DIR}/src/engine.c
-  ${LUA_OPENSSL_DIR}/src/mac.c
   ${LUA_OPENSSL_DIR}/src/hmac.c
   ${LUA_OPENSSL_DIR}/src/kdf.c
   ${LUA_OPENSSL_DIR}/src/lbn.c
   ${LUA_OPENSSL_DIR}/src/lhash.c
+  ${LUA_OPENSSL_DIR}/src/mac.c
   ${LUA_OPENSSL_DIR}/src/misc.c
   ${LUA_OPENSSL_DIR}/src/ocsp.c
   ${LUA_OPENSSL_DIR}/src/oids.txt
@@ -47,6 +47,7 @@ add_library(lua_openssl STATIC
   ${LUA_OPENSSL_DIR}/src/pkcs7.c
   ${LUA_OPENSSL_DIR}/src/pkey.c
   ${LUA_OPENSSL_DIR}/src/private.h
+  ${LUA_OPENSSL_DIR}/src/provider.c
   ${LUA_OPENSSL_DIR}/src/rsa.c
   ${LUA_OPENSSL_DIR}/src/sk.h
   ${LUA_OPENSSL_DIR}/src/srp.c
@@ -54,10 +55,10 @@ add_library(lua_openssl STATIC
   ${LUA_OPENSSL_DIR}/src/th-lock.c
   ${LUA_OPENSSL_DIR}/src/util.c
   ${LUA_OPENSSL_DIR}/src/x509.c
+  ${LUA_OPENSSL_DIR}/src/xalgor.c
   ${LUA_OPENSSL_DIR}/src/xattrs.c
   ${LUA_OPENSSL_DIR}/src/xexts.c
   ${LUA_OPENSSL_DIR}/src/xname.c
-  ${LUA_OPENSSL_DIR}/src/xalgor.c
   ${LUA_OPENSSL_DIR}/src/xstore.c
 )
 
