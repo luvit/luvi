@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, macos-latest]
+        os: [macos-15-intel, macos-latest]
         build_type: [tiny, regular]
         lua_engine: [LuaJIT, Lua]
     env:
@@ -166,7 +166,7 @@ jobs:
 
     - name: Build
       shell: msys2 {0}
-      run: mingw32-make 
+      run: mingw32-make
 
     - name: Test
       shell: msys2 {0}
