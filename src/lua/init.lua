@@ -115,11 +115,12 @@ return function(args)
   for i = 1, #args do
     local arg = args[i]
     if arg == "--" then
+      local appArgsStart = i
       if #bundles == 0 then
-        i = i + 1
-        bundles[1] = args[i]
+        appArgsStart = appArgsStart + 1
+        bundles[1] = args[appArgsStart]
       end
-      for j = i + 1, #args do
+      for j = appArgsStart + 1, #args do
         appArgs[#appArgs + 1] = args[j]
       end
       break
