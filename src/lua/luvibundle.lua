@@ -313,7 +313,7 @@ local function commonBundle(bundlePaths, mainPath, args)
 
   function bundle.action(path, action, ...)
     -- If it's a real path, run it directly.
-    if uv.fs_access(path, "r") then return action(path) end
+    if uv.fs_access(path, "r") then return action(path, ...) end
     -- Otherwise, copy to a temporary folder and run from there
     local data, err = bundle.readfile(path)
     if not data then return nil, err end
