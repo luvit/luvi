@@ -175,12 +175,12 @@ do
   print("miniz zlib compression - full data")
   local original = string.rep(bundle.readfile("sonnet-133.txt"), 1000)
   local deflator = miniz.new_deflator(9)
-  local deflated, err, part = deflator:deflate(original, "finish")
-  p("Compressed", #(deflated or part or ""))
+  local deflated, err, read = deflator:deflate(original, "finish")
+  p("Compressed", #(deflated or ""), read, #original)
   deflated = assert(deflated, err)
   local inflator = miniz.new_inflator()
-  local inflated, err, part = inflator:inflate(deflated)
-  p("Decompressed", #(inflated or part or ""))
+  local inflated, err, read = inflator:inflate(deflated)
+  p("Decompressed", #(inflated or ""), read, #deflated)
   inflated = assert(inflated, err)
   assert(inflated == original, "inflated data doesn't match original")
 end
@@ -196,14 +196,14 @@ do
   local inflator = miniz.new_inflator()
   for i, part in ipairs(original_parts) do
     p("part", part)
-    local deflated, err, partial = deflator:deflate(part,
+    local deflated, err, read = deflator:deflate(part,
       i == #original_parts and "finish" or "sync")
-    p("compressed", deflated, partial)
-    deflated = assert(not err, err) and (deflated or partial)
-    local inflated, err, partial = inflator:inflate(deflated,
+    p("compressed", deflated, read, #part)
+    deflated = assert(not err, err) and (deflated)
+    local inflated, err, read = inflator:inflate(deflated,
       i == #original_parts and "finish" or "sync")
-    p("decompressed", inflated, partial)
-    inflated = assert(not err, err) and (inflated or partial)
+    p("decompressed", inflated, read, #deflated)
+    inflated = assert(not err, err) and (inflated)
 
     assert(inflated == part, "inflated data doesn't match original")
   end
