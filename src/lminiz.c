@@ -338,8 +338,8 @@ static int ltinfl(lua_State* L) {
   size_t in_len;
   const char* in_buf = luaL_checklstring(L, 1, &in_len);
   size_t out_len;
-  int flags = luaL_optinteger(L, 2, 0);
-  char* out_buf = tinfl_decompress_mem_to_heap(in_buf, in_len, &out_len, flags);
+  int flags = luaL_optinteger(L, 2, 0), idx = luaL_optinteger(L, 3, 0), inm_len = luaL_optinteger(L, 4, 0);
+  char* out_buf = tinfl_decompress_mem_to_heap(in_buf + idx, inm_len || in_len, &out_len, flags);
   lua_pushlstring(L, out_buf, out_len);
   free(out_buf);
   return 1;
