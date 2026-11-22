@@ -95,9 +95,9 @@ jobs:
 
     - name: Setup QEMU
       if: matrix.arch == 'aarch64'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y qemu-user-static
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64
 
     - name: Build
       run: |
@@ -135,7 +135,7 @@ jobs:
       matrix:
         build_type: [tiny, regular]
         lua_engine: [LuaJIT, Lua]
-        msystem: [mingw32, mingw64]
+        msystem: [mingw64]
     env:
       MAKEFLAGS: -j4
       NPROCS: 4
@@ -146,7 +146,7 @@ jobs:
       with:
         msystem: ${{ matrix.msystem }}
         update: true
-        pacboy: toolchain:p cmake:p
+        pacboy: toolchain:p cmake:p make:p
         install: git
 
     - name: Install NASM

@@ -18,7 +18,11 @@ for i in 1 2 3; do
     docker pull $container_host && break
 done
 
+# Workaround networking issues on the container. Use `--network host` and mount
+# the `/etc/resolv.conf` from the outside to make mirrors reachable.
 docker run --rm \
+    --network host \
+    -v /etc/resolv.conf:/etc/resolv.conf \
     -v "$GITHUB_WORKSPACE":"/github/workspace" \
     -w /github/workspace \
     $container_host \
