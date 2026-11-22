@@ -83,6 +83,10 @@ jobs:
         lua_engine: [LuaJIT, Lua]
         arch: [x86_64, i686, aarch64]
         libc: [glibc, musl]
+        exclude:
+          # manylinux_2_28 has no i686 variant
+          - arch: i686
+            libc: glibc
     env:
       MAKEFLAGS: -j4
       NPROCS: 4
